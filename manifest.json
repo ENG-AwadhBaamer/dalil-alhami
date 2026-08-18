@@ -1,0 +1,15 @@
+{
+  "name": "دليل الحامي - دمي",
+  "short_name": "دليل الحامي",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#DC2626",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/929/929417.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

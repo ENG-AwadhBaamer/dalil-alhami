@@ -1,0 +1,46 @@
+[
+  {
+    "id": 1787063771520,
+    "name": "عوض احمد عوض باعامر",
+    "blood": "O-",
+    "area": "الحامي",
+    "phone": "775233773",
+    "username": "3773",
+    "password": "3773",
+    "status": "active",
+    "inactiveReason": ""
+  },
+  {
+    "id": 1787067657306,
+    "name": "عوض عمر عوض باعباد",
+    "blood": "A+",
+    "area": "الحامي -- الشافعي",
+    "phone": "777701487",
+    "username": "1487",
+    "password": "1487",
+    "status": "active",
+    "inactiveReason": ""
+  },
+  {
+    "id": 1787068058561,
+    "name": "ابوبكر احمد عوض باعامر",
+    "blood": "O-",
+    "area": "الحامي",
+    "phone": "774255414",
+    "username": "5414",
+    "password": "5414",
+    "status": "active",
+    "inactiveReason": ""
+  },
+  {
+    "id": 1787068726330,
+    "name": "نصر احمد ناجي",
+    "blood": "A+",
+    "area": "الغيضه",
+    "phone": "773600688",
+    "username": "0688",
+    "password": "0688",
+    "status": "active",
+    "inactiveReason": ""
+  }
+]
