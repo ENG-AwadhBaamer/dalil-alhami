@@ -1,0 +1,8 @@
+{
+  "name": "دمي - الحامي والمقد",
+  "short_name": "دمي",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#DC2626"
+}
