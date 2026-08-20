@@ -1,40 +1,324 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دمي - الحامي والمقد</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+body{font-family:'Cairo',sans-serif}
+.no-scrollbar::-webkit-scrollbar{display:none}
+.glass{background:rgba(255,255,255,0.85); backdrop-filter:blur(20px)}
+</style>
+</head>
+<body class="bg-[#FFF8F8] min-h-screen">
+<div class="max-w-[430px] mx-auto bg-white min-h-screen shadow-2xl relative pb-32 overflow-hidden">
+<div class="absolute -top-20 -left-20 w-72 h-72 bg-red-100 rounded-full blur-[80px] opacity-60 pointer-events-none"></div>
+<div class="absolute top-40 -right-20 w-64 h-64 bg-rose-100 rounded-full blur-[70px] opacity-40 pointer-events-none"></div>
 
-<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>فحص الربط V3</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.3/dist/umd/supabase.min.js"></script>
-<style>body{font-family:system-ui;padding:20px;background:#f5f5f5} .box{background:white;padding:20px;border-radius:15px;margin:10px 0;word-break:break-all} .ok{color:green;font-weight:bold} .err{color:red;font-weight:bold}</style>
-</head><body>
-<h2>🔍 فحص ربط Supabase V3</h2>
-<div id="log" class="box">جاري الفحص...</div>
+<header class="glass sticky top-0 z-30 border-b border-black/5">
+<div class="px-5 pt-5 pb-3 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-11 h-11 rounded-full bg-gradient-to-br from-red-600 to-rose-600 p-[2px] shadow-[0_0_20px_rgba(220,38,38,0.3)]">
+<div class="w-full h-full bg-gradient-to-br from-red-600 to-red-700 rounded-full flex items-center justify-center text-white text-xl">❤</div>
+</div>
+<div><h1 class="font-black text-[20px] tracking-tight">دمي<span class="text-red-600">.</span></h1><p class="text-[11px] text-gray-500 font-bold">فكرة قروب الحامي تجمعنا</p></div>
+</div>
+<div class="flex items-center gap-2"><span id="onlineBadge" class="text-[10px] bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-black">⏳ جاري الربط...</span>
+<button onclick="openNotifs()" class="relative w-10 h-10 bg-white border shadow-sm rounded-full flex items-center justify-center"><span class="text-[18px]">🔔</span><span id="notifBadge" class="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-black hidden">0</span></button>
+<button id="authBtn" onclick="openAuth()" class="bg-black text-white px-4 py-2.5 rounded-full text-xs font-black shadow">دخول</button>
+</div>
+</div>
+<div class="px-5 pb-4 flex gap-2">
+<button onclick="setArea('all')" id="area-all" class="area-pill bg-black text-white px-5 py-2.5 rounded-full text-[13px] font-black shadow">الكل</button>
+<button onclick="setArea('الحامي')" id="area-الحامي" class="area-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[13px] font-bold">الحامي 🟢</button>
+<button onclick="setArea('المقد')" id="area-المقد" class="area-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[13px] font-bold">المقد 🔵</button>
+</div>
+</header>
+
+<!-- لوحة الإدارة المحدثة -->
+<div id="adminPanel" class="hidden mx-4 mt-5 bg-gradient-to-br from-zinc-900 via-black to-zinc-900 text-white rounded-[28px] p-6 border border-white/10 shadow-2xl">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-2.5"><div class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center">👑</div><div><p class="font-black text-[13px]">لوحة الإدارة</p><p class="text-[10px] opacity-60">تحكم كامل - الحامي والمقد</p></div></div>
+<button onclick="openChangePassword()" class="text-[10px] bg-white text-black px-3 py-1.5 rounded-full font-black">🔑 تغيير كلمة السر</button>
+</div>
+<div class="grid grid-cols-3 gap-2.5 mt-5">
+<div class="bg-white/[0.06] border border-white/10 rounded-2xl p-3 text-center"><p class="text-[20px] font-black" id="totalDonors">0</p><p class="text-[10px] opacity-60 mt-1">إجمالي</p></div>
+<div class="bg-green-500/10 border border-green-500/20 rounded-2xl p-3 text-center"><p class="text-[20px] font-black text-green-400" id="availDonors">0</p><p class="text-[10px] text-green-300 mt-1">متاح الآن</p></div>
+<div class="bg-red-500/10 border border-red-500/20 rounded-2xl p-3 text-center"><p class="text-[20px] font-black text-red-400" id="hamiCount">0</p><p class="text-[10px] text-red-300 mt-1">الحامي</p></div>
+</div>
+
+<!-- تغيير كلمة السر -->
+<div id="changePassBox" class="hidden mt-5 bg-white/[0.06] rounded-[20px] p-4 border border-white/10">
+<p class="font-black text-[12px] mb-3">🔑 تغيير كلمة سر الإدارة</p>
+<input id="oldPass" type="password" placeholder="كلمة السر الحالية" class="w-full bg-white text-black rounded-2xl p-3.5 text-[13px] font-bold outline-none mb-2">
+<input id="newPass" type="password" placeholder="كلمة السر الجديدة" class="w-full bg-white text-black rounded-2xl p-3.5 text-[13px] font-bold outline-none mb-2">
+<input id="confirmPass" type="password" placeholder="تأكيد الجديدة" class="w-full bg-white text-black rounded-2xl p-3.5 text-[13px] font-bold outline-none mb-3">
+<button onclick="changeAdminPassword()" class="w-full bg-white text-black py-3 rounded-2xl font-black text-[13px]">حفظ كلمة السر الجديدة</button>
+<p class="text-[10px] opacity-60 mt-2 text-center">مرتبط بـ Supabase Auth</p>
+</div>
+
+<div class="mt-5 bg-white/[0.06] rounded-[20px] p-4 border border-white/10">
+<p class="font-black text-[12px] flex items-center gap-2">📢 إرسال إشعار لكل العملاء</p>
+<div class="mt-3 space-y-2.5">
+<div class="flex gap-2">
+<button onclick="setNotifType('urgent')" id="ntype-urgent" class="notif-type bg-red-600 text-white px-3 py-2.5 rounded-full text-[11px] font-black flex-1 shadow">🚨 طارئ</button>
+<button onclick="setNotifType('info')" id="ntype-info" class="notif-type bg-white/10 px-3 py-2.5 rounded-full text-[11px] font-bold flex-1">ℹ معلومة</button>
+<button onclick="setNotifType('success')" id="ntype-success" class="notif-type bg-white/10 px-3 py-2.5 rounded-full text-[11px] font-bold flex-1">✅ بشارة</button>
+</div>
+<input id="notifTitle" placeholder="عنوان الإشعار" class="w-full bg-white text-black rounded-2xl p-3.5 text-[13px] font-bold outline-none">
+<textarea id="notifMsg" placeholder="نص الرسالة..." class="w-full bg-white text-black rounded-2xl p-3.5 text-[12px] h-20 resize-none outline-none"></textarea>
+<select id="notifArea" class="w-full bg-white text-black rounded-2xl p-3.5 text-[12px] font-bold outline-none"><option value="all">📍 الكل</option><option value="الحامي">📍 الحامي فقط</option><option value="المقد">📍 المقد فقط</option></select>
+<button onclick="sendNotif()" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3.5 rounded-2xl font-black text-[13px]">🚀 إرسال الإشعار الآن</button>
+</div>
+</div>
+</div>
+
+<div id="notifFeed" class="mx-4 mt-4 space-y-2.5 hidden"></div>
+
+<div class="px-4 mt-5">
+<div class="bg-white border shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-full flex items-center px-5 py-3.5"><span class="text-gray-400">🔍</span><input id="search" oninput="render()" placeholder="ابحث بالاسم أو فصيلة الدم..." class="bg-transparent flex-1 mr-3 text-[13px] outline-none font-bold placeholder:text-gray-400"></div>
+<div class="flex gap-2 overflow-x-auto mt-3 pb-1 no-scrollbar">
+<button onclick="setBlood('all')" class="blood-pill active bg-black text-white px-5 py-2.5 rounded-full text-[12px] font-black shadow">الكل</button>
+<button onclick="setBlood('O+')" class="blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold">O+</button>
+<button onclick="setBlood('O-')" class="blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold">O-</button>
+<button onclick="setBlood('A+')" class="blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold">A+</button>
+<button onclick="setBlood('A-')" class="blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold">A-</button>
+<button onclick="setBlood('B+')" class="blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold">B+</button>
+<button onclick="setBlood('B-')" class="blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold">B-</button>
+<button onclick="setBlood('AB+')" class="blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold">AB+</button>
+<button onclick="setBlood('AB-')" class="blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold">AB-</button>
+</div>
+</div>
+
+<div id="donors" class="px-4 mt-6 space-y-3.5"></div>
+
+<div class="mt-12 mb-2 px-4">
+<div class="flex justify-center mb-6">
+<div class="relative">
+<div class="absolute inset-0 bg-red-600 rounded-full blur-[20px] opacity-20"></div>
+<div class="relative w-24 h-24 rounded-full bg-gradient-to-br from-red-600 to-rose-700 p-[3px] shadow-2xl">
+<div class="w-full h-full bg-white rounded-full flex items-center justify-center text-4xl">❤</div>
+</div>
+<div class="absolute inset-0 rounded-full border border-red-200 animate-ping opacity-20"></div>
+</div>
+</div>
+
+<div class="bg-gradient-to-br from-zinc-900 via-black to-zinc-900 rounded-[28px] p-6 border border-white/10 shadow-2xl text-white">
+<div class="text-center">
+<div class="inline-flex items-center gap-2 bg-white/10 border border-white/10 rounded-full px-4 py-1.5 mb-4">
+<span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+<span class="text-[10px] font-black tracking-widest">تطبيق الحامي والمقد - دمي</span>
+</div>
+<p class="font-black text-[16px]">برمجة وتصميم م/ عوض باعامر</p>
+<p class="font-bold text-[13px] mt-1.5 text-white/70">جوال 775233773</p>
+<div class="w-full h-[1px] bg-white/10 my-4"></div>
+<p class="font-bold text-[12px] text-amber-300">فكرة قروب الحامي تجمعنا</p>
+<p class="font-black text-[14px] mt-1">د. عوض عمر باعباد</p>
+<div class="flex justify-center gap-2.5 mt-5">
+<a href="https://wa.me/967775233773" class="bg-[#25D366] text-white px-5 py-2.5 rounded-full text-[11px] font-black shadow-lg flex items-center gap-1.5">💬 واتساب 775233773</a>
+<a href="https://wa.me/967777701487" class="bg-white text-black px-5 py-2.5 rounded-full text-[11px] font-black shadow">🚨 طوارئ 777701487</a>
+</div>
+</div>
+</div>
+<p class="text-center text-[10px] text-gray-400 mt-4 leading-relaxed">© 2026 دمي - الحامي والمقد<br>برمجة وتصميم م/ عوض باعامر 775233773 | فكرة قروب الحامي تجمعنا د. عوض عمر باعباد</p>
+</div>
+
+<div class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] bg-black/90 backdrop-blur-xl rounded-full px-3 py-2.5 flex justify-around items-center shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-white/10 z-40">
+<button class="text-white flex flex-col items-center px-4 py-1"><span class="text-[18px]">🏠</span><span class="text-[9px] font-bold mt-1">الرئيسية</span></button>
+<button onclick="openNotifs()" class="text-white/60 flex flex-col items-center px-4 py-1 relative"><span class="text-[18px]">🔔</span><span class="text-[9px] mt-1">تنبيهات</span></button>
+<button onclick="openRegister()" class="bg-gradient-to-br from-red-600 to-red-700 w-14 h-14 rounded-full flex items-center justify-center text-white text-[24px] -mt-8 shadow-[0_10px_30px_rgba(220,38,38,0.4)] border-[4px] border-white">+</button>
+<button onclick="openAuth()" class="text-white/60 flex flex-col items-center px-4 py-1"><span class="text-[18px]">👤</span><span class="text-[9px] mt-1">حسابي</span></button>
+<button class="text-white/60 flex flex-col items-center px-4 py-1"><span class="text-[18px]">🩸</span><span class="text-[9px] mt-1">تبرع</span></button>
+</div>
+</div>
+
+<!-- Modals نفس السابق مع إضافة تغيير كلمة السر -->
+<div id="authModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end justify-center">
+<div class="bg-white w-full max-w-[430px] rounded-t-[32px] p-6 max-h-[90vh] overflow-y-auto">
+<div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5"></div>
+<div class="flex justify-between items-center mb-6"><h3 class="font-black text-[18px]" id="authTitle">تسجيل الدخول</h3><button onclick="closeAuth()" class="w-9 h-9 bg-gray-100 rounded-full">✕</button></div>
+<div id="loginForm">
+<input id="l_user" placeholder="اسم المستخدم" class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-3 text-[14px] font-bold outline-none">
+<input id="l_pass" type="password" placeholder="كلمة المرور" class="w-full bg-gray-50 border border-gray-100 rounded-2xl p-4 mb-5 text-[14px] font-bold outline-none">
+<button onclick="doLogin()" class="w-full bg-black text-white py-4 rounded-2xl font-black text-[14px] shadow-xl">دخول</button>
+<p class="text-center text-[13px] mt-5">متبرع جديد؟ <button onclick="showRegister()" class="text-red-600 font-black">إنشاء حساب</button></p>
+</div>
+<div id="registerForm" class="hidden">
+<input id="r_name" placeholder="الاسم الكامل" class="w-full bg-gray-50 border rounded-2xl p-4 mb-2.5 text-[14px] font-bold">
+<input id="r_user" placeholder="اسم المستخدم (انجليزي)" class="w-full bg-gray-50 border rounded-2xl p-4 mb-2.5 text-[14px] font-bold">
+<input id="r_pass" type="password" placeholder="كلمة المرور" class="w-full bg-gray-50 border rounded-2xl p-4 mb-2.5 text-[14px] font-bold">
+<input id="r_phone" placeholder="واتساب 777..." class="w-full bg-gray-50 border rounded-2xl p-4 mb-2.5 text-[14px] font-bold">
+<div class="grid grid-cols-2 gap-2.5 mb-2.5"><select id="r_blood" class="bg-gray-50 border rounded-2xl p-4 text-[13px] font-bold"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select><select id="r_area" class="bg-gray-50 border rounded-2xl p-4 text-[13px] font-bold"><option>الحامي</option><option>المقد</option></select></div>
+<input id="r_hood" placeholder="الحارة" class="w-full bg-gray-50 border rounded-2xl p-4 mb-4 text-[14px] font-bold">
+<button onclick="doRegister()" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-2xl font-black text-[14px]">تسجيل كمتبرع</button>
+<p class="text-center text-[13px] mt-4"><button onclick="showLogin()" class="text-gray-600 font-bold">لدي حساب</button></p>
+</div>
+</div>
+</div>
+
+<div id="editModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end justify-center">
+<div class="bg-white w-full max-w-[430px] rounded-t-[32px] p-6">
+<div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5"></div>
+<div class="flex justify-between items-center mb-5"><h3 class="font-black" id="editTitle">تعديل حالتي</h3><button onclick="closeEdit()" class="w-9 h-9 bg-gray-100 rounded-full">✕</button></div>
+<div id="editAdminExtra" class="hidden"><input id="e_name" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold"><input id="e_user_edit" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold"></div>
+<select id="e_status" onchange="toggleReason()" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold"><option>متاح الآن</option><option>غير متاح</option><option>تبرعت مؤخراً</option></select>
+<div id="reasonBox" class="hidden"><input id="e_reason" placeholder="سبب عدم التوفر (مثال: مسافر، مريض، تبرعت قبل شهر)" class="w-full bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-3 text-[13px] font-bold outline-none"><select id="e_reason_preset" onchange="document.getElementById('e_reason').value=this.value" class="w-full bg-white border rounded-2xl p-3 mb-3 text-[12px]"><option value="">-- اختر سبب جاهز --</option><option value="مسافر خارج المنطقة">✈ مسافر خارج المنطقة</option><option value="مريض حالياً">🤒 مريض حالياً</option><option value="تبرعت قبل أقل من 3 أشهر">🩸 تبرعت قبل أقل من 3 أشهر</option><option value="ظروف عمل">💼 ظروف عمل</option><option value="غير متواجد في الحامي/المقد حالياً">📍 غير متواجد حالياً</option></select></div>
+<input id="e_phone" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold">
+<input id="e_last" type="date" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold">
+<select id="e_area" class="w-full bg-gray-50 border rounded-2xl p-4 mb-4 text-[14px] font-bold"><option>الحامي</option><option>المقد</option></select>
+<button onclick="saveEdit()" class="w-full bg-black text-white py-4 rounded-2xl font-black">حفظ التعديل</button>
+<button id="deleteBtn" onclick="deleteDonor()" class="hidden w-full mt-3 bg-red-50 text-red-600 py-3 rounded-2xl font-bold border border-red-100">حذف المتبرع</button>
+</div>
+</div>
+
+<div id="notifModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex items-end justify-center">
+<div class="bg-[#FAFAFA] w-full max-w-[430px] rounded-t-[32px] max-h-[85vh] flex flex-col">
+<div class="bg-white p-6 rounded-t-[32px] border-b"><div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5"></div><div class="flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-11 h-11 bg-red-50 rounded-full flex items-center justify-center">🔔</div><div><h3 class="font-black text-[16px]">الإشعارات</h3><p class="text-[11px] text-gray-400 font-bold">من إدارة الحامي تجمعنا</p></div></div><div class="flex gap-2"><button onclick="markAllRead()" class="text-[11px] bg-black text-white px-4 py-2 rounded-full font-bold">مقروء</button><button onclick="closeNotifs()" class="w-9 h-9 bg-gray-100 rounded-full">✕</button></div></div></div>
+<div id="notifList" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+</div>
+</div>
+
 <script>
 const SUPABASE_URL = 'https://sncymicxpwxyfmxtqoiv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_ax-vLH9J3LHOvUiD8NkYQg_5KKotYrX';
-async function run(){
-  let log = document.getElementById('log');
-  function add(t,c=''){ log.innerHTML += `<div class="${c}">${t}</div><hr>`; }
-  add('URL: '+SUPABASE_URL);
-  add('KEY: '+SUPABASE_KEY);
-  try {
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    add('✅ تم إنشاء Supabase Client بنجاح - تم إصلاح خطأ URL', 'ok');
-    let {data, error} = await client.from('donors').select('*').limit(5);
-    if(error){
-      add('❌ خطأ في جدول donors: '+error.message+' | Code: '+(error.code||'')+'', 'err');
-      add('<pre>'+JSON.stringify(error,null,2)+'</pre>');
-      if((error.code==='42P01') || (error.message && error.message.includes('does not exist'))){
-        add('⚠️ الجدول donors غير موجود! نفذ كود SQL في Supabase', 'err');
-      }
-    } else {
-      add('✅ الاتصال ناجح! جدول donors موجود - عدد السجلات: '+(data?data.length:0), 'ok');
-      add('<pre>'+JSON.stringify(data,null,2)+'</pre>');
-    }
-    let testUser = {name:'اختبار ربط', username:'test_'+Date.now(), pass:'1234', phone:'777000000', blood:'O+', area:'الحامي', hood:'اختبار', last_donation:'2024-01-01', status:'متاح الآن', reason:'اختبار', role:'donor'};
-    let {data:ins, error: insErr} = await client.from('donors').insert(testUser).select();
-    if(insErr) add('❌ فشل الإدخال: '+insErr.message+' '+JSON.stringify(insErr), 'err');
-    else add('✅✅✅ الإدخال نجح! الربط يعمل 100% - تم إدخال: '+ins[0].username, 'ok');
-  } catch(e){
-    add('❌ خطأ عام: '+e.message+'<br><pre>'+e.stack+'</pre>', 'err');
-  }
+const SUPABASE_ANON_KEY = 'sb_publishable_ax-vLH9J3LHOvUiD8NkYQg_5KKotYrX';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let areaFilter='all', bloodFilter='all', editTarget=null, notifType='urgent';
+let users = JSON.parse(localStorage.getItem('dami_users_v2')||'null') || [
+{username:'admin', pass:'admin777', name:'إدارة دمي', phone:'777701487', blood:'O+', area:'الحامي', hood:'الإدارة', last:'2024-01-01', status:'متاح الآن', role:'admin'},
+{name:'أحمد باعمر', username:'ahmed_hami', pass:'1234', phone:'777123456', blood:'O+', area:'الحامي', hood:'السوق', last:'2024-02-10', status:'متاح الآن', reason:'', role:'donor'},
+{name:'صالح الجمحي', username:'saleh_maqd', pass:'1234', phone:'777654321', blood:'A+', area:'المقد', hood:'الجامع', last:'2024-01-20', status:'غير متاح', reason:'مسافر خارج المنطقة حالياً', role:'donor'}
+];
+if(!localStorage.getItem('dami_users_v2')) localStorage.setItem('dami_users_v2', JSON.stringify(users));
+let currentUser = JSON.parse(localStorage.getItem('dami_current_v2')||'null');
+let notifications = JSON.parse(localStorage.getItem('dami_notifs')||'[]');
+function save(){localStorage.setItem('dami_users_v2', JSON.stringify(users));}
+
+function openChangePassword(){document.getElementById('changePassBox').classList.toggle('hidden');}
+async function changeAdminPassword(){
+ let oldP=document.getElementById('oldPass').value;
+ let newP=document.getElementById('newPass').value;
+ let conf=document.getElementById('confirmPass').value;
+ if(!oldP||!newP||!conf){alert('عبي كل الحقول'); return;}
+ if(newP!==conf){alert('التأكيد غير مطابق'); return;}
+ if(currentUser && currentUser.pass!==oldP){alert('كلمة السر الحالية خطأ'); return;}
+ // تحديث محلي
+ let idx=users.findIndex(x=>x.username===currentUser.username);
+ if(idx!==-1){users[idx].pass=newP; save();}
+ // تحديث Supabase إذا موجود
+ try{
+   const { error } = await supabaseClient.auth.updateUser({ password: newP });
+   if(error) console.log('Supabase auth not linked, local only:', error);
+ }catch(e){console.log(e);}
+ currentUser.pass=newP;
+ localStorage.setItem('dami_current_v2', JSON.stringify(currentUser));
+ alert('✅ تم تغيير كلمة السر بنجاح');
+ document.getElementById('changePassBox').classList.add('hidden');
+ document.getElementById('oldPass').value=''; document.getElementById('newPass').value=''; document.getElementById('confirmPass').value='';
 }
-run();
+
+function setArea(a){areaFilter=a; document.querySelectorAll('.area-pill').forEach(b=>{b.className='area-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[13px] font-bold'}); document.getElementById('area-'+a).className='area-pill bg-black text-white px-5 py-2.5 rounded-full text-[13px] font-black shadow'; render(); renderNotifs();}
+function setBlood(b){bloodFilter=b; document.querySelectorAll('.blood-pill').forEach(x=>x.className='blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold'); if(event) event.target.className='blood-pill active bg-black text-white px-5 py-2.5 rounded-full text-[12px] font-black shadow'; render();}
+function updateAuth(){let btn=document.getElementById('authBtn'); let panel=document.getElementById('adminPanel'); if(currentUser){btn.textContent=currentUser.role==='admin'?'👑 خروج':'أهلاً '+currentUser.name.split(' ')[0]; btn.onclick=doLogout; if(currentUser.role==='admin') panel.classList.remove('hidden'); else panel.classList.add('hidden');} else {btn.textContent='دخول'; btn.onclick=openAuth; panel.classList.add('hidden');}}
+function render(){
+let q=document.getElementById('search').value.toLowerCase();
+let cont=document.getElementById('donors'); cont.innerHTML='';
+let filtered=users.filter(u=>u.role!=='admin').filter(u=>{if(areaFilter!=='all' && u.area!==areaFilter) return false; if(bloodFilter!=='all' && u.blood!==bloodFilter) return false; if(q && !u.name.toLowerCase().includes(q) && !u.blood.toLowerCase().includes(q)) return false; return true;});
+document.getElementById('totalDonors').textContent=users.filter(u=>u.role!=='admin').length;
+document.getElementById('availDonors').textContent=users.filter(u=>u.role!=='admin' && u.status==='متاح الآن').length;
+document.getElementById('hamiCount').textContent=users.filter(u=>u.area==='الحامي' && u.role!=='admin').length;
+filtered.forEach(u=>{
+let statusColor = u.status==='متاح الآن'?'bg-green-500':u.status==='غير متاح'?'bg-red-500':'bg-amber-500';
+let reasonHtml = (u.status!=='متاح الآن' && u.reason) ? `<div class="mt-2 bg-amber-50 border border-amber-200 rounded-xl p-2.5"><p class="text-[10px] font-black text-amber-800">📝 السبب: ${u.reason}</p></div>` : '';
+let isMe = currentUser && currentUser.username===u.username;
+let isAdmin = currentUser && currentUser.role==='admin';
+let canEdit = isMe || isAdmin;
+cont.innerHTML+=`<div class="bg-white border border-black/[0.06] rounded-[24px] p-5 flex gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white flex items-center justify-center font-black text-[15px] shadow-[0_8px_20px_rgba(220,38,38,0.3)]">${u.blood}</div>
+<div class="flex-1">
+<div class="flex justify-between items-start"><div><p class="font-black text-[14px]">${u.name} ${isMe?'<span class="text-red-600 text-[10px]">(أنت)</span>':''}</p><p class="text-[11px] text-gray-400 font-bold mt-0.5">${u.hood} • @${u.username}</p></div><span class="text-[10px] border px-2.5 py-1 rounded-full font-bold ${u.area==='الحامي'?'bg-green-50 text-green-700 border-green-200':'bg-blue-50 text-blue-700 border-blue-200'}">${u.area}</span></div>
+<div class="flex items-center gap-2 mt-2.5"><span class="w-2 h-2 rounded-full ${statusColor} ${u.status==='متاح الآن'?'animate-pulse':''}"></span><span class="text-[11px] font-black">${u.status}</span><span class="text-[10px] text-gray-400">• ${u.last}</span></div>${reasonHtml}
+<div class="flex gap-2 mt-4">
+${canEdit?`<button onclick="openEditFor('${u.username}')" class="flex-1 bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-full text-[11px] font-black">${isAdmin?'👑 إدارة':'✏ تعديل حالتي'}</button>`:`<a href="https://wa.me/967${u.phone}" class="flex-1 bg-[#25D366] text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">💬 واتساب</a><a href="tel:${u.phone}" class="flex-1 bg-black text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">📞 اتصال</a>`}
+</div>
+</div></div>`;
+});
+if(filtered.length===0) cont.innerHTML='<div class="text-center py-16"><div class="w-20 h-20 mx-auto bg-gray-50 rounded-full flex items-center justify-center text-3xl mb-3">🔍</div><p class="font-black text-[14px]">لا يوجد متبرعين</p></div>';
+}
+function openAuth(){document.getElementById('authModal').classList.remove('hidden'); showLogin();}
+function closeAuth(){document.getElementById('authModal').classList.add('hidden');}
+function showRegister(){document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('authTitle').textContent='تسجيل متبرع جديد';}
+function showLogin(){document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('authTitle').textContent='تسجيل الدخول';}
+function openRegister(){openAuth(); showRegister();}
+function doLogin(){let u=document.getElementById('l_user').value.trim(); let p=document.getElementById('l_pass').value; let f=users.find(x=>x.username===u && x.pass===p); if(!f){alert('خطأ في اسم المستخدم أو كلمة المرور'); return;} currentUser=f; localStorage.setItem('dami_current_v2', JSON.stringify(f)); closeAuth(); updateAuth(); render(); renderNotifs(); updateBadge();}
+function doRegister(){let name=document.getElementById('r_name').value.trim(); let username=document.getElementById('r_user').value.trim().toLowerCase(); let pass=document.getElementById('r_pass').value; let phone=document.getElementById('r_phone').value.trim(); let blood=document.getElementById('r_blood').value; let area=document.getElementById('r_area').value; let hood=document.getElementById('r_hood').value.trim(); if(!name||!username||!pass||!phone){alert('عبي الحقول'); return;} if(users.find(x=>x.username===username)){alert('اسم المستخدم موجود'); return;} let nu={name, username, pass, phone, blood, area, hood:hood||area, last:new Date().toISOString().slice(0,10), status:'متاح الآن', role:'donor'}; users.push(nu); save(); currentUser=nu; localStorage.setItem('dami_current_v2', JSON.stringify(nu)); closeAuth(); updateAuth(); render();}
+function doLogout(){currentUser=null; localStorage.removeItem('dami_current_v2'); updateAuth(); render(); updateBadge();}
+function openEditFor(username){let u=users.find(x=>x.username===username); if(!u) return; if(!currentUser){alert('سجل دخول أولاً باسم المستخدم وكلمة السر الخاصة بك'); openAuth(); return;} if(currentUser.role!=='admin' && currentUser.username!==username){alert('يمكنك تعديل حالتك فقط - كل متبرع له حساب خاص'); return;} editTarget=username; document.getElementById('e_status').value=u.status; document.getElementById('e_reason').value=u.reason||''; toggleReason(); document.getElementById('e_phone').value=u.phone; document.getElementById('e_last').value=u.last; document.getElementById('e_area').value=u.area; document.getElementById('editTitle').textContent=currentUser.role==='admin'?'إدارة: '+u.name:'تعديل حالتي'; document.getElementById('editAdminExtra').classList.toggle('hidden', currentUser.role!=='admin'); if(currentUser.role==='admin'){document.getElementById('e_name').value=u.name; document.getElementById('e_user_edit').value=u.username; document.getElementById('deleteBtn').classList.remove('hidden');} else {document.getElementById('deleteBtn').classList.add('hidden');} document.getElementById('editModal').classList.remove('hidden');}
+function closeEdit(){document.getElementById('editModal').classList.add('hidden'); editTarget=null;}
+function toggleReason(){let st=document.getElementById('e_status').value; let box=document.getElementById('reasonBox'); if(st!=='متاح الآن'){box.classList.remove('hidden');} else {box.classList.add('hidden'); document.getElementById('e_reason').value='';}}
+function saveEdit(){if(!editTarget) return; let idx=users.findIndex(x=>x.username===editTarget); if(idx===-1) return; if(currentUser.role==='admin'){users[idx].name=document.getElementById('e_name').value.trim()||users[idx].name; users[idx].username=document.getElementById('e_user_edit').value.trim()||users[idx].username;} users[idx].status=document.getElementById('e_status').value; users[idx].reason=document.getElementById('e_reason').value.trim(); users[idx].phone=document.getElementById('e_phone').value; users[idx].last=document.getElementById('e_last').value; users[idx].area=document.getElementById('e_area').value; if(currentUser.username===editTarget) currentUser=users[idx]; save(); localStorage.setItem('dami_current_v2', JSON.stringify(currentUser)); closeEdit(); updateAuth(); render();}
+function deleteDonor(){if(!currentUser||currentUser.role!=='admin') return; if(!confirm('متأكد حذف المتبرع؟')) return; users=users.filter(x=>x.username!==editTarget); save(); closeEdit(); render();}
+function setNotifType(t){notifType=t; document.querySelectorAll('.notif-type').forEach(b=>b.className='notif-type bg-white/10 px-3 py-2.5 rounded-full text-[11px] font-bold flex-1'); document.getElementById('ntype-'+t).className='notif-type bg-red-600 text-white px-3 py-2.5 rounded-full text-[11px] font-black flex-1 shadow';}
+function sendNotif(){let title=document.getElementById('notifTitle').value.trim(); let msg=document.getElementById('notifMsg').value.trim(); let area=document.getElementById('notifArea').value; if(!title||!msg){alert('اكتب عنوان ونص'); return;} let notif={id:Date.now(), title, msg, area, type:notifType, time:new Date().toLocaleString('ar-YE'), readBy:[]}; notifications.unshift(notif); if(notifications.length>50) notifications=notifications.slice(0,50); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); document.getElementById('notifTitle').value=''; document.getElementById('notifMsg').value=''; renderNotifs(); updateBadge(); alert('تم الإرسال لكل العملاء 🚀');}
+function renderNotifs(){let list=document.getElementById('notifList'); let feed=document.getElementById('notifFeed'); let visible=notifications.filter(n=> n.area==='all' || areaFilter==='all' || n.area===areaFilter); if(visible.length>0){feed.classList.remove('hidden'); feed.innerHTML=visible.slice(0,2).map(n=>notifCard(n,true)).join('');} else {feed.classList.add('hidden');} list.innerHTML = notifications.length? notifications.map(n=>notifCard(n,false)).join('') : '<div class="text-center py-16"><p class="font-bold text-sm">لا توجد إشعارات</p></div>';}
+function notifCard(n,isFeed){let icon=n.type==='urgent'?'🚨':n.type==='success'?'✅':'ℹ'; let bg=n.type==='urgent'?'bg-red-50 border-red-200':n.type==='success'?'bg-green-50 border-green-200':'bg-blue-50 border-blue-200'; let isUnread=currentUser?!n.readBy.includes(currentUser.username):true; return `<div class="${bg} border rounded-[20px] p-4 relative ${isUnread?'ring-2 ring-red-100':''}"><div class="flex gap-3"><div class="w-11 h-11 bg-white rounded-full flex items-center justify-center text-[18px] shadow-sm">${icon}</div><div class="flex-1"><p class="font-black text-[13px] leading-tight">${n.title}</p><p class="text-[11px] text-gray-600 mt-1.5 leading-relaxed">${n.msg}</p><div class="flex items-center gap-2 mt-2.5"><span class="text-[9px] bg-white px-2.5 py-1 rounded-full border font-bold">${n.area==='all'?'📍 الحامي والمقد':n.area==='الحامي'?'📍 الحامي':'📍 المقد'}</span><span class="text-[9px] text-gray-400">${n.time}</span>${isUnread?'<span class="text-[9px] bg-red-600 text-white px-2.5 py-1 rounded-full font-black">جديد</span>':''}</div></div></div>${!isFeed?`<button onclick="deleteNotif(${n.id})" class="absolute top-3 left-3 w-6 h-6 bg-white rounded-full text-[10px]">✕</button>`:''}</div>`;}
+function openNotifs(){document.getElementById('notifModal').classList.remove('hidden'); renderNotifs(); if(currentUser){notifications.forEach(n=>{if(!n.readBy.includes(currentUser.username)) n.readBy.push(currentUser.username);}); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); updateBadge();}}
+function closeNotifs(){document.getElementById('notifModal').classList.add('hidden');}
+function markAllRead(){if(!currentUser){alert('سجل دخول'); return;} notifications.forEach(n=>{if(!n.readBy.includes(currentUser.username)) n.readBy.push(currentUser.username);}); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); renderNotifs(); updateBadge();}
+function updateBadge(){let unread=currentUser?notifications.filter(n=>!n.readBy.includes(currentUser.username)).length:notifications.length; let badge=document.getElementById('notifBadge'); if(unread>0){badge.textContent=unread>9?'9+':unread; badge.classList.remove('hidden');} else {badge.classList.add('hidden');}}
+function deleteNotif(id){if(!currentUser||currentUser.role!=='admin'){alert('للإدارة فقط'); return;} notifications=notifications.filter(n=>n.id!==id); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); renderNotifs(); updateBadge();}
+updateAuth(); render(); renderNotifs(); updateBadge();
 </script>
-</body></html>
+
+<script>
+let supabaseClient = null;
+let isOnlineMode = false;
+try {
+  if (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined' && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes('PUT_YOUR')) {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    isOnlineMode = true;
+    console.log('✅ Online mode');
+  }
+} catch(e){ console.log('offline', e); }
+
+async function loadFromSupabase(){
+  if(!isOnlineMode || !supabaseClient) return false;
+  try {
+    let {data, error} = await supabaseClient.from('donors').select('*').order('created_at', {ascending:true});
+    if(error){ console.log(error); return false; }
+    if(data && data.length>0){
+      let mapped = data.map(d=> ({ name: d.name, username: d.username, pass: d.pass, phone: d.phone||'', blood: d.blood||'O+', area: d.area||'الحامي', hood: d.hood||'', last: d.last_donation||new Date().toISOString().slice(0,10), status: d.status||'متاح الآن', reason: d.reason||'', role: d.role||'donor', id: d.id }));
+      let adminExists = mapped.find(u=>u.username==='admin');
+      if(!adminExists) mapped.unshift({name:'المدير العام', username:'admin', pass: localStorage.getItem('dami_admin_pass_v2')||'admin777', phone:'775233773', blood:'AB+', area:'الحامي', hood:'الإدارة', last:new Date().toISOString().slice(0,10), status:'متاح الآن', reason:'', role:'admin'});
+      users = mapped; saveLocal(); render(); updateAuth(); return true;
+    }
+  } catch(e){ console.log(e); }
+  return false;
+}
+function saveLocal(){ localStorage.setItem('dami_users_v2', JSON.stringify(users)); }
+async function syncToSupabase(user){
+  if(!isOnlineMode || !supabaseClient || user.role==='admin') return;
+  try {
+    let payload = { name: user.name, username: user.username, pass: user.pass, phone: user.phone, blood: user.blood, area: user.area, hood: user.hood, last_donation: user.last, status: user.status, reason: user.reason||'', role: 'donor' };
+    let {data: existing} = await supabaseClient.from('donors').select('id').eq('username', user.username).maybeSingle();
+    if(existing){ await supabaseClient.from('donors').update(payload).eq('username', user.username); }
+    else { await supabaseClient.from('donors').insert(payload); }
+  } catch(e){ console.log(e); }
+}
+const _origSave = save;
+save = function(){ _origSave(); if(isOnlineMode){ users.forEach(u=> { if(u.role!=='admin') syncToSupabase(u); }); } }
+setTimeout(async ()=>{
+  let ok = await loadFromSupabase();
+  let badge = document.getElementById('onlineBadge');
+  if(badge){
+    if(ok){ badge.textContent='🌐 أونلاين - مرتبط بـ Supabase'; badge.className='text-[10px] bg-green-100 text-green-700 px-3 py-1 rounded-full font-black'; }
+    else { badge.textContent='📱 محلي - جدول donors غير موجود بعد'; badge.className='text-[10px] bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-black'; }
+  }
+}, 800);
+</script>
+
+</body>
+</html>
