@@ -1,28 +1,30 @@
 
-<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>فحص الربط V2</title>
+<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>فحص الربط V3</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.3/dist/umd/supabase.min.js"></script>
 <style>body{font-family:system-ui;padding:20px;background:#f5f5f5} .box{background:white;padding:20px;border-radius:15px;margin:10px 0;word-break:break-all} .ok{color:green;font-weight:bold} .err{color:red;font-weight:bold}</style>
 </head><body>
-<h2>🔍 فحص ربط Supabase V2 (محدث)</h2>
+<h2>🔍 فحص ربط Supabase V3</h2>
 <div id="log" class="box">جاري الفحص...</div>
 <script>
-const URL = 'https://sncymicxpwxyfmxtqoiv.supabase.co';
-const KEY = 'sb_publishable_ax-vLH9J3LHOvUiD8NkYQg_5KKotYrX';
+const SUPABASE_URL = 'https://sncymicxpwxyfmxtqoiv.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_ax-vLH9J3LHOvUiD8NkYQg_5KKotYrX';
 async function run(){
   let log = document.getElementById('log');
   function add(t,c=''){ log.innerHTML += `<div class="${c}">${t}</div><hr>`; }
-  add('URL: '+URL);
-  add('KEY: '+KEY);
+  add('URL: '+SUPABASE_URL);
+  add('KEY: '+SUPABASE_KEY);
   try {
-    // v2.50 uses window.supabase.createClient
-    const client = window.supabase.createClient(URL, KEY);
-    add('✅ تم إنشاء Supabase Client بنجاح', 'ok');
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    add('✅ تم إنشاء Supabase Client بنجاح - تم إصلاح خطأ URL', 'ok');
     let {data, error} = await client.from('donors').select('*').limit(5);
     if(error){
-      add('❌ خطأ في جدول donors: '+error.message+' | Code: '+error.code, 'err');
-      add(JSON.stringify(error));
+      add('❌ خطأ في جدول donors: '+error.message+' | Code: '+(error.code||'')+'', 'err');
+      add('<pre>'+JSON.stringify(error,null,2)+'</pre>');
+      if((error.code==='42P01') || (error.message && error.message.includes('does not exist'))){
+        add('⚠️ الجدول donors غير موجود! نفذ كود SQL في Supabase', 'err');
+      }
     } else {
-      add('✅ الاتصال ناجح! جدول donors موجود وعدد السجلات: '+(data?data.length:0), 'ok');
+      add('✅ الاتصال ناجح! جدول donors موجود - عدد السجلات: '+(data?data.length:0), 'ok');
       add('<pre>'+JSON.stringify(data,null,2)+'</pre>');
     }
     let testUser = {name:'اختبار ربط', username:'test_'+Date.now(), pass:'1234', phone:'777000000', blood:'O+', area:'الحامي', hood:'اختبار', last_donation:'2024-01-01', status:'متاح الآن', reason:'اختبار', role:'donor'};
@@ -30,7 +32,7 @@ async function run(){
     if(insErr) add('❌ فشل الإدخال: '+insErr.message+' '+JSON.stringify(insErr), 'err');
     else add('✅✅✅ الإدخال نجح! الربط يعمل 100% - تم إدخال: '+ins[0].username, 'ok');
   } catch(e){
-    add('❌ خطأ عام: '+e.message+'<br>'+e.stack, 'err');
+    add('❌ خطأ عام: '+e.message+'<br><pre>'+e.stack+'</pre>', 'err');
   }
 }
 run();
