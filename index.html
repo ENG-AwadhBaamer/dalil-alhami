@@ -38,7 +38,7 @@ body{font-family:'Cairo',sans-serif}
 </div>
 </header>
 
-<!-- لوحة الإدارة المحدثة -->
+<!-- لوحة الإدارة -->
 <div id="adminPanel" class="hidden mx-4 mt-5 bg-gradient-to-br from-zinc-900 via-black to-zinc-900 text-white rounded-[28px] p-6 border border-white/10 shadow-2xl">
 <div class="flex justify-between items-center">
 <div class="flex items-center gap-2.5"><div class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center">👑</div><div><p class="font-black text-[13px]">لوحة الإدارة</p><p class="text-[10px] opacity-60">تحكم كامل - الحامي والمقد</p></div></div>
@@ -135,7 +135,7 @@ body{font-family:'Cairo',sans-serif}
 </div>
 </div>
 
-<!-- Modals نفس السابق مع إضافة تغيير كلمة السر -->
+<!-- Modal تسجيل الدخول -->
 <div id="authModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end justify-center">
 <div class="bg-white w-full max-w-[430px] rounded-t-[32px] p-6 max-h-[90vh] overflow-y-auto">
 <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5"></div>
@@ -159,6 +159,7 @@ body{font-family:'Cairo',sans-serif}
 </div>
 </div>
 
+<!-- Modal التعديل -->
 <div id="editModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end justify-center">
 <div class="bg-white w-full max-w-[430px] rounded-t-[32px] p-6">
 <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5"></div>
@@ -174,6 +175,7 @@ body{font-family:'Cairo',sans-serif}
 </div>
 </div>
 
+<!-- Modal الإشعارات -->
 <div id="notifModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex items-end justify-center">
 <div class="bg-[#FAFAFA] w-full max-w-[430px] rounded-t-[32px] max-h-[85vh] flex flex-col">
 <div class="bg-white p-6 rounded-t-[32px] border-b"><div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5"></div><div class="flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-11 h-11 bg-red-50 rounded-full flex items-center justify-center">🔔</div><div><h3 class="font-black text-[16px]">الإشعارات</h3><p class="text-[11px] text-gray-400 font-bold">من إدارة الحامي تجمعنا</p></div></div><div class="flex gap-2"><button onclick="markAllRead()" class="text-[11px] bg-black text-white px-4 py-2 rounded-full font-bold">مقروء</button><button onclick="closeNotifs()" class="w-9 h-9 bg-gray-100 rounded-full">✕</button></div></div></div>
@@ -182,143 +184,481 @@ body{font-family:'Cairo',sans-serif}
 </div>
 
 <script>
+// ==================== إعدادات Supabase ====================
 const SUPABASE_URL = 'https://sncymicxpwxyfmxtqoiv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ax-vLH9J3LHOvUiD8NkYQg_5KKotYrX';
-const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-let areaFilter='all', bloodFilter='all', editTarget=null, notifType='urgent';
-let users = JSON.parse(localStorage.getItem('dami_users_v2')||'null') || [
-{username:'admin', pass:'admin777', name:'إدارة دمي', phone:'777701487', blood:'O+', area:'الحامي', hood:'الإدارة', last:'2024-01-01', status:'متاح الآن', role:'admin'},
-{name:'أحمد باعمر', username:'ahmed_hami', pass:'1234', phone:'777123456', blood:'O+', area:'الحامي', hood:'السوق', last:'2024-02-10', status:'متاح الآن', reason:'', role:'donor'},
-{name:'صالح الجمحي', username:'saleh_maqd', pass:'1234', phone:'777654321', blood:'A+', area:'المقد', hood:'الجامع', last:'2024-01-20', status:'غير متاح', reason:'مسافر خارج المنطقة حالياً', role:'donor'}
-];
-if(!localStorage.getItem('dami_users_v2')) localStorage.setItem('dami_users_v2', JSON.stringify(users));
-let currentUser = JSON.parse(localStorage.getItem('dami_current_v2')||'null');
-let notifications = JSON.parse(localStorage.getItem('dami_notifs')||'[]');
-function save(){localStorage.setItem('dami_users_v2', JSON.stringify(users));}
-
-function openChangePassword(){document.getElementById('changePassBox').classList.toggle('hidden');}
-async function changeAdminPassword(){
- let oldP=document.getElementById('oldPass').value;
- let newP=document.getElementById('newPass').value;
- let conf=document.getElementById('confirmPass').value;
- if(!oldP||!newP||!conf){alert('عبي كل الحقول'); return;}
- if(newP!==conf){alert('التأكيد غير مطابق'); return;}
- if(currentUser && currentUser.pass!==oldP){alert('كلمة السر الحالية خطأ'); return;}
- // تحديث محلي
- let idx=users.findIndex(x=>x.username===currentUser.username);
- if(idx!==-1){users[idx].pass=newP; save();}
- // تحديث Supabase إذا موجود
- try{
-   const { error } = await supabaseClient.auth.updateUser({ password: newP });
-   if(error) console.log('Supabase auth not linked, local only:', error);
- }catch(e){console.log(e);}
- currentUser.pass=newP;
- localStorage.setItem('dami_current_v2', JSON.stringify(currentUser));
- alert('✅ تم تغيير كلمة السر بنجاح');
- document.getElementById('changePassBox').classList.add('hidden');
- document.getElementById('oldPass').value=''; document.getElementById('newPass').value=''; document.getElementById('confirmPass').value='';
-}
-
-function setArea(a){areaFilter=a; document.querySelectorAll('.area-pill').forEach(b=>{b.className='area-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[13px] font-bold'}); document.getElementById('area-'+a).className='area-pill bg-black text-white px-5 py-2.5 rounded-full text-[13px] font-black shadow'; render(); renderNotifs();}
-function setBlood(b){bloodFilter=b; document.querySelectorAll('.blood-pill').forEach(x=>x.className='blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold'); if(event) event.target.className='blood-pill active bg-black text-white px-5 py-2.5 rounded-full text-[12px] font-black shadow'; render();}
-function updateAuth(){let btn=document.getElementById('authBtn'); let panel=document.getElementById('adminPanel'); if(currentUser){btn.textContent=currentUser.role==='admin'?'👑 خروج':'أهلاً '+currentUser.name.split(' ')[0]; btn.onclick=doLogout; if(currentUser.role==='admin') panel.classList.remove('hidden'); else panel.classList.add('hidden');} else {btn.textContent='دخول'; btn.onclick=openAuth; panel.classList.add('hidden');}}
-function render(){
-let q=document.getElementById('search').value.toLowerCase();
-let cont=document.getElementById('donors'); cont.innerHTML='';
-let filtered=users.filter(u=>u.role!=='admin').filter(u=>{if(areaFilter!=='all' && u.area!==areaFilter) return false; if(bloodFilter!=='all' && u.blood!==bloodFilter) return false; if(q && !u.name.toLowerCase().includes(q) && !u.blood.toLowerCase().includes(q)) return false; return true;});
-document.getElementById('totalDonors').textContent=users.filter(u=>u.role!=='admin').length;
-document.getElementById('availDonors').textContent=users.filter(u=>u.role!=='admin' && u.status==='متاح الآن').length;
-document.getElementById('hamiCount').textContent=users.filter(u=>u.area==='الحامي' && u.role!=='admin').length;
-filtered.forEach(u=>{
-let statusColor = u.status==='متاح الآن'?'bg-green-500':u.status==='غير متاح'?'bg-red-500':'bg-amber-500';
-let reasonHtml = (u.status!=='متاح الآن' && u.reason) ? `<div class="mt-2 bg-amber-50 border border-amber-200 rounded-xl p-2.5"><p class="text-[10px] font-black text-amber-800">📝 السبب: ${u.reason}</p></div>` : '';
-let isMe = currentUser && currentUser.username===u.username;
-let isAdmin = currentUser && currentUser.role==='admin';
-let canEdit = isMe || isAdmin;
-cont.innerHTML+=`<div class="bg-white border border-black/[0.06] rounded-[24px] p-5 flex gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-<div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white flex items-center justify-center font-black text-[15px] shadow-[0_8px_20px_rgba(220,38,38,0.3)]">${u.blood}</div>
-<div class="flex-1">
-<div class="flex justify-between items-start"><div><p class="font-black text-[14px]">${u.name} ${isMe?'<span class="text-red-600 text-[10px]">(أنت)</span>':''}</p><p class="text-[11px] text-gray-400 font-bold mt-0.5">${u.hood} • @${u.username}</p></div><span class="text-[10px] border px-2.5 py-1 rounded-full font-bold ${u.area==='الحامي'?'bg-green-50 text-green-700 border-green-200':'bg-blue-50 text-blue-700 border-blue-200'}">${u.area}</span></div>
-<div class="flex items-center gap-2 mt-2.5"><span class="w-2 h-2 rounded-full ${statusColor} ${u.status==='متاح الآن'?'animate-pulse':''}"></span><span class="text-[11px] font-black">${u.status}</span><span class="text-[10px] text-gray-400">• ${u.last}</span></div>${reasonHtml}
-<div class="flex gap-2 mt-4">
-${canEdit?`<button onclick="openEditFor('${u.username}')" class="flex-1 bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-full text-[11px] font-black">${isAdmin?'👑 إدارة':'✏ تعديل حالتي'}</button>`:`<a href="https://wa.me/967${u.phone}" class="flex-1 bg-[#25D366] text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">💬 واتساب</a><a href="tel:${u.phone}" class="flex-1 bg-black text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">📞 اتصال</a>`}
-</div>
-</div></div>`;
-});
-if(filtered.length===0) cont.innerHTML='<div class="text-center py-16"><div class="w-20 h-20 mx-auto bg-gray-50 rounded-full flex items-center justify-center text-3xl mb-3">🔍</div><p class="font-black text-[14px]">لا يوجد متبرعين</p></div>';
-}
-function openAuth(){document.getElementById('authModal').classList.remove('hidden'); showLogin();}
-function closeAuth(){document.getElementById('authModal').classList.add('hidden');}
-function showRegister(){document.getElementById('loginForm').classList.add('hidden'); document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('authTitle').textContent='تسجيل متبرع جديد';}
-function showLogin(){document.getElementById('registerForm').classList.add('hidden'); document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('authTitle').textContent='تسجيل الدخول';}
-function openRegister(){openAuth(); showRegister();}
-function doLogin(){let u=document.getElementById('l_user').value.trim(); let p=document.getElementById('l_pass').value; let f=users.find(x=>x.username===u && x.pass===p); if(!f){alert('خطأ في اسم المستخدم أو كلمة المرور'); return;} currentUser=f; localStorage.setItem('dami_current_v2', JSON.stringify(f)); closeAuth(); updateAuth(); render(); renderNotifs(); updateBadge();}
-function doRegister(){let name=document.getElementById('r_name').value.trim(); let username=document.getElementById('r_user').value.trim().toLowerCase(); let pass=document.getElementById('r_pass').value; let phone=document.getElementById('r_phone').value.trim(); let blood=document.getElementById('r_blood').value; let area=document.getElementById('r_area').value; let hood=document.getElementById('r_hood').value.trim(); if(!name||!username||!pass||!phone){alert('عبي الحقول'); return;} if(users.find(x=>x.username===username)){alert('اسم المستخدم موجود'); return;} let nu={name, username, pass, phone, blood, area, hood:hood||area, last:new Date().toISOString().slice(0,10), status:'متاح الآن', role:'donor'}; users.push(nu); save(); currentUser=nu; localStorage.setItem('dami_current_v2', JSON.stringify(nu)); closeAuth(); updateAuth(); render();}
-function doLogout(){currentUser=null; localStorage.removeItem('dami_current_v2'); updateAuth(); render(); updateBadge();}
-function openEditFor(username){let u=users.find(x=>x.username===username); if(!u) return; if(!currentUser){alert('سجل دخول أولاً باسم المستخدم وكلمة السر الخاصة بك'); openAuth(); return;} if(currentUser.role!=='admin' && currentUser.username!==username){alert('يمكنك تعديل حالتك فقط - كل متبرع له حساب خاص'); return;} editTarget=username; document.getElementById('e_status').value=u.status; document.getElementById('e_reason').value=u.reason||''; toggleReason(); document.getElementById('e_phone').value=u.phone; document.getElementById('e_last').value=u.last; document.getElementById('e_area').value=u.area; document.getElementById('editTitle').textContent=currentUser.role==='admin'?'إدارة: '+u.name:'تعديل حالتي'; document.getElementById('editAdminExtra').classList.toggle('hidden', currentUser.role!=='admin'); if(currentUser.role==='admin'){document.getElementById('e_name').value=u.name; document.getElementById('e_user_edit').value=u.username; document.getElementById('deleteBtn').classList.remove('hidden');} else {document.getElementById('deleteBtn').classList.add('hidden');} document.getElementById('editModal').classList.remove('hidden');}
-function closeEdit(){document.getElementById('editModal').classList.add('hidden'); editTarget=null;}
-function toggleReason(){let st=document.getElementById('e_status').value; let box=document.getElementById('reasonBox'); if(st!=='متاح الآن'){box.classList.remove('hidden');} else {box.classList.add('hidden'); document.getElementById('e_reason').value='';}}
-function saveEdit(){if(!editTarget) return; let idx=users.findIndex(x=>x.username===editTarget); if(idx===-1) return; if(currentUser.role==='admin'){users[idx].name=document.getElementById('e_name').value.trim()||users[idx].name; users[idx].username=document.getElementById('e_user_edit').value.trim()||users[idx].username;} users[idx].status=document.getElementById('e_status').value; users[idx].reason=document.getElementById('e_reason').value.trim(); users[idx].phone=document.getElementById('e_phone').value; users[idx].last=document.getElementById('e_last').value; users[idx].area=document.getElementById('e_area').value; if(currentUser.username===editTarget) currentUser=users[idx]; save(); localStorage.setItem('dami_current_v2', JSON.stringify(currentUser)); closeEdit(); updateAuth(); render();}
-function deleteDonor(){if(!currentUser||currentUser.role!=='admin') return; if(!confirm('متأكد حذف المتبرع؟')) return; users=users.filter(x=>x.username!==editTarget); save(); closeEdit(); render();}
-function setNotifType(t){notifType=t; document.querySelectorAll('.notif-type').forEach(b=>b.className='notif-type bg-white/10 px-3 py-2.5 rounded-full text-[11px] font-bold flex-1'); document.getElementById('ntype-'+t).className='notif-type bg-red-600 text-white px-3 py-2.5 rounded-full text-[11px] font-black flex-1 shadow';}
-function sendNotif(){let title=document.getElementById('notifTitle').value.trim(); let msg=document.getElementById('notifMsg').value.trim(); let area=document.getElementById('notifArea').value; if(!title||!msg){alert('اكتب عنوان ونص'); return;} let notif={id:Date.now(), title, msg, area, type:notifType, time:new Date().toLocaleString('ar-YE'), readBy:[]}; notifications.unshift(notif); if(notifications.length>50) notifications=notifications.slice(0,50); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); document.getElementById('notifTitle').value=''; document.getElementById('notifMsg').value=''; renderNotifs(); updateBadge(); alert('تم الإرسال لكل العملاء 🚀');}
-function renderNotifs(){let list=document.getElementById('notifList'); let feed=document.getElementById('notifFeed'); let visible=notifications.filter(n=> n.area==='all' || areaFilter==='all' || n.area===areaFilter); if(visible.length>0){feed.classList.remove('hidden'); feed.innerHTML=visible.slice(0,2).map(n=>notifCard(n,true)).join('');} else {feed.classList.add('hidden');} list.innerHTML = notifications.length? notifications.map(n=>notifCard(n,false)).join('') : '<div class="text-center py-16"><p class="font-bold text-sm">لا توجد إشعارات</p></div>';}
-function notifCard(n,isFeed){let icon=n.type==='urgent'?'🚨':n.type==='success'?'✅':'ℹ'; let bg=n.type==='urgent'?'bg-red-50 border-red-200':n.type==='success'?'bg-green-50 border-green-200':'bg-blue-50 border-blue-200'; let isUnread=currentUser?!n.readBy.includes(currentUser.username):true; return `<div class="${bg} border rounded-[20px] p-4 relative ${isUnread?'ring-2 ring-red-100':''}"><div class="flex gap-3"><div class="w-11 h-11 bg-white rounded-full flex items-center justify-center text-[18px] shadow-sm">${icon}</div><div class="flex-1"><p class="font-black text-[13px] leading-tight">${n.title}</p><p class="text-[11px] text-gray-600 mt-1.5 leading-relaxed">${n.msg}</p><div class="flex items-center gap-2 mt-2.5"><span class="text-[9px] bg-white px-2.5 py-1 rounded-full border font-bold">${n.area==='all'?'📍 الحامي والمقد':n.area==='الحامي'?'📍 الحامي':'📍 المقد'}</span><span class="text-[9px] text-gray-400">${n.time}</span>${isUnread?'<span class="text-[9px] bg-red-600 text-white px-2.5 py-1 rounded-full font-black">جديد</span>':''}</div></div></div>${!isFeed?`<button onclick="deleteNotif(${n.id})" class="absolute top-3 left-3 w-6 h-6 bg-white rounded-full text-[10px]">✕</button>`:''}</div>`;}
-function openNotifs(){document.getElementById('notifModal').classList.remove('hidden'); renderNotifs(); if(currentUser){notifications.forEach(n=>{if(!n.readBy.includes(currentUser.username)) n.readBy.push(currentUser.username);}); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); updateBadge();}}
-function closeNotifs(){document.getElementById('notifModal').classList.add('hidden');}
-function markAllRead(){if(!currentUser){alert('سجل دخول'); return;} notifications.forEach(n=>{if(!n.readBy.includes(currentUser.username)) n.readBy.push(currentUser.username);}); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); renderNotifs(); updateBadge();}
-function updateBadge(){let unread=currentUser?notifications.filter(n=>!n.readBy.includes(currentUser.username)).length:notifications.length; let badge=document.getElementById('notifBadge'); if(unread>0){badge.textContent=unread>9?'9+':unread; badge.classList.remove('hidden');} else {badge.classList.add('hidden');}}
-function deleteNotif(id){if(!currentUser||currentUser.role!=='admin'){alert('للإدارة فقط'); return;} notifications=notifications.filter(n=>n.id!==id); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); renderNotifs(); updateBadge();}
-updateAuth(); render(); renderNotifs(); updateBadge();
-</script>
-
-<script>
-let supabaseClient = null;
-let isOnlineMode = false;
+let supabaseClient = null; // سيتم تهيئته بعد تحميل المكتبة
 try {
-  if (typeof supabase !== 'undefined' && typeof SUPABASE_URL !== 'undefined' && typeof SUPABASE_ANON_KEY !== 'undefined' && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes('PUT_YOUR')) {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    isOnlineMode = true;
-    console.log('✅ Online mode');
-  }
-} catch(e){ console.log('offline', e); }
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch(e) { console.warn('فشل تحميل Supabase', e); }
 
-async function loadFromSupabase(){
-  if(!isOnlineMode || !supabaseClient) return false;
-  try {
-    let {data, error} = await supabaseClient.from('donors').select('*').order('created_at', {ascending:true});
-    if(error){ console.log(error); return false; }
-    if(!error){ console.log('Supabase connected, count:', data?.length); if(data && data.length>0){
-      let mapped = data.map(d=> ({ name: d.name, username: d.username, pass: d.pass, phone: d.phone||'', blood: d.blood||'O+', area: d.area||'الحامي', hood: d.hood||'', last: d.last_donation||new Date().toISOString().slice(0,10), status: d.status||'متاح الآن', reason: d.reason||'', role: d.role||'donor', id: d.id }));
-      } } // end data>0 block, even if empty we are online
-      let adminExists = users.find(u=>u.username==='admin');
-      if(!adminExists) mapped.unshift({name:'المدير العام', username:'admin', pass: localStorage.getItem('dami_admin_pass_v2')||'admin777', phone:'775233773', blood:'AB+', area:'الحامي', hood:'الإدارة', last:new Date().toISOString().slice(0,10), status:'متاح الآن', reason:'', role:'admin'});
-      users = mapped; saveLocal(); render(); updateAuth(); return true;
-    }
-  } catch(e){ console.log(e); }
-  return false;
+// ==================== البيانات الأساسية ====================
+let areaFilter = 'all';
+let bloodFilter = 'all';
+let editTarget = null;
+let notifType = 'urgent';
+
+let users = [];
+let currentUser = null;
+let notifications = JSON.parse(localStorage.getItem('dami_notifs') || '[]');
+
+// ==================== دوال الحفظ والمزامنة ====================
+function saveLocal() {
+  localStorage.setItem('dami_users_v2', JSON.stringify(users));
 }
-function saveLocal(){ localStorage.setItem('dami_users_v2', JSON.stringify(users)); }
-async function syncToSupabase(user){
-  if(!isOnlineMode || !supabaseClient || user.role==='admin') return;
-  try {
-    let payload = { name: user.name, username: user.username, pass: user.pass, phone: user.phone, blood: user.blood, area: user.area, hood: user.hood, last_donation: user.last, status: user.status, reason: user.reason||'', role: 'donor' };
-    let {data: existing} = await supabaseClient.from('donors').select('id').eq('username', user.username).maybeSingle();
-    if(existing){ await supabaseClient.from('donors').update(payload).eq('username', user.username); }
-    else { await supabaseClient.from('donors').insert(payload); }
-  } catch(e){ console.log(e); }
-}
-const _origSave = save;
-save = function(){ _origSave(); if(isOnlineMode){ users.forEach(u=> { if(u.role!=='admin') syncToSupabase(u); }); } }
-setTimeout(async ()=>{
-  let ok = await loadFromSupabase(); console.log('load ok', ok);
-  let badge = document.getElementById('onlineBadge');
-  if(badge){
-    if(ok){ badge.textContent='🌐 أونلاين - مرتبط بـ Supabase'; badge.className='text-[10px] bg-green-100 text-green-700 px-3 py-1 rounded-full font-black'; }
-    else { badge.textContent='📱 محلي - جدول donors غير موجود بعد'; badge.className='text-[10px] bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-black'; }
+
+// دالة المزامنة مع Supabase (تُستدعى تلقائياً بعد كل تغيير)
+async function syncAllToSupabase() {
+  if (!supabaseClient) return;
+  for (const u of users) {
+    if (u.role === 'admin') continue; // لا نرفع المدير للسحاب
+    try {
+      const payload = {
+        name: u.name,
+        username: u.username,
+        pass: u.pass,
+        phone: u.phone || '',
+        blood: u.blood || 'O+',
+        area: u.area || 'الحامي',
+        hood: u.hood || '',
+        last_donation: u.last || new Date().toISOString().slice(0,10),
+        status: u.status || 'متاح الآن',
+        reason: u.reason || '',
+        role: 'donor'
+      };
+      // التحقق من الوجود
+      const { data: existing, error: findErr } = await supabaseClient
+        .from('donors')
+        .select('id')
+        .eq('username', u.username)
+        .maybeSingle();
+      if (findErr) throw findErr;
+      if (existing) {
+        await supabaseClient.from('donors').update(payload).eq('username', u.username);
+      } else {
+        await supabaseClient.from('donors').insert(payload);
+      }
+    } catch(e) { console.warn('فشل مزامنة المستخدم', u.username, e); }
   }
-}, 800);
+}
+
+// دالة حفظ شاملة (محلي + سحاب)
+async function saveAll() {
+  saveLocal();
+  if (supabaseClient) {
+    await syncAllToSupabase();
+  }
+  // تحديث الواجهة
+  render();
+  updateAuth();
+}
+
+// ==================== تحميل البيانات من Supabase ====================
+async function loadFromSupabase() {
+  if (!supabaseClient) return false;
+  try {
+    const { data, error } = await supabaseClient.from('donors').select('*').order('created_at', { ascending: true });
+    if (error) throw error;
+    if (data && data.length > 0) {
+      // تحويل البيانات إلى هيكل المستخدمين
+      users = data.map(d => ({
+        id: d.id,
+        name: d.name,
+        username: d.username,
+        pass: d.pass,
+        phone: d.phone || '',
+        blood: d.blood || 'O+',
+        area: d.area || 'الحامي',
+        hood: d.hood || '',
+        last: d.last_donation || new Date().toISOString().slice(0,10),
+        status: d.status || 'متاح الآن',
+        reason: d.reason || '',
+        role: d.role || 'donor'
+      }));
+      // التأكد من وجود المدير
+      const adminExists = users.find(u => u.username === 'admin');
+      if (!adminExists) {
+        users.unshift({
+          name: 'المدير العام',
+          username: 'admin',
+          pass: localStorage.getItem('dami_admin_pass_v2') || 'admin777',
+          phone: '775233773',
+          blood: 'AB+',
+          area: 'الحامي',
+          hood: 'الإدارة',
+          last: new Date().toISOString().slice(0,10),
+          status: 'متاح الآن',
+          reason: '',
+          role: 'admin'
+        });
+      }
+      saveLocal();
+      render();
+      updateAuth();
+      updateBadgeStatus('🌐 أونلاين - مرتبط بـ Supabase', 'bg-green-100 text-green-700');
+      return true;
+    }
+    return false;
+  } catch(e) { console.warn('فشل تحميل من Supabase', e); return false; }
+}
+
+// ==================== التهيئة ====================
+function init() {
+  // استعادة المستخدم الحالي
+  const saved = localStorage.getItem('dami_current_v2');
+  if (saved) {
+    try { currentUser = JSON.parse(saved); } catch(e) { currentUser = null; }
+  }
+  // محاولة تحميل البيانات من Supabase
+  loadFromSupabase().then(ok => {
+    if (!ok) {
+      // إذا فشل، نستخدم localStorage
+      const local = localStorage.getItem('dami_users_v2');
+      if (local) {
+        try { users = JSON.parse(local); } catch(e) { users = []; }
+      }
+      if (!users || users.length === 0) {
+        // بيانات افتراضية
+        users = [
+          { name: 'المدير العام', username: 'admin', pass: 'admin777', phone: '775233773', blood: 'AB+', area: 'الحامي', hood: 'الإدارة', last: '2024-01-01', status: 'متاح الآن', reason: '', role: 'admin' },
+          { name: 'أحمد باعمر', username: 'ahmed_hami', pass: '1234', phone: '777123456', blood: 'O+', area: 'الحامي', hood: 'السوق', last: '2024-02-10', status: 'متاح الآن', reason: '', role: 'donor' },
+          { name: 'صالح الجمحي', username: 'saleh_maqd', pass: '1234', phone: '777654321', blood: 'A+', area: 'المقد', hood: 'الجامع', last: '2024-01-20', status: 'غير متاح', reason: 'مسافر خارج المنطقة حالياً', role: 'donor' }
+        ];
+        saveLocal();
+      }
+      updateBadgeStatus('📱 وضع غير متصل (محلي)', 'bg-amber-100 text-amber-700');
+    }
+    // بعد تحميل البيانات، نعرض الواجهة
+    render();
+    updateAuth();
+    renderNotifs();
+    updateBadge();
+  });
+}
+
+// ==================== دوال الواجهة ====================
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const container = document.getElementById('donors');
+  container.innerHTML = '';
+  const filtered = users
+    .filter(u => u.role !== 'admin')
+    .filter(u => {
+      if (areaFilter !== 'all' && u.area !== areaFilter) return false;
+      if (bloodFilter !== 'all' && u.blood !== bloodFilter) return false;
+      if (q && !u.name.toLowerCase().includes(q) && !u.blood.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  // إحصائيات
+  document.getElementById('totalDonors').textContent = users.filter(u => u.role !== 'admin').length;
+  document.getElementById('availDonors').textContent = users.filter(u => u.role !== 'admin' && u.status === 'متاح الآن').length;
+  document.getElementById('hamiCount').textContent = users.filter(u => u.area === 'الحامي' && u.role !== 'admin').length;
+  // عرض البطاقات
+  filtered.forEach(u => {
+    const statusColor = u.status === 'متاح الآن' ? 'bg-green-500' : u.status === 'غير متاح' ? 'bg-red-500' : 'bg-amber-500';
+    const reasonHtml = (u.status !== 'متاح الآن' && u.reason) ? `<div class="mt-2 bg-amber-50 border border-amber-200 rounded-xl p-2.5"><p class="text-[10px] font-black text-amber-800">📝 السبب: ${u.reason}</p></div>` : '';
+    const isMe = currentUser && currentUser.username === u.username;
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const canEdit = isMe || isAdmin;
+    container.innerHTML += `
+      <div class="bg-white border border-black/[0.06] rounded-[24px] p-5 flex gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white flex items-center justify-center font-black text-[15px] shadow-[0_8px_20px_rgba(220,38,38,0.3)]">${u.blood}</div>
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <div><p class="font-black text-[14px]">${u.name} ${isMe ? '<span class="text-red-600 text-[10px]">(أنت)</span>' : ''}</p><p class="text-[11px] text-gray-400 font-bold mt-0.5">${u.hood} • @${u.username}</p></div>
+            <span class="text-[10px] border px-2.5 py-1 rounded-full font-bold ${u.area === 'الحامي' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}">${u.area}</span>
+          </div>
+          <div class="flex items-center gap-2 mt-2.5"><span class="w-2 h-2 rounded-full ${statusColor} ${u.status === 'متاح الآن' ? 'animate-pulse' : ''}"></span><span class="text-[11px] font-black">${u.status}</span><span class="text-[10px] text-gray-400">• ${u.last}</span></div>
+          ${reasonHtml}
+          <div class="flex gap-2 mt-4">
+            ${canEdit ? `<button onclick="openEditFor('${u.username}')" class="flex-1 bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-full text-[11px] font-black">${isAdmin ? '👑 إدارة' : '✏ تعديل حالتي'}</button>` :
+            `<a href="https://wa.me/967${u.phone}" class="flex-1 bg-[#25D366] text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">💬 واتساب</a><a href="tel:${u.phone}" class="flex-1 bg-black text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">📞 اتصال</a>`}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="text-center py-16"><div class="w-20 h-20 mx-auto bg-gray-50 rounded-full flex items-center justify-center text-3xl mb-3">🔍</div><p class="font-black text-[14px]">لا يوجد متبرعين</p></div>';
+  }
+}
+
+function updateAuth() {
+  const btn = document.getElementById('authBtn');
+  const panel = document.getElementById('adminPanel');
+  if (currentUser) {
+    btn.textContent = currentUser.role === 'admin' ? '👑 خروج' : 'أهلاً ' + currentUser.name.split(' ')[0];
+    btn.onclick = doLogout;
+    if (currentUser.role === 'admin') panel.classList.remove('hidden');
+    else panel.classList.add('hidden');
+  } else {
+    btn.textContent = 'دخول';
+    btn.onclick = openAuth;
+    panel.classList.add('hidden');
+  }
+}
+
+function updateBadgeStatus(text, className) {
+  const badge = document.getElementById('onlineBadge');
+  if (badge) {
+    badge.textContent = text;
+    badge.className = `text-[10px] px-3 py-1 rounded-full font-black ${className}`;
+  }
+}
+
+// ==================== دوال تسجيل الدخول والتسجيل ====================
+function openAuth() { document.getElementById('authModal').classList.remove('hidden'); showLogin(); }
+function closeAuth() { document.getElementById('authModal').classList.add('hidden'); }
+function showLogin() { document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('registerForm').classList.add('hidden'); document.getElementById('authTitle').textContent = 'تسجيل الدخول'; }
+function showRegister() { document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden'); document.getElementById('authTitle').textContent = 'تسجيل متبرع جديد'; }
+function openRegister() { openAuth(); showRegister(); }
+
+function doLogin() {
+  const username = document.getElementById('l_user').value.trim();
+  const pass = document.getElementById('l_pass').value;
+  const found = users.find(u => u.username === username && u.pass === pass);
+  if (!found) { alert('خطأ في اسم المستخدم أو كلمة المرور'); return; }
+  currentUser = found;
+  localStorage.setItem('dami_current_v2', JSON.stringify(found));
+  closeAuth();
+  updateAuth();
+  render();
+  renderNotifs();
+  updateBadge();
+}
+
+async function doRegister() {
+  const name = document.getElementById('r_name').value.trim();
+  const username = document.getElementById('r_user').value.trim().toLowerCase();
+  const pass = document.getElementById('r_pass').value;
+  const phone = document.getElementById('r_phone').value.trim();
+  const blood = document.getElementById('r_blood').value;
+  const area = document.getElementById('r_area').value;
+  const hood = document.getElementById('r_hood').value.trim();
+  if (!name || !username || !pass || !phone) { alert('عبي الحقول'); return; }
+  if (users.find(u => u.username === username)) { alert('اسم المستخدم موجود'); return; }
+  const newUser = {
+    name, username, pass, phone, blood, area,
+    hood: hood || area,
+    last: new Date().toISOString().slice(0,10),
+    status: 'متاح الآن',
+    reason: '',
+    role: 'donor'
+  };
+  users.push(newUser);
+  await saveAll(); // حفظ محلي وسحاب
+  currentUser = newUser;
+  localStorage.setItem('dami_current_v2', JSON.stringify(newUser));
+  closeAuth();
+  updateAuth();
+  render();
+}
+
+function doLogout() {
+  currentUser = null;
+  localStorage.removeItem('dami_current_v2');
+  updateAuth();
+  render();
+  updateBadge();
+}
+
+// ==================== تعديل وحذف المتبرعين ====================
+function openEditFor(username) {
+  const u = users.find(x => x.username === username);
+  if (!u) return;
+  if (!currentUser) { alert('سجل دخول أولاً'); openAuth(); return; }
+  if (currentUser.role !== 'admin' && currentUser.username !== username) { alert('يمكنك تعديل حالتك فقط'); return; }
+  editTarget = username;
+  document.getElementById('e_status').value = u.status;
+  document.getElementById('e_reason').value = u.reason || '';
+  toggleReason();
+  document.getElementById('e_phone').value = u.phone;
+  document.getElementById('e_last').value = u.last;
+  document.getElementById('e_area').value = u.area;
+  document.getElementById('editTitle').textContent = currentUser.role === 'admin' ? 'إدارة: ' + u.name : 'تعديل حالتي';
+  const extra = document.getElementById('editAdminExtra');
+  if (currentUser.role === 'admin') {
+    extra.classList.remove('hidden');
+    document.getElementById('e_name').value = u.name;
+    document.getElementById('e_user_edit').value = u.username;
+    document.getElementById('deleteBtn').classList.remove('hidden');
+  } else {
+    extra.classList.add('hidden');
+    document.getElementById('deleteBtn').classList.add('hidden');
+  }
+  document.getElementById('editModal').classList.remove('hidden');
+}
+
+function closeEdit() { document.getElementById('editModal').classList.add('hidden'); editTarget = null; }
+
+function toggleReason() {
+  const st = document.getElementById('e_status').value;
+  const box = document.getElementById('reasonBox');
+  if (st !== 'متاح الآن') { box.classList.remove('hidden'); } else { box.classList.add('hidden'); document.getElementById('e_reason').value = ''; }
+}
+
+async function saveEdit() {
+  if (!editTarget) return;
+  const idx = users.findIndex(x => x.username === editTarget);
+  if (idx === -1) return;
+  const u = users[idx];
+  if (currentUser.role === 'admin') {
+    u.name = document.getElementById('e_name').value.trim() || u.name;
+    u.username = document.getElementById('e_user_edit').value.trim() || u.username;
+  }
+  u.status = document.getElementById('e_status').value;
+  u.reason = document.getElementById('e_reason').value.trim();
+  u.phone = document.getElementById('e_phone').value;
+  u.last = document.getElementById('e_last').value;
+  u.area = document.getElementById('e_area').value;
+  if (currentUser.username === editTarget) {
+    currentUser = u;
+    localStorage.setItem('dami_current_v2', JSON.stringify(u));
+  }
+  await saveAll();
+  closeEdit();
+  updateAuth();
+  render();
+}
+
+async function deleteDonor() {
+  if (!currentUser || currentUser.role !== 'admin') return;
+  if (!confirm('متأكد حذف المتبرع؟')) return;
+  const username = editTarget;
+  users = users.filter(x => x.username !== username);
+  if (supabaseClient) {
+    try {
+      await supabaseClient.from('donors').delete().eq('username', username);
+    } catch(e) { console.warn('فشل حذف من Supabase', e); }
+  }
+  await saveAll();
+  closeEdit();
+  render();
+}
+
+// ==================== الإشعارات ====================
+function setNotifType(t) {
+  notifType = t;
+  document.querySelectorAll('.notif-type').forEach(b => b.className = 'notif-type bg-white/10 px-3 py-2.5 rounded-full text-[11px] font-bold flex-1');
+  document.getElementById('ntype-' + t).className = 'notif-type bg-red-600 text-white px-3 py-2.5 rounded-full text-[11px] font-black flex-1 shadow';
+}
+
+function sendNotif() {
+  const title = document.getElementById('notifTitle').value.trim();
+  const msg = document.getElementById('notifMsg').value.trim();
+  const area = document.getElementById('notifArea').value;
+  if (!title || !msg) { alert('اكتب عنوان ونص'); return; }
+  const notif = { id: Date.now(), title, msg, area, type: notifType, time: new Date().toLocaleString('ar-YE'), readBy: [] };
+  notifications.unshift(notif);
+  if (notifications.length > 50) notifications = notifications.slice(0, 50);
+  localStorage.setItem('dami_notifs', JSON.stringify(notifications));
+  document.getElementById('notifTitle').value = '';
+  document.getElementById('notifMsg').value = '';
+  renderNotifs();
+  updateBadge();
+  alert('تم الإرسال 🚀');
+}
+
+function renderNotifs() {
+  const list = document.getElementById('notifList');
+  const feed = document.getElementById('notifFeed');
+  const visible = notifications.filter(n => n.area === 'all' || areaFilter === 'all' || n.area === areaFilter);
+  if (visible.length > 0) {
+    feed.classList.remove('hidden');
+    feed.innerHTML = visible.slice(0, 2).map(n => notifCard(n, true)).join('');
+  } else {
+    feed.classList.add('hidden');
+  }
+  list.innerHTML = notifications.length ? notifications.map(n => notifCard(n, false)).join('') : '<div class="text-center py-16"><p class="font-bold text-sm">لا توجد إشعارات</p></div>';
+}
+
+function notifCard(n, isFeed) {
+  const icon = n.type === 'urgent' ? '🚨' : n.type === 'success' ? '✅' : 'ℹ';
+  const bg = n.type === 'urgent' ? 'bg-red-50 border-red-200' : n.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200';
+  const isUnread = currentUser ? !n.readBy.includes(currentUser.username) : true;
+  return `<div class="${bg} border rounded-[20px] p-4 relative ${isUnread ? 'ring-2 ring-red-100' : ''}">
+    <div class="flex gap-3"><div class="w-11 h-11 bg-white rounded-full flex items-center justify-center text-[18px] shadow-sm">${icon}</div>
+    <div class="flex-1"><p class="font-black text-[13px] leading-tight">${n.title}</p><p class="text-[11px] text-gray-600 mt-1.5 leading-relaxed">${n.msg}</p>
+    <div class="flex items-center gap-2 mt-2.5"><span class="text-[9px] bg-white px-2.5 py-1 rounded-full border font-bold">${n.area === 'all' ? '📍 الحامي والمقد' : n.area === 'الحامي' ? '📍 الحامي' : '📍 المقد'}</span><span class="text-[9px] text-gray-400">${n.time}</span>${isUnread ? '<span class="text-[9px] bg-red-600 text-white px-2.5 py-1 rounded-full font-black">جديد</span>' : ''}</div></div></div>
+    ${!isFeed ? `<button onclick="deleteNotif(${n.id})" class="absolute top-3 left-3 w-6 h-6 bg-white rounded-full text-[10px]">✕</button>` : ''}
+  </div>`;
+}
+
+function openNotifs() {
+  document.getElementById('notifModal').classList.remove('hidden');
+  renderNotifs();
+  if (currentUser) {
+    notifications.forEach(n => { if (!n.readBy.includes(currentUser.username)) n.readBy.push(currentUser.username); });
+    localStorage.setItem('dami_notifs', JSON.stringify(notifications));
+    updateBadge();
+  }
+}
+function closeNotifs() { document.getElementById('notifModal').classList.add('hidden'); }
+function markAllRead() {
+  if (!currentUser) { alert('سجل دخول'); return; }
+  notifications.forEach(n => { if (!n.readBy.includes(currentUser.username)) n.readBy.push(currentUser.username); });
+  localStorage.setItem('dami_notifs', JSON.stringify(notifications));
+  renderNotifs();
+  updateBadge();
+}
+function updateBadge() {
+  const unread = currentUser ? notifications.filter(n => !n.readBy.includes(currentUser.username)).length : notifications.length;
+  const badge = document.getElementById('notifBadge');
+  if (unread > 0) { badge.textContent = unread > 9 ? '9+' : unread; badge.classList.remove('hidden'); }
+  else { badge.classList.add('hidden'); }
+}
+function deleteNotif(id) {
+  if (!currentUser || currentUser.role !== 'admin') { alert('للإدارة فقط'); return; }
+  notifications = notifications.filter(n => n.id !== id);
+  localStorage.setItem('dami_notifs', JSON.stringify(notifications));
+  renderNotifs();
+  updateBadge();
+}
+
+// ==================== تغيير كلمة السر ====================
+function openChangePassword() { document.getElementById('changePassBox').classList.toggle('hidden'); }
+async function changeAdminPassword() {
+  const old = document.getElementById('oldPass').value;
+  const newP = document.getElementById('newPass').value;
+  const conf = document.getElementById('confirmPass').value;
+  if (!old || !newP || !conf) { alert('عبي كل الحقول'); return; }
+  if (newP !== conf) { alert('التأكيد غير مطابق'); return; }
+  if (!currentUser || currentUser.pass !== old) { alert('كلمة السر الحالية خطأ'); return; }
+  const idx = users.findIndex(x => x.username === currentUser.username);
+  if (idx !== -1) {
+    users[idx].pass = newP;
+    currentUser.pass = newP;
+    localStorage.setItem('dami_current_v2', JSON.stringify(currentUser));
+    await saveAll();
+  }
+  alert('✅ تم تغيير كلمة السر بنجاح');
+  document.getElementById('changePassBox').classList.add('hidden');
+  document.getElementById('oldPass').value = '';
+  document.getElementById('newPass').value = '';
+  document.getElementById('confirmPass').value = '';
+}
+
+// ==================== الفلاتر ====================
+function setArea(a) {
+  areaFilter = a;
+  document.querySelectorAll('.area-pill').forEach(b => b.className = 'area-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[13px] font-bold');
+  document.getElementById('area-' + a).className = 'area-pill bg-black text-white px-5 py-2.5 rounded-full text-[13px] font-black shadow';
+  render();
+  renderNotifs();
+}
+function setBlood(b) {
+  bloodFilter = b;
+  document.querySelectorAll('.blood-pill').forEach(x => x.className = 'blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold');
+  const activeBtn = document.querySelector(`.blood-pill[onclick*="'${b}'"]`);
+  if (activeBtn) activeBtn.className = 'blood-pill active bg-black text-white px-5 py-2.5 rounded-full text-[12px] font-black shadow';
+  render();
+}
+
+// ==================== بدء التطبيق ====================
+init();
+
+// ربط البحث
+document.getElementById('search').addEventListener('input', render);
 </script>
 
 </body>
