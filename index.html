@@ -100,7 +100,7 @@ async function doAdd(){
   customAlert('جاري الإرسال','جاري إرسال إشعار للرئيسي والمدراء...','👤');
   const sent=await notifyAdminsNewDonor(nu);
   closeAdd();render();renderAdminNewDonorList();updateBadge();
-  if(sent){ customAlert('تمت الإضافة','✅ تمت إضافة المتبرع بنجاح\n\n✅ تم إرسال إشعار للرئيسي والمدراء الـ 5\nسيظهر عندهم فوراً في قسم 👑 للإدارة','✅'); }
+  if(sent){ customAlert('تمت الإضافة','✅ تمت إضافة المتبرع بنجاح\n\n✅ تم إرسال إشعار  \nسيظهر عندهم فوراً في قسم 👑 للإدارة','✅'); }
   else{ customAlert('تمت الإضافة','✅ تمت إضافة المتبرع\n\n⚠️ الإشعار محفوظ محلياً - تأكد من اتصال الإنترنت ليصل للإدارة','⚠️'); }
 }
 function openEdit(username){editTarget=users.find(u=>u.username===username);if(!editTarget) return;if(editTarget.username==='admin'&&(!currentUser||currentUser.role!=='super_admin')){customAlert('⛔ محمي','لا يمكن تعديل الرئيسي','⚠️');return;}if(!currentUser||(currentUser.role!=='super_admin'&&currentUser.role!=='admin'&&currentUser.username!==username)){customPrompt('تأكيد الهوية','أدخل كلمة سر حسابك ('+username+') للتعديل:','كلمة السر',function(p){if(!p||p!==editTarget.pass){customAlert('خطأ','كلمة السر خطأ','❌');return;}document.getElementById('eStatus').value=editTarget.status;document.getElementById('eReason').value=editTarget.reason||'';document.getElementById('editModal').classList.remove('hidden');});return;}document.getElementById('eStatus').value=editTarget.status;document.getElementById('eReason').value=editTarget.reason||'';document.getElementById('editModal').classList.remove('hidden');}
