@@ -6,21 +6,18 @@
 <title>دمي - الحامي والمقد</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.3/dist/umd/supabase.min.js"></script>
 <style>
 body{font-family:'Cairo',sans-serif}
 .no-scrollbar::-webkit-scrollbar{display:none}
-.glass{background:rgba(255,255,255,0.85); backdrop-filter:blur(20px)}
+.glass{background:rgba(255,255,255,0.85);backdrop-filter:blur(20px)}
 </style>
 </head>
 <body class="bg-[#FFF8F8] min-h-screen">
-
 <div class="max-w-[430px] mx-auto bg-white min-h-screen shadow-2xl relative pb-32 overflow-hidden">
-<!-- خلفيات زخرفية -->
 <div class="absolute -top-20 -left-20 w-72 h-72 bg-red-100 rounded-full blur-[80px] opacity-60 pointer-events-none"></div>
 <div class="absolute top-40 -right-20 w-64 h-64 bg-rose-100 rounded-full blur-[70px] opacity-40 pointer-events-none"></div>
 
-<!-- الهيدر -->
 <header class="glass sticky top-0 z-30 border-b border-black/5">
 <div class="px-5 pt-5 pb-3 flex justify-between items-center">
 <div class="flex items-center gap-3">
@@ -35,7 +32,6 @@ body{font-family:'Cairo',sans-serif}
 <button id="authBtn" onclick="openAuth()" class="bg-black text-white px-4 py-2.5 rounded-full text-xs font-black shadow">دخول</button>
 </div>
 </div>
-<!-- فلاتر المنطقة -->
 <div class="px-5 pb-4 flex gap-2">
 <button onclick="setArea('all')" id="area-all" class="area-pill bg-black text-white px-5 py-2.5 rounded-full text-[13px] font-black shadow">الكل</button>
 <button onclick="setArea('الحامي')" id="area-الحامي" class="area-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[13px] font-bold">الحامي 🟢</button>
@@ -46,7 +42,7 @@ body{font-family:'Cairo',sans-serif}
 <!-- لوحة الإدارة -->
 <div id="adminPanel" class="hidden mx-4 mt-5 bg-gradient-to-br from-zinc-900 via-black to-zinc-900 text-white rounded-[28px] p-6 border border-white/10 shadow-2xl">
 <div class="flex justify-between items-center">
-<div class="flex items-center gap-2.5"><div class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center">👑</div><div><p class="font-black text-[13px]">لوحة الإدارة</p><p class="text-[10px] opacity-60">تحكم كامل</p></div></div>
+<div class="flex items-center gap-2.5"><div class="w-9 h-9 bg-white/10 rounded-full flex items-center justify-center">👑</div><div><p class="font-black text-[13px]">لوحة الإدارة</p><p class="text-[10px] opacity-60">تحكم كامل - الحامي والمقد</p></div></div>
 <button onclick="openChangePassword()" class="text-[10px] bg-white text-black px-3 py-1.5 rounded-full font-black">🔑 تغيير كلمة السر</button>
 </div>
 <div class="grid grid-cols-3 gap-2.5 mt-5">
@@ -54,6 +50,7 @@ body{font-family:'Cairo',sans-serif}
 <div class="bg-green-500/10 border border-green-500/20 rounded-2xl p-3 text-center"><p class="text-[20px] font-black text-green-400" id="availDonors">0</p><p class="text-[10px] text-green-300 mt-1">متاح الآن</p></div>
 <div class="bg-red-500/10 border border-red-500/20 rounded-2xl p-3 text-center"><p class="text-[20px] font-black text-red-400" id="hamiCount">0</p><p class="text-[10px] text-red-300 mt-1">الحامي</p></div>
 </div>
+
 <!-- تغيير كلمة السر -->
 <div id="changePassBox" class="hidden mt-5 bg-white/[0.06] rounded-[20px] p-4 border border-white/10">
 <p class="font-black text-[12px] mb-3">🔑 تغيير كلمة سر الإدارة</p>
@@ -62,9 +59,10 @@ body{font-family:'Cairo',sans-serif}
 <input id="confirmPass" type="password" placeholder="تأكيد الجديدة" class="w-full bg-white text-black rounded-2xl p-3.5 text-[13px] font-bold outline-none mb-3">
 <button onclick="changeAdminPassword()" class="w-full bg-white text-black py-3 rounded-2xl font-black text-[13px]">حفظ كلمة السر الجديدة</button>
 </div>
+
 <!-- إرسال إشعار -->
 <div class="mt-5 bg-white/[0.06] rounded-[20px] p-4 border border-white/10">
-<p class="font-black text-[12px] flex items-center gap-2">📢 إرسال إشعار</p>
+<p class="font-black text-[12px] flex items-center gap-2">📢 إرسال إشعار لكل العملاء</p>
 <div class="mt-3 space-y-2.5">
 <div class="flex gap-2">
 <button onclick="setNotifType('urgent')" id="ntype-urgent" class="notif-type bg-red-600 text-white px-3 py-2.5 rounded-full text-[11px] font-black flex-1 shadow">🚨 طارئ</button>
@@ -74,15 +72,13 @@ body{font-family:'Cairo',sans-serif}
 <input id="notifTitle" placeholder="عنوان الإشعار" class="w-full bg-white text-black rounded-2xl p-3.5 text-[13px] font-bold outline-none">
 <textarea id="notifMsg" placeholder="نص الرسالة..." class="w-full bg-white text-black rounded-2xl p-3.5 text-[12px] h-20 resize-none outline-none"></textarea>
 <select id="notifArea" class="w-full bg-white text-black rounded-2xl p-3.5 text-[12px] font-bold outline-none"><option value="all">📍 الكل</option><option value="الحامي">📍 الحامي فقط</option><option value="المقد">📍 المقد فقط</option></select>
-<button onclick="sendNotif()" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3.5 rounded-2xl font-black text-[13px]">🚀 إرسال الإشعار</button>
+<button onclick="sendNotif()" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3.5 rounded-2xl font-black text-[13px]">🚀 إرسال الإشعار الآن</button>
 </div>
 </div>
 </div>
 
-<!-- خلاصة الإشعارات -->
 <div id="notifFeed" class="mx-4 mt-4 space-y-2.5 hidden"></div>
 
-<!-- بحث وفلاتر الدم -->
 <div class="px-4 mt-5">
 <div class="bg-white border shadow-[0_8px_30px_rgba(0,0,0,0.04)] rounded-full flex items-center px-5 py-3.5"><span class="text-gray-400">🔍</span><input id="search" oninput="render()" placeholder="ابحث بالاسم أو فصيلة الدم..." class="bg-transparent flex-1 mr-3 text-[13px] outline-none font-bold placeholder:text-gray-400"></div>
 <div class="flex gap-2 overflow-x-auto mt-3 pb-1 no-scrollbar">
@@ -98,36 +94,50 @@ body{font-family:'Cairo',sans-serif}
 </div>
 </div>
 
-<!-- قائمة المتبرعين -->
 <div id="donors" class="px-4 mt-6 space-y-3.5"></div>
 
-<!-- تذييل -->
 <div class="mt-12 mb-2 px-4">
-<div class="bg-gradient-to-br from-zinc-900 via-black to-zinc-900 rounded-[28px] p-6 border border-white/10 shadow-2xl text-white text-center">
+<div class="flex justify-center mb-6">
+<div class="relative">
+<div class="absolute inset-0 bg-red-600 rounded-full blur-[20px] opacity-20"></div>
+<div class="relative w-24 h-24 rounded-full bg-gradient-to-br from-red-600 to-rose-700 p-[3px] shadow-2xl">
+<div class="w-full h-full bg-white rounded-full flex items-center justify-center text-4xl">❤</div>
+</div>
+<div class="absolute inset-0 rounded-full border border-red-200 animate-ping opacity-20"></div>
+</div>
+</div>
+
+<div class="bg-gradient-to-br from-zinc-900 via-black to-zinc-900 rounded-[28px] p-6 border border-white/10 shadow-2xl text-white">
+<div class="text-center">
+<div class="inline-flex items-center gap-2 bg-white/10 border border-white/10 rounded-full px-4 py-1.5 mb-4">
+<span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+<span class="text-[10px] font-black tracking-widest">تطبيق الحامي والمقد - دمي</span>
+</div>
 <p class="font-black text-[16px]">برمجة وتصميم م/ عوض باعامر</p>
 <p class="font-bold text-[13px] mt-1.5 text-white/70">جوال 775233773</p>
 <div class="w-full h-[1px] bg-white/10 my-4"></div>
 <p class="font-bold text-[12px] text-amber-300">فكرة قروب الحامي تجمعنا</p>
 <p class="font-black text-[14px] mt-1">د. عوض عمر باعباد</p>
 <div class="flex justify-center gap-2.5 mt-5">
+<!-- ✅ تم حذف الرقم من النص، مع بقاء الرابط -->
 <a href="https://wa.me/967775233773" class="bg-[#25D366] text-white px-5 py-2.5 rounded-full text-[11px] font-black shadow-lg flex items-center gap-1.5">💬 واتساب</a>
+<a href="https://wa.me/967777701487" class="bg-white text-black px-5 py-2.5 rounded-full text-[11px] font-black shadow">🚨 طوارئ 777701487</a>
 </div>
 </div>
-<p class="text-center text-[10px] text-gray-400 mt-4">© 2026 دمي - الحامي والمقد</p>
+</div>
+<p class="text-center text-[10px] text-gray-400 mt-4 leading-relaxed">© 2026 دمي - الحامي والمقد<br>برمجة وتصميم م/ عوض باعامر 775233773 | فكرة قروب الحامي تجمعنا د. عوض عمر باعباد</p>
 </div>
 
-<!-- القائمة السفلية -->
 <div class="fixed bottom-5 left-1/2 -translate-x-1/2 w-[92%] max-w-[400px] bg-black/90 backdrop-blur-xl rounded-full px-3 py-2.5 flex justify-around items-center shadow-[0_20px_60px_rgba(0,0,0,0.4)] border border-white/10 z-40">
 <button class="text-white flex flex-col items-center px-4 py-1"><span class="text-[18px]">🏠</span><span class="text-[9px] font-bold mt-1">الرئيسية</span></button>
 <button onclick="openNotifs()" class="text-white/60 flex flex-col items-center px-4 py-1 relative"><span class="text-[18px]">🔔</span><span class="text-[9px] mt-1">تنبيهات</span></button>
-<button onclick="openRegister()" class="bg-gradient-to-br from-red-600 to-red-700 w-14 h-14 rounded-full flex items-center justify-center text-white text-[24px] -mt-8 shadow-[0_10px_30px_rgba(220,38,38,0.4)] border-[4px] border-white">+</button>
+<button onclick="openAdd()" class="bg-gradient-to-br from-red-600 to-red-700 w-14 h-14 rounded-full flex items-center justify-center text-white text-[24px] -mt-8 shadow-[0_10px_30px_rgba(220,38,38,0.4)] border-[4px] border-white">+</button>
 <button onclick="openAuth()" class="text-white/60 flex flex-col items-center px-4 py-1"><span class="text-[18px]">👤</span><span class="text-[9px] mt-1">حسابي</span></button>
 <button class="text-white/60 flex flex-col items-center px-4 py-1"><span class="text-[18px]">🩸</span><span class="text-[9px] mt-1">تبرع</span></button>
 </div>
 </div>
 
-<!-- مودالات -->
-<!-- مودال تسجيل الدخول -->
+<!-- مودالات (نفس ما سبق) -->
 <div id="authModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end justify-center">
 <div class="bg-white w-full max-w-[430px] rounded-t-[32px] p-6 max-h-[90vh] overflow-y-auto">
 <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5"></div>
@@ -140,12 +150,12 @@ body{font-family:'Cairo',sans-serif}
 </div>
 <div id="registerForm" class="hidden">
 <input id="r_name" placeholder="الاسم الكامل" class="w-full bg-gray-50 border rounded-2xl p-4 mb-2.5 text-[14px] font-bold">
-<input id="r_user" placeholder="اسم المستخدم" class="w-full bg-gray-50 border rounded-2xl p-4 mb-2.5 text-[14px] font-bold">
+<input id="r_user" placeholder="اسم المستخدم (انجليزي)" class="w-full bg-gray-50 border rounded-2xl p-4 mb-2.5 text-[14px] font-bold">
 <input id="r_pass" type="password" placeholder="كلمة المرور" class="w-full bg-gray-50 border rounded-2xl p-4 mb-2.5 text-[14px] font-bold">
-<input id="r_phone" placeholder="واتساب" class="w-full bg-gray-50 border rounded-2xl p-4 mb-2.5 text-[14px] font-bold">
+<input id="r_phone" placeholder="واتساب 777..." class="w-full bg-gray-50 border rounded-2xl p-4 mb-2.5 text-[14px] font-bold">
 <div class="grid grid-cols-2 gap-2.5 mb-2.5"><select id="r_blood" class="bg-gray-50 border rounded-2xl p-4 text-[13px] font-bold"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select><select id="r_area" class="bg-gray-50 border rounded-2xl p-4 text-[13px] font-bold"><option>الحامي</option><option>المقد</option></select></div>
 <input id="r_hood" placeholder="الحارة" class="w-full bg-gray-50 border rounded-2xl p-4 mb-4 text-[14px] font-bold">
-<button onclick="doRegister()" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-2xl font-black text-[14px]">تسجيل</button>
+<button onclick="doRegister()" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-2xl font-black text-[14px]">تسجيل كمتبرع</button>
 <p class="text-center text-[13px] mt-4"><button onclick="showLogin()" class="text-gray-600 font-bold">لدي حساب</button></p>
 </div>
 </div>
@@ -156,32 +166,53 @@ body{font-family:'Cairo',sans-serif}
 <div class="bg-white w-full max-w-[430px] rounded-t-[32px] p-6">
 <div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5"></div>
 <div class="flex justify-between items-center mb-5"><h3 class="font-black" id="editTitle">تعديل حالتي</h3><button onclick="closeEdit()" class="w-9 h-9 bg-gray-100 rounded-full">✕</button></div>
-<div id="editAdminExtra" class="hidden"><input id="e_name" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold"><input id="e_user_edit" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold"></div>
+<div id="editAdminExtra" class="hidden">
+<input id="e_name" placeholder="الاسم" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold">
+<input id="e_user_edit" placeholder="اسم المستخدم" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold">
+<input id="e_pass" type="text" placeholder="كلمة السر (اتركها فارغة إن لم ترد تغييرها)" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold outline-none">
+</div>
 <select id="e_status" onchange="toggleReason()" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold"><option>متاح الآن</option><option>غير متاح</option><option>تبرعت مؤخراً</option></select>
-<div id="reasonBox" class="hidden"><input id="e_reason" placeholder="السبب" class="w-full bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-3 text-[13px] font-bold outline-none"></div>
-<input id="e_phone" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold">
+<div id="reasonBox" class="hidden"><input id="e_reason" placeholder="سبب عدم التوفر" class="w-full bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-3 text-[13px] font-bold outline-none"><select id="e_reason_preset" onchange="document.getElementById('e_reason').value=this.value" class="w-full bg-white border rounded-2xl p-3 mb-3 text-[12px]"><option value="">-- اختر سبب جاهز --</option><option value="مسافر خارج المنطقة">✈ مسافر</option><option value="مريض حالياً">🤒 مريض</option><option value="تبرعت قبل أقل من 3 أشهر">🩸 تبرعت مؤخراً</option><option value="ظروف عمل">💼 ظروف عمل</option><option value="غير متواجد حالياً">📍 غير متواجد</option></select></div>
+<input id="e_phone" placeholder="رقم الجوال" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold">
 <input id="e_last" type="date" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold">
 <select id="e_area" class="w-full bg-gray-50 border rounded-2xl p-4 mb-4 text-[14px] font-bold"><option>الحامي</option><option>المقد</option></select>
-<button onclick="saveEdit()" class="w-full bg-black text-white py-4 rounded-2xl font-black">حفظ</button>
-<button id="deleteBtn" onclick="deleteDonor()" class="hidden w-full mt-3 bg-red-50 text-red-600 py-3 rounded-2xl font-bold border border-red-100">حذف</button>
+<button onclick="saveEdit()" class="w-full bg-black text-white py-4 rounded-2xl font-black">حفظ التعديل</button>
+<button id="deleteBtn" onclick="deleteDonor()" class="hidden w-full mt-3 bg-red-50 text-red-600 py-3 rounded-2xl font-bold border border-red-100">حذف المتبرع</button>
 </div>
 </div>
 
 <!-- مودال الإشعارات -->
 <div id="notifModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] hidden flex items-end justify-center">
 <div class="bg-[#FAFAFA] w-full max-w-[430px] rounded-t-[32px] max-h-[85vh] flex flex-col">
-<div class="bg-white p-6 rounded-t-[32px] border-b"><div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5"></div><div class="flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-11 h-11 bg-red-50 rounded-full flex items-center justify-center">🔔</div><div><h3 class="font-black text-[16px]">الإشعارات</h3></div></div><div class="flex gap-2"><button onclick="markAllRead()" class="text-[11px] bg-black text-white px-4 py-2 rounded-full font-bold">مقروء</button><button onclick="closeNotifs()" class="w-9 h-9 bg-gray-100 rounded-full">✕</button></div></div></div>
+<div class="bg-white p-6 rounded-t-[32px] border-b"><div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5"></div><div class="flex justify-between items-center"><div class="flex items-center gap-3"><div class="w-11 h-11 bg-red-50 rounded-full flex items-center justify-center">🔔</div><div><h3 class="font-black text-[16px]">الإشعارات</h3><p class="text-[11px] text-gray-400 font-bold">من إدارة الحامي تجمعنا</p></div></div><div class="flex gap-2"><button onclick="markAllRead()" class="text-[11px] bg-black text-white px-4 py-2 rounded-full font-bold">مقروء</button><button onclick="closeNotifs()" class="w-9 h-9 bg-gray-100 rounded-full">✕</button></div></div></div>
 <div id="notifList" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
 </div>
 </div>
 
-<script>
-// ==================== إعدادات Supabase ====================
-const SUPABASE_URL = 'https://sncymicxpwxyfmxtqoiv.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_ax-vLH9J3LHOvUiD8NkYQg_5KKotYrX';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<!-- مودال الإضافة (تسجيل بدون دخول) -->
+<div id="addModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-end justify-center">
+<div class="bg-white w-full max-w-[430px] rounded-t-[32px] p-6 max-h-[90vh] overflow-y-auto">
+<div class="w-12 h-1.5 bg-gray-200 rounded-full mx-auto mb-5"></div>
+<div class="flex justify-between items-center mb-5"><h3 class="font-black text-[18px]">تسجيل متبرع جديد</h3><button onclick="closeAdd()" class="w-9 h-9 bg-gray-100 rounded-full">✕</button></div>
+<input id="dName" placeholder="الاسم الكامل" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold outline-none">
+<input id="dUsername" placeholder="اسم المستخدم (انجليزي)" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold outline-none">
+<input id="dPass" type="password" placeholder="كلمة المرور" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold outline-none">
+<input id="dPhone" placeholder="رقم الجوال (واتساب)" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold outline-none">
+<div class="grid grid-cols-2 gap-2.5 mb-3"><select id="dBlood" class="bg-gray-50 border rounded-2xl p-4 text-[13px] font-bold"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select><select id="dArea" class="bg-gray-50 border rounded-2xl p-4 text-[13px] font-bold"><option>الحامي</option><option>المقد</option></select></div>
+<input id="dHood" placeholder="الحارة" class="w-full bg-gray-50 border rounded-2xl p-4 mb-3 text-[14px] font-bold outline-none">
+<input id="dLast" type="date" class="w-full bg-gray-50 border rounded-2xl p-4 mb-4 text-[14px] font-bold outline-none">
+<button onclick="doAdd()" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-2xl font-black text-[14px]">تسجيل - أونلاين مباشر</button>
+<p class="text-center text-[11px] text-gray-500 mt-3">بعد التسجيل، يمكنك الدخول باسم المستخدم وكلمة السر</p>
+</div>
+</div>
 
-// ==================== المتغيرات العامة ====================
+<script>
+// ==================== Supabase Config ====================
+const SUPABASE_URL = 'https://peauprygfxfqtzgimtyh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_lRkk7HRJVxrbzAV8rJe7zw_dgOV-HSy';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ==================== متغيرات ====================
 let users = [];
 let currentUser = null;
 let notifications = JSON.parse(localStorage.getItem('dami_notifs') || '[]');
@@ -190,389 +221,420 @@ let bloodFilter = 'all';
 let editTarget = null;
 let notifType = 'urgent';
 
-// ==================== دوال الاتصال والتحميل ====================
+// ==================== تحميل من Supabase ====================
 async function loadFromSupabase() {
-    const statusEl = document.getElementById('onlineBadge');
-    statusEl.textContent = '⏳ جاري التحميل...';
-    statusEl.className = 'text-[10px] bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-black';
+  const el = document.getElementById('onlineBadge');
+  try {
+    el.textContent = '⏳ جاري الربط...';
+    const { data, error } = await supabaseClient.from('donors').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
 
-    try {
-        const { data, error } = await supabase.from('donors').select('*').order('created_at', { ascending: false });
-        if (error) {
-            console.error('Supabase error:', error);
-            statusEl.textContent = '❌ خطأ: ' + error.message;
-            statusEl.className = 'text-[10px] bg-red-100 text-red-700 px-3 py-1 rounded-full font-black';
-            // الرجوع للنسخة المحلية
-            loadLocalBackup();
-            return;
-        }
-
-        if (data) {
-            users = data.map(d => ({
-                id: d.id,
-                name: d.name || 'غير معروف',
-                username: d.username || 'user',
-                pass: d.pass || '1234',
-                phone: d.phone || '',
-                blood: d.blood || 'O+',
-                area: d.area || 'الحامي',
-                hood: d.hood || d.area || 'الحارة',
-                last: d.last_donation || new Date().toISOString().slice(0,10),
-                status: d.status || 'متاح الآن',
-                reason: d.reason || '',
-                role: d.role || 'donor'
-            }));
-
-            // إضافة المدير إذا لم يكن موجوداً
-            if (!users.find(u => u.username === 'admin')) {
-                users.unshift({
-                    name: 'المدير العام',
-                    username: 'admin',
-                    pass: localStorage.getItem('dami_admin_pass_v2') || 'admin777',
-                    phone: '775233773',
-                    blood: 'AB+',
-                    area: 'الحامي',
-                    hood: 'الإدارة',
-                    last: new Date().toISOString().slice(0,10),
-                    status: 'متاح الآن',
-                    reason: '',
-                    role: 'admin'
-                });
-            }
-
-            // حفظ نسخة محلية احتياطية
-            localStorage.setItem('dami_users_v2', JSON.stringify(users));
-            
-            statusEl.textContent = '🌐 أونلاين (' + users.filter(u=>u.role!=='admin').length + ')';
-            statusEl.className = 'text-[10px] bg-green-100 text-green-700 px-3 py-1 rounded-full font-black';
-            render();
-            updateAuth();
-        }
-    } catch (e) {
-        console.error('Fetch error:', e);
-        statusEl.textContent = '⚠️ فشل الشبكة';
-        statusEl.className = 'text-[10px] bg-red-100 text-red-700 px-3 py-1 rounded-full font-black';
-        loadLocalBackup();
+    if (data && data.length > 0) {
+      users = data.map(d => ({
+        id: d.id,
+        name: d.name || 'غير معروف',
+        username: d.username,
+        pass: d.pass || '1234',
+        phone: d.phone || '',
+        blood: d.blood || 'O+',
+        area: d.area || 'الحامي',
+        hood: d.hood || d.area || 'الحارة',
+        last: d.last_donation || new Date().toISOString().slice(0,10),
+        status: d.status || 'متاح الآن',
+        reason: d.reason || '',
+        role: d.role || 'donor'
+      }));
+    } else {
+      users = [];
     }
+
+    // التأكد من وجود المدير
+    if (!users.find(u => u.username === 'admin')) {
+      users.unshift({
+        name: 'المدير العام',
+        username: 'admin',
+        pass: localStorage.getItem('dami_admin_pass_v2') || 'admin777',
+        phone: '775233773',
+        blood: 'AB+',
+        area: 'الحامي',
+        hood: 'الإدارة',
+        last: new Date().toISOString().slice(0,10),
+        status: 'متاح الآن',
+        reason: '',
+        role: 'admin'
+      });
+    }
+
+    localStorage.setItem('dami_users_v2', JSON.stringify(users));
+    el.textContent = '🌐 أونلاين - ' + (users.filter(u => u.role !== 'admin').length) + ' متبرع';
+    el.className = 'text-[10px] bg-green-100 text-green-700 px-3 py-1 rounded-full font-black';
+    render();
+    updateAuth();
+    renderNotifs();
+    updateBadge();
+    return true;
+  } catch (e) {
+    console.error(e);
+    el.textContent = '❌ ' + e.message.slice(0,40);
+    el.className = 'text-[10px] bg-red-100 text-red-700 px-3 py-1 rounded-full font-black';
+    if (e.message.includes('does not exist')) {
+      alert('⚠️ الجدول غير موجود! نفذ كود SQL لإنشاء الجدول في Supabase.');
+    } else if (e.code === '42501' || e.message.includes('policy')) {
+      alert('⚠️ صلاحيات الجدول ممنوعة! نفذ سياسة "Allow all" في Supabase.');
+    }
+    loadLocalBackup();
+    return false;
+  }
 }
 
 function loadLocalBackup() {
-    const local = localStorage.getItem('dami_users_v2');
-    if (local) {
-        try { users = JSON.parse(local); } catch(e) { users = []; }
+  try {
+    const local = JSON.parse(localStorage.getItem('dami_users_v2') || '[]');
+    if (local.length) {
+      users = local;
+      render();
+      updateAuth();
     }
-    if (!users || users.length === 0) {
-        users = [
-            { name: 'المدير العام', username: 'admin', pass: 'admin777', phone: '775233773', blood: 'AB+', area: 'الحامي', hood: 'الإدارة', last: '2024-01-01', status: 'متاح الآن', reason: '', role: 'admin' },
-            { name: 'أحمد باعمر', username: 'ahmed_hami', pass: '1234', phone: '777123456', blood: 'O+', area: 'الحامي', hood: 'السوق', last: '2024-02-10', status: 'متاح الآن', reason: '', role: 'donor' },
-            { name: 'صالح الجمحي', username: 'saleh_maqd', pass: '1234', phone: '777654321', blood: 'A+', area: 'المقد', hood: 'الجامع', last: '2024-01-20', status: 'غير متاح', reason: 'مسافر', role: 'donor' }
-        ];
-        localStorage.setItem('dami_users_v2', JSON.stringify(users));
-    }
-    render();
-    updateAuth();
+  } catch (e) {}
 }
 
-// ==================== دوال المزامنة (الحفظ في السحاب) ====================
+// ==================== مزامنة مع Supabase ====================
 async function syncToSupabase(userData) {
-    try {
-        const { data: existing } = await supabase.from('donors').select('id').eq('username', userData.username).maybeSingle();
-        if (existing) {
-            await supabase.from('donors').update(userData).eq('username', userData.username);
-        } else {
-            await supabase.from('donors').insert(userData);
-        }
-        return true;
-    } catch(e) { console.warn('Sync error:', e); return false; }
-}
-
-// ==================== دوال العرض الأساسية ====================
-function render() {
-    const q = document.getElementById('search').value.toLowerCase();
-    const container = document.getElementById('donors');
-    container.innerHTML = '';
-
-    const filtered = users
-        .filter(u => u.role !== 'admin')
-        .filter(u => {
-            if (areaFilter !== 'all' && u.area !== areaFilter) return false;
-            if (bloodFilter !== 'all' && u.blood !== bloodFilter) return false;
-            if (q && !u.name.toLowerCase().includes(q) && !u.blood.toLowerCase().includes(q)) return false;
-            return true;
-        });
-
-    document.getElementById('totalDonors').textContent = users.filter(u => u.role !== 'admin').length;
-    document.getElementById('availDonors').textContent = users.filter(u => u.role !== 'admin' && u.status === 'متاح الآن').length;
-    document.getElementById('hamiCount').textContent = users.filter(u => u.area === 'الحامي' && u.role !== 'admin').length;
-
-    if (filtered.length === 0) {
-        container.innerHTML = '<div class="text-center py-16"><p class="font-black text-[14px]">لا يوجد متبرعين</p></div>';
-        return;
-    }
-
-    filtered.forEach(u => {
-        const statusColor = u.status === 'متاح الآن' ? 'bg-green-500' : u.status === 'غير متاح' ? 'bg-red-500' : 'bg-amber-500';
-        const reasonHtml = (u.status !== 'متاح الآن' && u.reason) ? `<div class="mt-2 bg-amber-50 border border-amber-200 rounded-xl p-2.5"><p class="text-[10px] font-black text-amber-800">📝 السبب: ${u.reason}</p></div>` : '';
-        const isMe = currentUser && currentUser.username === u.username;
-        const isAdmin = currentUser && currentUser.role === 'admin';
-        const canEdit = isMe || isAdmin;
-
-        container.innerHTML += `
-        <div class="bg-white border border-black/[0.06] rounded-[24px] p-5 flex gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white flex items-center justify-center font-black text-[15px] shadow-[0_8px_20px_rgba(220,38,38,0.3)]">${u.blood}</div>
-            <div class="flex-1">
-                <div class="flex justify-between items-start">
-                    <div><p class="font-black text-[14px]">${u.name} ${isMe ? '<span class="text-red-600 text-[10px]">(أنت)</span>' : ''}</p><p class="text-[11px] text-gray-400 font-bold mt-0.5">${u.hood} • @${u.username}</p></div>
-                    <span class="text-[10px] border px-2.5 py-1 rounded-full font-bold ${u.area === 'الحامي' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}">${u.area}</span>
-                </div>
-                <div class="flex items-center gap-2 mt-2.5"><span class="w-2 h-2 rounded-full ${statusColor} ${u.status === 'متاح الآن' ? 'animate-pulse' : ''}"></span><span class="text-[11px] font-black">${u.status}</span><span class="text-[10px] text-gray-400">• ${u.last}</span></div>
-                ${reasonHtml}
-                <div class="flex gap-2 mt-4">
-                    ${canEdit ? `<button onclick="openEditFor('${u.username}')" class="flex-1 bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-full text-[11px] font-black">${isAdmin ? '👑 إدارة' : '✏ تعديل'}</button>` :
-                    `<a href="https://wa.me/967${u.phone}" class="flex-1 bg-[#25D366] text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">💬 واتساب</a><a href="tel:${u.phone}" class="flex-1 bg-black text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">📞 اتصال</a>`}
-                </div>
-            </div>
-        </div>`;
-    });
-}
-
-// ==================== دوال المستخدم والتسجيل ====================
-function updateAuth() {
-    const btn = document.getElementById('authBtn');
-    const panel = document.getElementById('adminPanel');
-    if (currentUser) {
-        btn.textContent = currentUser.role === 'admin' ? '👑 خروج' : 'أهلاً ' + currentUser.name.split(' ')[0];
-        btn.onclick = doLogout;
-        if (currentUser.role === 'admin') panel.classList.remove('hidden');
-        else panel.classList.add('hidden');
+  try {
+    const payload = {
+      name: userData.name,
+      username: userData.username,
+      pass: userData.pass,
+      phone: userData.phone,
+      blood: userData.blood,
+      area: userData.area,
+      hood: userData.hood,
+      last_donation: userData.last,
+      status: userData.status,
+      reason: userData.reason || '',
+      role: userData.role || 'donor'
+    };
+    const { data: existing } = await supabaseClient.from('donors').select('id').eq('username', userData.username).maybeSingle();
+    if (existing) {
+      await supabaseClient.from('donors').update(payload).eq('username', userData.username);
     } else {
-        btn.textContent = 'دخول';
-        btn.onclick = openAuth;
-        panel.classList.add('hidden');
+      await supabaseClient.from('donors').insert(payload);
     }
+    return true;
+  } catch (e) {
+    console.warn('Sync error:', e);
+    return false;
+  }
+}
+
+// ==================== العرض ====================
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const container = document.getElementById('donors');
+  container.innerHTML = '';
+  const filtered = users.filter(u => u.role !== 'admin').filter(u => {
+    if (areaFilter !== 'all' && u.area !== areaFilter) return false;
+    if (bloodFilter !== 'all' && u.blood !== bloodFilter) return false;
+    if (q && !u.name.toLowerCase().includes(q) && !u.blood.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  document.getElementById('totalDonors').textContent = users.filter(u => u.role !== 'admin').length;
+  document.getElementById('availDonors').textContent = users.filter(u => u.role !== 'admin' && u.status === 'متاح الآن').length;
+  document.getElementById('hamiCount').textContent = users.filter(u => u.role !== 'admin' && u.area === 'الحامي').length;
+
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="text-center py-16"><div class="w-20 h-20 mx-auto bg-gray-50 rounded-full flex items-center justify-center text-3xl mb-3">🔍</div><p class="font-black text-[14px]">لا يوجد متبرعين</p><p class="text-xs text-gray-400 mt-1">اضغط زر + لتسجيل نفسك كمتبرع</p></div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(u => {
+    const statusColor = u.status === 'متاح الآن' ? 'bg-green-500' : u.status === 'غير متاح' ? 'bg-red-500' : 'bg-amber-500';
+    const reasonHtml = (u.status !== 'متاح الآن' && u.reason) ? `<div class="mt-2 bg-amber-50 border border-amber-200 rounded-xl p-2.5"><p class="text-[10px] font-black text-amber-800">📝 السبب: ${u.reason}</p></div>` : '';
+    const isMe = currentUser && currentUser.username === u.username;
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const canEdit = isMe || isAdmin;
+
+    return `<div class="bg-white border border-black/[0.06] rounded-[24px] p-5 flex gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white flex items-center justify-center font-black text-[15px] shadow-[0_8px_20px_rgba(220,38,38,0.3)]">${u.blood}</div>
+      <div class="flex-1">
+        <div class="flex justify-between items-start">
+          <div><p class="font-black text-[14px]">${u.name} ${isMe ? '<span class="text-red-600 text-[10px]">(أنت)</span>' : ''}</p><p class="text-[11px] text-gray-400 font-bold mt-0.5">${u.hood} • @${u.username}</p></div>
+          <span class="text-[10px] border px-2.5 py-1 rounded-full font-bold ${u.area === 'الحامي' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}">${u.area}</span>
+        </div>
+        <div class="flex items-center gap-2 mt-2.5"><span class="w-2 h-2 rounded-full ${statusColor} ${u.status === 'متاح الآن' ? 'animate-pulse' : ''}"></span><span class="text-[11px] font-black">${u.status}</span><span class="text-[10px] text-gray-400">• ${u.last}</span></div>
+        ${reasonHtml}
+        <div class="flex gap-2 mt-4">
+          ${canEdit ? `<button onclick="openEditFor('${u.username}')" class="flex-1 bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-full text-[11px] font-black">${isAdmin ? '👑 إدارة' : '✏ تعديل حالتي'}</button>` :
+          `<a href="https://wa.me/967${u.phone}" class="flex-1 bg-[#25D366] text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">💬 واتساب</a><a href="tel:${u.phone}" class="flex-1 bg-black text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">📞 اتصال</a>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ==================== دوال المستخدم ====================
+function updateAuth() {
+  const btn = document.getElementById('authBtn');
+  const admin = document.getElementById('adminPanel');
+  if (currentUser) {
+    btn.textContent = currentUser.role === 'admin' ? '👑 خروج' : 'أهلاً ' + currentUser.name.split(' ')[0];
+    btn.onclick = () => { currentUser = null; localStorage.removeItem('dami_current_v2'); updateAuth(); render(); };
+    if (currentUser.role === 'admin') admin.classList.remove('hidden');
+    else admin.classList.add('hidden');
+  } else {
+    btn.textContent = 'دخول';
+    btn.onclick = openAuth;
+    admin.classList.add('hidden');
+  }
 }
 
 function openAuth() { document.getElementById('authModal').classList.remove('hidden'); showLogin(); }
 function closeAuth() { document.getElementById('authModal').classList.add('hidden'); }
 function showLogin() { document.getElementById('loginForm').classList.remove('hidden'); document.getElementById('registerForm').classList.add('hidden'); document.getElementById('authTitle').textContent = 'تسجيل الدخول'; }
 function showRegister() { document.getElementById('registerForm').classList.remove('hidden'); document.getElementById('loginForm').classList.add('hidden'); document.getElementById('authTitle').textContent = 'تسجيل متبرع جديد'; }
-function openRegister() { openAuth(); showRegister(); }
 
 function doLogin() {
-    const username = document.getElementById('l_user').value.trim();
-    const pass = document.getElementById('l_pass').value;
-    const found = users.find(u => u.username === username && u.pass === pass);
-    if (!found) { alert('خطأ في اسم المستخدم أو كلمة المرور'); return; }
-    currentUser = found;
-    localStorage.setItem('dami_current_v2', JSON.stringify(found));
-    closeAuth();
-    updateAuth();
-    render();
-    renderNotifs();
-    updateBadge();
+  const username = document.getElementById('l_user').value.trim();
+  const pass = document.getElementById('l_pass').value.trim();
+  const found = users.find(u => u.username === username && u.pass === pass);
+  if (!found) { alert('خطأ في البيانات'); return; }
+  currentUser = found;
+  localStorage.setItem('dami_current_v2', JSON.stringify(found));
+  closeAuth();
+  updateAuth();
+  render();
+  renderNotifs();
+  updateBadge();
 }
 
 async function doRegister() {
-    const name = document.getElementById('r_name').value.trim();
-    const username = document.getElementById('r_user').value.trim().toLowerCase();
-    const pass = document.getElementById('r_pass').value;
-    const phone = document.getElementById('r_phone').value.trim();
-    const blood = document.getElementById('r_blood').value;
-    const area = document.getElementById('r_area').value;
-    const hood = document.getElementById('r_hood').value.trim() || area;
-    if (!name || !username || !pass) { alert('الاسم واسم المستخدم وكلمة السر إجبارية'); return; }
-    if (users.find(u => u.username === username)) { alert('اسم المستخدم موجود'); return; }
-
-    const newUser = { name, username, pass, phone, blood, area, hood, last: new Date().toISOString().slice(0,10), status: 'متاح الآن', reason: '', role: 'donor' };
-    users.push(newUser);
-    localStorage.setItem('dami_users_v2', JSON.stringify(users));
-    await syncToSupabase(newUser); // مزامنة مع السحاب
-
-    currentUser = newUser;
-    localStorage.setItem('dami_current_v2', JSON.stringify(newUser));
-    closeAuth();
-    updateAuth();
-    render();
+  const name = document.getElementById('r_name').value.trim();
+  const username = document.getElementById('r_user').value.trim().toLowerCase();
+  const pass = document.getElementById('r_pass').value.trim();
+  const phone = document.getElementById('r_phone').value.trim();
+  const blood = document.getElementById('r_blood').value;
+  const area = document.getElementById('r_area').value;
+  const hood = document.getElementById('r_hood').value.trim() || area;
+  if (!name || !username || !pass || !phone) { alert('عبي الحقول'); return; }
+  if (users.find(u => u.username === username)) { alert('اسم المستخدم موجود'); return; }
+  const newUser = { name, username, pass, phone, blood, area, hood, last: new Date().toISOString().slice(0,10), status: 'متاح الآن', reason: '', role: 'donor' };
+  users.push(newUser);
+  localStorage.setItem('dami_users_v2', JSON.stringify(users));
+  await syncToSupabase(newUser);
+  currentUser = newUser;
+  localStorage.setItem('dami_current_v2', JSON.stringify(newUser));
+  closeAuth();
+  updateAuth();
+  render();
+  alert('✅ تم التسجيل والمزامنة مع السحاب');
 }
 
-function doLogout() {
-    currentUser = null;
-    localStorage.removeItem('dami_current_v2');
-    updateAuth();
-    render();
-    updateBadge();
+// ==================== الإضافة (بدون حاجة لدخول) ====================
+function openAdd() {
+  document.getElementById('addModal').classList.remove('hidden');
+}
+function closeAdd() { document.getElementById('addModal').classList.add('hidden'); }
+
+async function doAdd() {
+  const name = document.getElementById('dName').value.trim();
+  const username = document.getElementById('dUsername').value.trim().toLowerCase();
+  const pass = document.getElementById('dPass').value.trim();
+  const phone = document.getElementById('dPhone').value.trim();
+  const blood = document.getElementById('dBlood').value;
+  const area = document.getElementById('dArea').value;
+  const hood = document.getElementById('dHood').value.trim() || area;
+  const last = document.getElementById('dLast').value || new Date().toISOString().slice(0,10);
+  if (!name || !username || !pass) { alert('الاسم واسم المستخدم وكلمة السر إجبارية'); return; }
+  if (users.find(u => u.username === username)) { alert('اسم المستخدم موجود'); return; }
+  const newUser = { name, username, pass, phone, blood, area, hood, last, status: 'متاح الآن', reason: '', role: 'donor' };
+  users.push(newUser);
+  localStorage.setItem('dami_users_v2', JSON.stringify(users));
+  const ok = await syncToSupabase(newUser);
+  closeAdd();
+  render();
+  alert(ok ? '✅ تم التسجيل أونلاين - يمكنك الدخول الآن' : '⚠️ تم التسجيل محلياً فقط - تحقق من النت');
+  document.getElementById('dName').value = '';
+  document.getElementById('dUsername').value = '';
+  document.getElementById('dPass').value = '';
+  document.getElementById('dPhone').value = '';
+  document.getElementById('dHood').value = '';
 }
 
 // ==================== التعديل والحذف ====================
 function openEditFor(username) {
-    const u = users.find(x => x.username === username);
-    if (!u) return;
-    if (!currentUser) { alert('سجل دخول أولاً'); openAuth(); return; }
-    if (currentUser.role !== 'admin' && currentUser.username !== username) { alert('يمكنك تعديل حالتك فقط'); return; }
-    editTarget = username;
-    document.getElementById('e_status').value = u.status;
-    document.getElementById('e_reason').value = u.reason || '';
-    toggleReason();
-    document.getElementById('e_phone').value = u.phone;
-    document.getElementById('e_last').value = u.last;
-    document.getElementById('e_area').value = u.area;
-    document.getElementById('editTitle').textContent = currentUser.role === 'admin' ? 'إدارة: ' + u.name : 'تعديل حالتي';
-    const extra = document.getElementById('editAdminExtra');
-    if (currentUser.role === 'admin') {
-        extra.classList.remove('hidden');
-        document.getElementById('e_name').value = u.name;
-        document.getElementById('e_user_edit').value = u.username;
-        document.getElementById('deleteBtn').classList.remove('hidden');
-    } else {
-        extra.classList.add('hidden');
-        document.getElementById('deleteBtn').classList.add('hidden');
-    }
-    document.getElementById('editModal').classList.remove('hidden');
+  const u = users.find(x => x.username === username);
+  if (!u) return;
+  if (!currentUser) { alert('سجل دخول أولاً'); openAuth(); return; }
+  if (currentUser.role !== 'admin' && currentUser.username !== username) { alert('يمكنك تعديل حالتك فقط'); return; }
+  editTarget = u;
+  document.getElementById('e_status').value = u.status;
+  document.getElementById('e_reason').value = u.reason || '';
+  toggleReason();
+  document.getElementById('e_phone').value = u.phone;
+  document.getElementById('e_last').value = u.last;
+  document.getElementById('e_area').value = u.area;
+  document.getElementById('editTitle').textContent = currentUser.role === 'admin' ? 'إدارة: ' + u.name : 'تعديل حالتي';
+  const extra = document.getElementById('editAdminExtra');
+  if (currentUser.role === 'admin') {
+    extra.classList.remove('hidden');
+    document.getElementById('e_name').value = u.name;
+    document.getElementById('e_user_edit').value = u.username;
+    document.getElementById('e_pass').value = u.pass || '';
+    document.getElementById('deleteBtn').classList.remove('hidden');
+  } else {
+    extra.classList.add('hidden');
+    document.getElementById('deleteBtn').classList.add('hidden');
+  }
+  document.getElementById('editModal').classList.remove('hidden');
 }
-
 function closeEdit() { document.getElementById('editModal').classList.add('hidden'); editTarget = null; }
-
 function toggleReason() {
-    const st = document.getElementById('e_status').value;
-    document.getElementById('reasonBox').style.display = (st !== 'متاح الآن') ? 'block' : 'none';
+  document.getElementById('reasonBox').style.display = document.getElementById('e_status').value !== 'متاح الآن' ? 'block' : 'none';
 }
 
 async function saveEdit() {
-    if (!editTarget) return;
-    const idx = users.findIndex(x => x.username === editTarget);
-    if (idx === -1) return;
-    const u = users[idx];
-    if (currentUser.role === 'admin') {
-        u.name = document.getElementById('e_name').value.trim() || u.name;
-        u.username = document.getElementById('e_user_edit').value.trim() || u.username;
-    }
-    u.status = document.getElementById('e_status').value;
-    u.reason = document.getElementById('e_reason').value.trim();
-    u.phone = document.getElementById('e_phone').value;
-    u.last = document.getElementById('e_last').value;
-    u.area = document.getElementById('e_area').value;
-    if (currentUser.username === editTarget) {
-        currentUser = u;
-        localStorage.setItem('dami_current_v2', JSON.stringify(u));
-    }
-    localStorage.setItem('dami_users_v2', JSON.stringify(users));
-    await syncToSupabase(u);
-    closeEdit();
-    render();
-    updateAuth();
+  if (!editTarget) return;
+  const u = editTarget;
+  if (currentUser.role === 'admin') {
+    u.name = document.getElementById('e_name').value.trim() || u.name;
+    u.username = document.getElementById('e_user_edit').value.trim() || u.username;
+    let newPass = document.getElementById('e_pass').value.trim();
+    if (newPass !== '') u.pass = newPass;
+  }
+  u.status = document.getElementById('e_status').value;
+  u.reason = document.getElementById('e_reason').value.trim();
+  u.phone = document.getElementById('e_phone').value;
+  u.last = document.getElementById('e_last').value;
+  u.area = document.getElementById('e_area').value;
+  if (currentUser.username === u.username) {
+    currentUser = u;
+    localStorage.setItem('dami_current_v2', JSON.stringify(u));
+  }
+  localStorage.setItem('dami_users_v2', JSON.stringify(users));
+  await syncToSupabase(u);
+  closeEdit();
+  render();
+  updateAuth();
+  alert('✅ تم التحديث (بما في ذلك كلمة السر إن تم تغييرها)');
 }
 
 async function deleteDonor() {
-    if (!currentUser || currentUser.role !== 'admin') return;
-    if (!confirm('متأكد حذف المتبرع؟')) return;
-    const username = editTarget;
-    users = users.filter(x => x.username !== username);
-    localStorage.setItem('dami_users_v2', JSON.stringify(users));
-    try { await supabase.from('donors').delete().eq('username', username); } catch(e) {}
-    closeEdit();
-    render();
+  if (!currentUser || currentUser.role !== 'admin') return;
+  if (!confirm('متأكد حذف المتبرع؟')) return;
+  const username = editTarget.username;
+  users = users.filter(x => x.username !== username);
+  localStorage.setItem('dami_users_v2', JSON.stringify(users));
+  try { await supabaseClient.from('donors').delete().eq('username', username); } catch (e) {}
+  closeEdit();
+  render();
 }
 
 // ==================== الإشعارات ====================
 function setNotifType(t) {
-    notifType = t;
-    document.querySelectorAll('.notif-type').forEach(b => b.className = 'notif-type bg-white/10 px-3 py-2.5 rounded-full text-[11px] font-bold flex-1');
-    document.getElementById('ntype-'+t).className = 'notif-type bg-red-600 text-white px-3 py-2.5 rounded-full text-[11px] font-black flex-1 shadow';
+  notifType = t;
+  document.querySelectorAll('.notif-type').forEach(b => b.className = 'notif-type bg-white/10 px-3 py-2.5 rounded-full text-[11px] font-bold flex-1');
+  document.getElementById('ntype-' + t).className = 'notif-type bg-red-600 text-white px-3 py-2.5 rounded-full text-[11px] font-black flex-1 shadow';
 }
 
 function sendNotif() {
-    const title = document.getElementById('notifTitle').value.trim();
-    const msg = document.getElementById('notifMsg').value.trim();
-    const area = document.getElementById('notifArea').value;
-    if (!title || !msg) { alert('اكتب عنوان ونص'); return; }
-    const notif = { id: Date.now(), title, msg, area, type: notifType, time: new Date().toLocaleString('ar-YE'), readBy: [] };
-    notifications.unshift(notif);
-    if (notifications.length > 50) notifications = notifications.slice(0,50);
-    localStorage.setItem('dami_notifs', JSON.stringify(notifications));
-    document.getElementById('notifTitle').value = '';
-    document.getElementById('notifMsg').value = '';
-    renderNotifs();
-    updateBadge();
-    alert('تم الإرسال 🚀');
+  const title = document.getElementById('notifTitle').value.trim();
+  const msg = document.getElementById('notifMsg').value.trim();
+  const area = document.getElementById('notifArea').value;
+  if (!title || !msg) { alert('اكتب عنوان ونص'); return; }
+  const notif = { id: Date.now(), title, msg, area, type: notifType, time: new Date().toLocaleString('ar-YE'), readBy: [] };
+  notifications.unshift(notif);
+  if (notifications.length > 50) notifications = notifications.slice(0,50);
+  localStorage.setItem('dami_notifs', JSON.stringify(notifications));
+  document.getElementById('notifTitle').value = '';
+  document.getElementById('notifMsg').value = '';
+  renderNotifs();
+  updateBadge();
+  alert('تم الإرسال 🚀');
 }
 
 function renderNotifs() {
-    const list = document.getElementById('notifList');
-    const feed = document.getElementById('notifFeed');
-    const visible = notifications.filter(n => n.area === 'all' || areaFilter === 'all' || n.area === areaFilter);
-    if (visible.length > 0) {
-        feed.classList.remove('hidden');
-        feed.innerHTML = visible.slice(0,2).map(n => notifCard(n, true)).join('');
-    } else { feed.classList.add('hidden'); }
-    list.innerHTML = notifications.length ? notifications.map(n => notifCard(n, false)).join('') : '<div class="text-center py-16"><p class="font-bold text-sm">لا توجد إشعارات</p></div>';
+  const list = document.getElementById('notifList');
+  const feed = document.getElementById('notifFeed');
+  const visible = notifications.filter(n => n.area === 'all' || areaFilter === 'all' || n.area === areaFilter);
+  if (visible.length > 0) {
+    feed.classList.remove('hidden');
+    feed.innerHTML = visible.slice(0,2).map(n => notifCard(n, true)).join('');
+  } else {
+    feed.classList.add('hidden');
+  }
+  list.innerHTML = notifications.length ? notifications.map(n => notifCard(n, false)).join('') : '<div class="text-center py-16"><p class="font-bold text-sm">لا توجد إشعارات</p></div>';
 }
 
 function notifCard(n, isFeed) {
-    const icon = n.type === 'urgent' ? '🚨' : n.type === 'success' ? '✅' : 'ℹ';
-    const bg = n.type === 'urgent' ? 'bg-red-50 border-red-200' : n.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200';
-    const isUnread = currentUser ? !n.readBy.includes(currentUser.username) : true;
-    return `<div class="${bg} border rounded-[20px] p-4 relative ${isUnread ? 'ring-2 ring-red-100' : ''}"><div class="flex gap-3"><div class="w-11 h-11 bg-white rounded-full flex items-center justify-center text-[18px] shadow-sm">${icon}</div><div class="flex-1"><p class="font-black text-[13px] leading-tight">${n.title}</p><p class="text-[11px] text-gray-600 mt-1.5 leading-relaxed">${n.msg}</p><div class="flex items-center gap-2 mt-2.5"><span class="text-[9px] bg-white px-2.5 py-1 rounded-full border font-bold">${n.area === 'all' ? '📍 الكل' : '📍 '+n.area}</span><span class="text-[9px] text-gray-400">${n.time}</span>${isUnread ? '<span class="text-[9px] bg-red-600 text-white px-2.5 py-1 rounded-full font-black">جديد</span>' : ''}</div></div></div>${!isFeed ? `<button onclick="deleteNotif(${n.id})" class="absolute top-3 left-3 w-6 h-6 bg-white rounded-full text-[10px]">✕</button>` : ''}</div>`;
+  const icon = n.type === 'urgent' ? '🚨' : n.type === 'success' ? '✅' : 'ℹ';
+  const bg = n.type === 'urgent' ? 'bg-red-50 border-red-200' : n.type === 'success' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200';
+  const isUnread = currentUser ? !n.readBy.includes(currentUser.username) : true;
+  return `<div class="${bg} border rounded-[20px] p-4 relative ${isUnread ? 'ring-2 ring-red-100' : ''}">
+    <div class="flex gap-3"><div class="w-11 h-11 bg-white rounded-full flex items-center justify-center text-[18px] shadow-sm">${icon}</div>
+    <div class="flex-1"><p class="font-black text-[13px] leading-tight">${n.title}</p><p class="text-[11px] text-gray-600 mt-1.5 leading-relaxed">${n.msg}</p>
+    <div class="flex items-center gap-2 mt-2.5"><span class="text-[9px] bg-white px-2.5 py-1 rounded-full border font-bold">${n.area === 'all' ? '📍 الكل' : '📍 '+n.area}</span><span class="text-[9px] text-gray-400">${n.time}</span>${isUnread ? '<span class="text-[9px] bg-red-600 text-white px-2.5 py-1 rounded-full font-black">جديد</span>' : ''}</div></div></div>
+    ${!isFeed ? `<button onclick="deleteNotif(${n.id})" class="absolute top-3 left-3 w-6 h-6 bg-white rounded-full text-[10px]">✕</button>` : ''}
+  </div>`;
 }
 
-function openNotifs() { document.getElementById('notifModal').classList.remove('hidden'); renderNotifs(); if(currentUser){ notifications.forEach(n => { if(!n.readBy.includes(currentUser.username)) n.readBy.push(currentUser.username); }); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); updateBadge(); } }
+function openNotifs() { document.getElementById('notifModal').classList.remove('hidden'); renderNotifs(); if (currentUser) { notifications.forEach(n => { if (!n.readBy.includes(currentUser.username)) n.readBy.push(currentUser.username); }); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); updateBadge(); } }
 function closeNotifs() { document.getElementById('notifModal').classList.add('hidden'); }
-function markAllRead() { if(!currentUser){ alert('سجل دخول'); return; } notifications.forEach(n => { if(!n.readBy.includes(currentUser.username)) n.readBy.push(currentUser.username); }); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); renderNotifs(); updateBadge(); }
-function updateBadge() { const unread = currentUser ? notifications.filter(n => !n.readBy.includes(currentUser.username)).length : notifications.length; const badge = document.getElementById('notifBadge'); if(unread > 0){ badge.textContent = unread > 9 ? '9+' : unread; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); } }
-function deleteNotif(id) { if(!currentUser || currentUser.role !== 'admin'){ alert('للإدارة فقط'); return; } notifications = notifications.filter(n => n.id !== id); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); renderNotifs(); updateBadge(); }
+function markAllRead() { if (!currentUser) { alert('سجل دخول'); return; } notifications.forEach(n => { if (!n.readBy.includes(currentUser.username)) n.readBy.push(currentUser.username); }); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); renderNotifs(); updateBadge(); }
+function updateBadge() { const unread = currentUser ? notifications.filter(n => !n.readBy.includes(currentUser.username)).length : notifications.length; const badge = document.getElementById('notifBadge'); if (unread > 0) { badge.textContent = unread > 9 ? '9+' : unread; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); } }
+function deleteNotif(id) { if (!currentUser || currentUser.role !== 'admin') { alert('للإدارة فقط'); return; } notifications = notifications.filter(n => n.id !== id); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); renderNotifs(); updateBadge(); }
 
 // ==================== تغيير كلمة السر ====================
 function openChangePassword() { document.getElementById('changePassBox').classList.toggle('hidden'); }
 async function changeAdminPassword() {
-    const old = document.getElementById('oldPass').value;
-    const newP = document.getElementById('newPass').value;
-    const conf = document.getElementById('confirmPass').value;
-    if (!old || !newP || !conf) { alert('عبي كل الحقول'); return; }
-    if (newP !== conf) { alert('التأكيد غير مطابق'); return; }
-    if (!currentUser || currentUser.pass !== old) { alert('كلمة السر الحالية خطأ'); return; }
-    const idx = users.findIndex(x => x.username === currentUser.username);
-    if (idx !== -1) {
-        users[idx].pass = newP;
-        currentUser.pass = newP;
-        localStorage.setItem('dami_current_v2', JSON.stringify(currentUser));
-        localStorage.setItem('dami_users_v2', JSON.stringify(users));
-        await syncToSupabase(users[idx]);
-    }
-    alert('✅ تم تغيير كلمة السر');
-    document.getElementById('changePassBox').classList.add('hidden');
-    document.getElementById('oldPass').value = '';
-    document.getElementById('newPass').value = '';
-    document.getElementById('confirmPass').value = '';
+  const old = document.getElementById('oldPass').value;
+  const newP = document.getElementById('newPass').value;
+  const conf = document.getElementById('confirmPass').value;
+  if (!old || !newP || !conf) { alert('عبي كل الحقول'); return; }
+  if (newP !== conf) { alert('التأكيد غير مطابق'); return; }
+  if (!currentUser || currentUser.pass !== old) { alert('كلمة السر الحالية خطأ'); return; }
+  const idx = users.findIndex(x => x.username === currentUser.username);
+  if (idx !== -1) {
+    users[idx].pass = newP;
+    currentUser.pass = newP;
+    localStorage.setItem('dami_current_v2', JSON.stringify(currentUser));
+    localStorage.setItem('dami_users_v2', JSON.stringify(users));
+    await syncToSupabase(users[idx]);
+    localStorage.setItem('dami_admin_pass_v2', newP);
+  }
+  alert('✅ تم تغيير كلمة السر');
+  document.getElementById('changePassBox').classList.add('hidden');
+  document.getElementById('oldPass').value = '';
+  document.getElementById('newPass').value = '';
+  document.getElementById('confirmPass').value = '';
 }
 
 // ==================== الفلاتر ====================
 function setArea(a) {
-    areaFilter = a;
-    document.querySelectorAll('.area-pill').forEach(b => b.className = 'area-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[13px] font-bold');
-    document.getElementById('area-'+a).className = 'area-pill bg-black text-white px-5 py-2.5 rounded-full text-[13px] font-black shadow';
-    render();
+  areaFilter = a;
+  document.querySelectorAll('.area-pill').forEach(b => b.className = 'area-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[13px] font-bold');
+  document.getElementById('area-' + a).className = 'area-pill bg-black text-white px-5 py-2.5 rounded-full text-[13px] font-black shadow';
+  render();
+  renderNotifs();
 }
 function setBlood(b) {
-    bloodFilter = b;
-    document.querySelectorAll('.blood-pill').forEach(x => x.className = 'blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold');
-    const active = document.querySelector(`.blood-pill[onclick*="'${b}'"]`);
-    if (active) active.className = 'blood-pill active bg-black text-white px-5 py-2.5 rounded-full text-[12px] font-black shadow';
-    render();
+  bloodFilter = b;
+  document.querySelectorAll('.blood-pill').forEach(x => x.className = 'blood-pill bg-white border shadow-sm px-5 py-2.5 rounded-full text-[12px] font-bold');
+  const active = document.querySelector(`.blood-pill[onclick*="'${b}'"]`);
+  if (active) active.className = 'blood-pill active bg-black text-white px-5 py-2.5 rounded-full text-[12px] font-black shadow';
+  render();
 }
 
 // ==================== بدء التطبيق ====================
-// استعادة المستخدم الحالي
 const savedUser = localStorage.getItem('dami_current_v2');
 if (savedUser) {
-    try { currentUser = JSON.parse(savedUser); } catch(e) { currentUser = null; }
+  try { currentUser = JSON.parse(savedUser); } catch (e) { currentUser = null; }
 }
 
-// تحميل البيانات
 loadFromSupabase();
 updateAuth();
 renderNotifs();
 updateBadge();
-
-// ربط البحث
 document.getElementById('search').addEventListener('input', render);
 </script>
 </body>
