@@ -289,9 +289,10 @@ async function loadFromSupabase(){
   try {
     let {data, error} = await supabaseClient.from('donors').select('*').order('created_at', {ascending:true});
     if(error){ console.log(error); return false; }
-    if(data && data.length>0){
+    if(!error){ console.log('Supabase connected, count:', data?.length); if(data && data.length>0){
       let mapped = data.map(d=> ({ name: d.name, username: d.username, pass: d.pass, phone: d.phone||'', blood: d.blood||'O+', area: d.area||'الحامي', hood: d.hood||'', last: d.last_donation||new Date().toISOString().slice(0,10), status: d.status||'متاح الآن', reason: d.reason||'', role: d.role||'donor', id: d.id }));
-      let adminExists = mapped.find(u=>u.username==='admin');
+      } } // end data>0 block, even if empty we are online
+      let adminExists = users.find(u=>u.username==='admin');
       if(!adminExists) mapped.unshift({name:'المدير العام', username:'admin', pass: localStorage.getItem('dami_admin_pass_v2')||'admin777', phone:'775233773', blood:'AB+', area:'الحامي', hood:'الإدارة', last:new Date().toISOString().slice(0,10), status:'متاح الآن', reason:'', role:'admin'});
       users = mapped; saveLocal(); render(); updateAuth(); return true;
     }
@@ -311,7 +312,7 @@ async function syncToSupabase(user){
 const _origSave = save;
 save = function(){ _origSave(); if(isOnlineMode){ users.forEach(u=> { if(u.role!=='admin') syncToSupabase(u); }); } }
 setTimeout(async ()=>{
-  let ok = await loadFromSupabase();
+  let ok = await loadFromSupabase(); console.log('load ok', ok);
   let badge = document.getElementById('onlineBadge');
   if(badge){
     if(ok){ badge.textContent='🌐 أونلاين - مرتبط بـ Supabase'; badge.className='text-[10px] bg-green-100 text-green-700 px-3 py-1 rounded-full font-black'; }
