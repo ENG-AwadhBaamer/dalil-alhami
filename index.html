@@ -184,18 +184,13 @@ body{font-family:'Cairo',sans-serif}
 </div>
 
 <script>
-// ==================== إعدادات Supabase (استخدم المفتاح العام فقط) ====================
+// ==================== إعدادات Supabase ====================
 const SUPABASE_URL = 'https://sncymicxpwxyfmxtqoiv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ax-vLH9J3LHOvUiD8NkYQg_5KKotYrX';
-
-// ==================== إنشاء عميل Supabase ====================
-let supabaseClient = null;
+let supabaseClient = null; // سيتم تهيئته بعد تحميل المكتبة
 try {
   supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  console.log('✅ تم إنشاء عميل Supabase بنجاح');
-} catch(e) {
-  console.error('❌ فشل إنشاء عميل Supabase:', e);
-}
+} catch(e) { console.warn('فشل تحميل Supabase', e); }
 
 // ==================== البيانات الأساسية ====================
 let areaFilter = 'all';
@@ -212,12 +207,9 @@ function saveLocal() {
   localStorage.setItem('dami_users_v2', JSON.stringify(users));
 }
 
-// دالة المزامنة مع Supabase
+// دالة المزامنة مع Supabase (تُستدعى تلقائياً بعد كل تغيير)
 async function syncAllToSupabase() {
-  if (!supabaseClient) {
-    console.warn('⚠️ Supabase غير متاح، لن تتم المزامنة');
-    return;
-  }
+  if (!supabaseClient) return;
   for (const u of users) {
     if (u.role === 'admin') continue; // لا نرفع المدير للسحاب
     try {
@@ -246,36 +238,29 @@ async function syncAllToSupabase() {
       } else {
         await supabaseClient.from('donors').insert(payload);
       }
-    } catch(e) {
-      console.warn('❌ فشل مزامنة المستخدم', u.username, e);
-    }
+    } catch(e) { console.warn('فشل مزامنة المستخدم', u.username, e); }
   }
 }
 
-// دالة حفظ شاملة
+// دالة حفظ شاملة (محلي + سحاب)
 async function saveAll() {
   saveLocal();
   if (supabaseClient) {
     await syncAllToSupabase();
   }
+  // تحديث الواجهة
   render();
   updateAuth();
 }
 
 // ==================== تحميل البيانات من Supabase ====================
 async function loadFromSupabase() {
-  if (!supabaseClient) {
-    console.warn('⚠️ Supabase غير متاح');
-    return false;
-  }
+  if (!supabaseClient) return false;
   try {
-    console.log('🔄 جاري تحميل البيانات من Supabase...');
     const { data, error } = await supabaseClient.from('donors').select('*').order('created_at', { ascending: true });
-    if (error) {
-      console.error('❌ خطأ في تحميل البيانات:', error);
-      return false;
-    }
+    if (error) throw error;
     if (data && data.length > 0) {
+      // تحويل البيانات إلى هيكل المستخدمين
       users = data.map(d => ({
         id: d.id,
         name: d.name,
@@ -308,17 +293,13 @@ async function loadFromSupabase() {
         });
       }
       saveLocal();
+      render();
+      updateAuth();
       updateBadgeStatus('🌐 أونلاين - مرتبط بـ Supabase', 'bg-green-100 text-green-700');
-      console.log('✅ تم تحميل', data.length, 'متبرع من Supabase');
       return true;
-    } else {
-      console.log('ℹ️ لا توجد بيانات في Supabase، سيتم استخدام المحلي');
-      return false;
     }
-  } catch(e) {
-    console.error('❌ فشل تحميل من Supabase:', e);
     return false;
-  }
+  } catch(e) { console.warn('فشل تحميل من Supabase', e); return false; }
 }
 
 // ==================== التهيئة ====================
@@ -355,6 +336,68 @@ function init() {
   });
 }
 
+// ==================== دوال الواجهة ====================
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const container = document.getElementById('donors');
+  container.innerHTML = '';
+  const filtered = users
+    .filter(u => u.role !== 'admin')
+    .filter(u => {
+      if (areaFilter !== 'all' && u.area !== areaFilter) return false;
+      if (bloodFilter !== 'all' && u.blood !== bloodFilter) return false;
+      if (q && !u.name.toLowerCase().includes(q) && !u.blood.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  // إحصائيات
+  document.getElementById('totalDonors').textContent = users.filter(u => u.role !== 'admin').length;
+  document.getElementById('availDonors').textContent = users.filter(u => u.role !== 'admin' && u.status === 'متاح الآن').length;
+  document.getElementById('hamiCount').textContent = users.filter(u => u.area === 'الحامي' && u.role !== 'admin').length;
+  // عرض البطاقات
+  filtered.forEach(u => {
+    const statusColor = u.status === 'متاح الآن' ? 'bg-green-500' : u.status === 'غير متاح' ? 'bg-red-500' : 'bg-amber-500';
+    const reasonHtml = (u.status !== 'متاح الآن' && u.reason) ? `<div class="mt-2 bg-amber-50 border border-amber-200 rounded-xl p-2.5"><p class="text-[10px] font-black text-amber-800">📝 السبب: ${u.reason}</p></div>` : '';
+    const isMe = currentUser && currentUser.username === u.username;
+    const isAdmin = currentUser && currentUser.role === 'admin';
+    const canEdit = isMe || isAdmin;
+    container.innerHTML += `
+      <div class="bg-white border border-black/[0.06] rounded-[24px] p-5 flex gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white flex items-center justify-center font-black text-[15px] shadow-[0_8px_20px_rgba(220,38,38,0.3)]">${u.blood}</div>
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <div><p class="font-black text-[14px]">${u.name} ${isMe ? '<span class="text-red-600 text-[10px]">(أنت)</span>' : ''}</p><p class="text-[11px] text-gray-400 font-bold mt-0.5">${u.hood} • @${u.username}</p></div>
+            <span class="text-[10px] border px-2.5 py-1 rounded-full font-bold ${u.area === 'الحامي' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}">${u.area}</span>
+          </div>
+          <div class="flex items-center gap-2 mt-2.5"><span class="w-2 h-2 rounded-full ${statusColor} ${u.status === 'متاح الآن' ? 'animate-pulse' : ''}"></span><span class="text-[11px] font-black">${u.status}</span><span class="text-[10px] text-gray-400">• ${u.last}</span></div>
+          ${reasonHtml}
+          <div class="flex gap-2 mt-4">
+            ${canEdit ? `<button onclick="openEditFor('${u.username}')" class="flex-1 bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-full text-[11px] font-black">${isAdmin ? '👑 إدارة' : '✏ تعديل حالتي'}</button>` :
+            `<a href="https://wa.me/967${u.phone}" class="flex-1 bg-[#25D366] text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">💬 واتساب</a><a href="tel:${u.phone}" class="flex-1 bg-black text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">📞 اتصال</a>`}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="text-center py-16"><div class="w-20 h-20 mx-auto bg-gray-50 rounded-full flex items-center justify-center text-3xl mb-3">🔍</div><p class="font-black text-[14px]">لا يوجد متبرعين</p></div>';
+  }
+}
+
+function updateAuth() {
+  const btn = document.getElementById('authBtn');
+  const panel = document.getElementById('adminPanel');
+  if (currentUser) {
+    btn.textContent = currentUser.role === 'admin' ? '👑 خروج' : 'أهلاً ' + currentUser.name.split(' ')[0];
+    btn.onclick = doLogout;
+    if (currentUser.role === 'admin') panel.classList.remove('hidden');
+    else panel.classList.add('hidden');
+  } else {
+    btn.textContent = 'دخول';
+    btn.onclick = openAuth;
+    panel.classList.add('hidden');
+  }
+}
+
 function updateBadgeStatus(text, className) {
   const badge = document.getElementById('onlineBadge');
   if (badge) {
@@ -362,10 +405,6 @@ function updateBadgeStatus(text, className) {
     badge.className = `text-[10px] px-3 py-1 rounded-full font-black ${className}`;
   }
 }
-
-// ... (باقي الدوال: render, updateAuth, openAuth, doLogin, doRegister, saveEdit, deleteDonor, دوال الإشعارات، تغيير كلمة السر، الفلاتر) ...
-// أضف جميع الدوال الأخرى كما هي من الكود السابق، لأنها لم تتغير.
-// لكن للتوفير، سأدرجها مختصرةً مع الإشارة إلى أنها موجودة.
 
 // ==================== دوال تسجيل الدخول والتسجيل ====================
 function openAuth() { document.getElementById('authModal').classList.remove('hidden'); showLogin(); }
@@ -615,71 +654,12 @@ function setBlood(b) {
   render();
 }
 
-// ==================== دوال العرض ====================
-function render() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const container = document.getElementById('donors');
-  container.innerHTML = '';
-  const filtered = users
-    .filter(u => u.role !== 'admin')
-    .filter(u => {
-      if (areaFilter !== 'all' && u.area !== areaFilter) return false;
-      if (bloodFilter !== 'all' && u.blood !== bloodFilter) return false;
-      if (q && !u.name.toLowerCase().includes(q) && !u.blood.toLowerCase().includes(q)) return false;
-      return true;
-    });
-  document.getElementById('totalDonors').textContent = users.filter(u => u.role !== 'admin').length;
-  document.getElementById('availDonors').textContent = users.filter(u => u.role !== 'admin' && u.status === 'متاح الآن').length;
-  document.getElementById('hamiCount').textContent = users.filter(u => u.area === 'الحامي' && u.role !== 'admin').length;
-  filtered.forEach(u => {
-    const statusColor = u.status === 'متاح الآن' ? 'bg-green-500' : u.status === 'غير متاح' ? 'bg-red-500' : 'bg-amber-500';
-    const reasonHtml = (u.status !== 'متاح الآن' && u.reason) ? `<div class="mt-2 bg-amber-50 border border-amber-200 rounded-xl p-2.5"><p class="text-[10px] font-black text-amber-800">📝 السبب: ${u.reason}</p></div>` : '';
-    const isMe = currentUser && currentUser.username === u.username;
-    const isAdmin = currentUser && currentUser.role === 'admin';
-    const canEdit = isMe || isAdmin;
-    container.innerHTML += `
-      <div class="bg-white border border-black/[0.06] rounded-[24px] p-5 flex gap-4 shadow-[0_8px_30px_rgba(0,0,0,0.04)]">
-        <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-700 text-white flex items-center justify-center font-black text-[15px] shadow-[0_8px_20px_rgba(220,38,38,0.3)]">${u.blood}</div>
-        <div class="flex-1">
-          <div class="flex justify-between items-start">
-            <div><p class="font-black text-[14px]">${u.name} ${isMe ? '<span class="text-red-600 text-[10px]">(أنت)</span>' : ''}</p><p class="text-[11px] text-gray-400 font-bold mt-0.5">${u.hood} • @${u.username}</p></div>
-            <span class="text-[10px] border px-2.5 py-1 rounded-full font-bold ${u.area === 'الحامي' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-blue-50 text-blue-700 border-blue-200'}">${u.area}</span>
-          </div>
-          <div class="flex items-center gap-2 mt-2.5"><span class="w-2 h-2 rounded-full ${statusColor} ${u.status === 'متاح الآن' ? 'animate-pulse' : ''}"></span><span class="text-[11px] font-black">${u.status}</span><span class="text-[10px] text-gray-400">• ${u.last}</span></div>
-          ${reasonHtml}
-          <div class="flex gap-2 mt-4">
-            ${canEdit ? `<button onclick="openEditFor('${u.username}')" class="flex-1 bg-red-50 text-red-600 border border-red-200 py-2.5 rounded-full text-[11px] font-black">${isAdmin ? '👑 إدارة' : '✏ تعديل حالتي'}</button>` :
-            `<a href="https://wa.me/967${u.phone}" class="flex-1 bg-[#25D366] text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">💬 واتساب</a><a href="tel:${u.phone}" class="flex-1 bg-black text-white py-2.5 rounded-full text-[11px] font-black text-center shadow">📞 اتصال</a>`}
-          </div>
-        </div>
-      </div>
-    `;
-  });
-  if (filtered.length === 0) {
-    container.innerHTML = '<div class="text-center py-16"><div class="w-20 h-20 mx-auto bg-gray-50 rounded-full flex items-center justify-center text-3xl mb-3">🔍</div><p class="font-black text-[14px]">لا يوجد متبرعين</p></div>';
-  }
-}
-
-function updateAuth() {
-  const btn = document.getElementById('authBtn');
-  const panel = document.getElementById('adminPanel');
-  if (currentUser) {
-    btn.textContent = currentUser.role === 'admin' ? '👑 خروج' : 'أهلاً ' + currentUser.name.split(' ')[0];
-    btn.onclick = doLogout;
-    if (currentUser.role === 'admin') panel.classList.remove('hidden');
-    else panel.classList.add('hidden');
-  } else {
-    btn.textContent = 'دخول';
-    btn.onclick = openAuth;
-    panel.classList.add('hidden');
-  }
-}
-
 // ==================== بدء التطبيق ====================
 init();
 
 // ربط البحث
 document.getElementById('search').addEventListener('input', render);
 </script>
+
 </body>
 </html>
