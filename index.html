@@ -1,44 +1,36 @@
 
-<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>فحص الربط</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
-<style>body{font-family:system-ui;padding:20px;background:#f5f5f5} .box{background:white;padding:20px;border-radius:15px;margin:10px 0} .ok{color:green} .err{color:red}</style>
+<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>فحص الربط V2</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.3/dist/umd/supabase.min.js"></script>
+<style>body{font-family:system-ui;padding:20px;background:#f5f5f5} .box{background:white;padding:20px;border-radius:15px;margin:10px 0;word-break:break-all} .ok{color:green;font-weight:bold} .err{color:red;font-weight:bold}</style>
 </head><body>
-<h2>🔍 فحص ربط Supabase</h2>
+<h2>🔍 فحص ربط Supabase V2 (محدث)</h2>
 <div id="log" class="box">جاري الفحص...</div>
 <script>
 const URL = 'https://sncymicxpwxyfmxtqoiv.supabase.co';
 const KEY = 'sb_publishable_ax-vLH9J3LHOvUiD8NkYQg_5KKotYrX';
 async function run(){
   let log = document.getElementById('log');
-  function add(t,c=''){ log.innerHTML += `<div class="${c}">${t}</div>`; }
+  function add(t,c=''){ log.innerHTML += `<div class="${c}">${t}</div><hr>`; }
   add('URL: '+URL);
-  add('KEY: '+KEY.slice(0,20)+'...');
+  add('KEY: '+KEY);
   try {
-    const client = supabase.createClient(URL, KEY);
-    add('✅ تم إنشاء Supabase Client', 'ok');
-    // Test 1: try donors table
+    // v2.50 uses window.supabase.createClient
+    const client = window.supabase.createClient(URL, KEY);
+    add('✅ تم إنشاء Supabase Client بنجاح', 'ok');
     let {data, error} = await client.from('donors').select('*').limit(5);
     if(error){
       add('❌ خطأ في جدول donors: '+error.message+' | Code: '+error.code, 'err');
-      add('التفاصيل: '+JSON.stringify(error));
-      if(error.code==='42P01' || error.message.includes('does not exist')){
-        add('⚠️ الجدول غير موجود! لازم تنشئ الجدول من صفحة SQL', 'err');
-      }
-      if(error.code==='42501' || error.message.includes('permission')){
-        add('⚠️ مشكلة صلاحيات RLS - لازم تنفذ policy السماح للجميع', 'err');
-      }
+      add(JSON.stringify(error));
     } else {
-      add('✅ الاتصال ناجح! جدول donors موجود', 'ok');
-      add('عدد السجلات: '+(data?data.length:0));
-      add(JSON.stringify(data,null,2));
+      add('✅ الاتصال ناجح! جدول donors موجود وعدد السجلات: '+(data?data.length:0), 'ok');
+      add('<pre>'+JSON.stringify(data,null,2)+'</pre>');
     }
-    // Test 2: try insert test
-    let testUser = {name:'اختبار', username:'test_'+Date.now(), pass:'1234', phone:'777000000', blood:'O+', area:'الحامي', hood:'اختبار', last_donation:'2024-01-01', status:'متاح الآن', reason:'', role:'donor'};
-    let {error: insErr} = await client.from('donors').insert(testUser);
-    if(insErr) add('❌ فشل الإدخال التجريبي: '+insErr.message, 'err');
-    else add('✅ الإدخال التجريبي نجح - الربط يعمل 100%!', 'ok');
+    let testUser = {name:'اختبار ربط', username:'test_'+Date.now(), pass:'1234', phone:'777000000', blood:'O+', area:'الحامي', hood:'اختبار', last_donation:'2024-01-01', status:'متاح الآن', reason:'اختبار', role:'donor'};
+    let {data:ins, error: insErr} = await client.from('donors').insert(testUser).select();
+    if(insErr) add('❌ فشل الإدخال: '+insErr.message+' '+JSON.stringify(insErr), 'err');
+    else add('✅✅✅ الإدخال نجح! الربط يعمل 100% - تم إدخال: '+ins[0].username, 'ok');
   } catch(e){
-    add('❌ خطأ عام: '+e.message, 'err');
+    add('❌ خطأ عام: '+e.message+'<br>'+e.stack, 'err');
   }
 }
 run();
