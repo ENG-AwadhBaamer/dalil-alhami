@@ -26,7 +26,7 @@ body{font-family:'Cairo',sans-serif}
 </div>
 <div><h1 class="font-black text-[20px] tracking-tight">دمي<span class="text-red-600">.</span></h1><p class="text-[11px] text-gray-500 font-bold">فكرة قروب الحامي تجمعنا</p></div>
 </div>
-<div class="flex items-center gap-2">
+<div class="flex items-center gap-2"><span id="onlineBadge" class="text-[10px] bg-amber-100 text-amber-700 px-3 py-1 rounded-full font-black">📱 محلي - جاري الربط...</span>
 <button onclick="openNotifs()" class="relative w-10 h-10 bg-white border shadow-sm rounded-full flex items-center justify-center"><span class="text-[18px]">🔔</span><span id="notifBadge" class="absolute -top-1 -right-1 bg-red-600 text-white text-[9px] w-5 h-5 rounded-full flex items-center justify-center font-black hidden">0</span></button>
 <button id="authBtn" onclick="openAuth()" class="bg-black text-white px-4 py-2.5 rounded-full text-xs font-black shadow">دخول</button>
 </div>
@@ -272,5 +272,82 @@ function updateBadge(){let unread=currentUser?notifications.filter(n=>!n.readBy.
 function deleteNotif(id){if(!currentUser||currentUser.role!=='admin'){alert('للإدارة فقط'); return;} notifications=notifications.filter(n=>n.id!==id); localStorage.setItem('dami_notifs', JSON.stringify(notifications)); renderNotifs(); updateBadge();}
 updateAuth(); render(); renderNotifs(); updateBadge();
 </script>
+
+<script>
+// ===== SUPABASE ONLINE SYNC - تم الربط بمشروعك =====
+let supabaseClient = null;
+let isOnlineMode = false;
+try {
+  if (typeof supabase !== 'undefined' && SUPABASE_URL && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes('PUT_YOUR')) {
+    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    isOnlineMode = true;
+    console.log('✅ Online mode connected to:', SUPABASE_URL);
+  }
+} catch(e){ console.log('offline mode', e); }
+
+async function loadFromSupabase(){
+  if(!isOnlineMode || !supabaseClient) return false;
+  try {
+    let {data, error} = await supabaseClient.from('donors').select('*').order('created_at', {ascending:true});
+    if(error){ console.log('supabase error', error); return false; }
+    if(data && data.length>0){
+      users = data.map(d=> ({
+        name: d.name, username: d.username, pass: d.pass, phone: d.phone||'', blood: d.blood||'O+',
+        area: d.area||'الحامي', hood: d.hood||'', last: d.last_donation||new Date().toISOString().slice(0,10),
+        status: d.status||'متاح الآن', reason: d.reason||'', role: d.role||'donor', id: d.id
+      }));
+      // Keep admin in memory
+      if(!users.find(u=>u.username==='admin')) users.unshift({name:'المدير العام', username:'admin', pass: localStorage.getItem('dami_admin_pass_v2')||'admin777', phone:'775233773', blood:'AB+', area:'الحامي', hood:'الإدارة', last:new Date().toISOString().slice(0,10), status:'متاح الآن', reason:'', role:'admin'});
+      save(); render(); updateAuth();
+      console.log('Loaded', users.length, 'donors from Supabase');
+      return true;
+    }
+  } catch(e){ console.log(e); }
+  return false;
+}
+
+async function syncToSupabase(user){
+  if(!isOnlineMode || !supabaseClient) return;
+  if(user.role==='admin') return; // لا نخزن الادمن في السحابة
+  try {
+    let payload = {
+      name: user.name, username: user.username, pass: user.pass, phone: user.phone,
+      blood: user.blood, area: user.area, hood: user.hood,
+      last_donation: user.last, status: user.status, reason: user.reason||'', role: 'donor'
+    };
+    // upsert by username
+    let {data: existing} = await supabaseClient.from('donors').select('id').eq('username', user.username).maybeSingle();
+    if(existing){
+      await supabaseClient.from('donors').update(payload).eq('username', user.username);
+    } else {
+      await supabaseClient.from('donors').insert(payload);
+    }
+  } catch(e){ console.log('sync error', e); }
+}
+
+async function deleteFromSupabase(username){
+  if(!isOnlineMode || !supabaseClient) return;
+  try { await supabaseClient.from('donors').delete().eq('username', username); } catch(e){}
+}
+
+// Override save to also sync
+const originalSave = save;
+save = function(){
+  originalSave();
+  if(isOnlineMode){
+    users.forEach(u=> { if(u.role!=='admin') syncToSupabase(u); });
+  }
+}
+
+// Initial load
+setTimeout(async ()=>{
+  let ok = await loadFromSupabase();
+  if(ok){
+    let badge = document.getElementById('onlineBadge');
+    if(badge){ badge.textContent='🌐 أونلاين - مرتبط بـ Supabase'; badge.className='text-[10px] bg-green-100 text-green-700 px-3 py-1 rounded-full font-black'; }
+  }
+}, 500);
+</script>
+
 </body>
 </html>
