@@ -1081,5 +1081,420 @@ window.saveFullEdit = function(idx){
   alert('✅ تم تعديل كل بيانات المستخدم:\n\nالاسم: '+n+'\nالجوال: '+ph+'\nالمنطقة: '+ar+'\nالفصيلة: '+bl+'\nاليوزر: '+un+'\nكلمة السر: '+pw);
 };
 </script>
+
+<script>
+// === تنبيهات المدراء عند التسجيل والتعديل + سلة محذوفات محسنة ===
+
+// دالة إرسال تنبيه للمدراء
+function notifyManagers(title, msg, type='info'){
+  try{
+    // حفظ في الإشعارات العامة
+    if(typeof notifications!=='undefined'){
+      notifications.unshift({
+        title: title,
+        msg: msg,
+        message: msg,
+        time: new Date().toLocaleString('ar-YE'),
+        type: type,
+        forManagers: true,
+        createdAt: new Date().toISOString()
+      });
+      localStorage.setItem('dami_notifs', JSON.stringify(notifications));
+      if(typeof renderNotifs==='function') renderNotifs();
+      if(typeof updateBadge==='function') updateBadge();
+      if(typeof renderAdminNotifList==='function') renderAdminNotifList();
+    }
+    // حفظ في Supabase notifications
+    if(typeof supabaseClient!=='undefined'){
+      supabaseClient.from('notifications').insert({
+        title: title,
+        message: msg,
+        area: 'all',
+        type: type,
+        target_username: 'managers',
+        for_managers: true
+      }).then(()=>{});
+    }
+    // إشعار صوتي/مرئي للمدراء الحاليين
+    if(document.getElementById('adminPanel') && !document.getElementById('adminPanel').classList.contains('hidden')){
+      // لوحة التحكم مفتوحة
+      if(typeof customAlert==='function'){
+        setTimeout(()=>customAlert(title, msg), 500);
+      }
+    }
+    console.log('🔔 تنبيه للمدراء:', title, msg);
+  }catch(e){ console.log('notify error', e); }
+}
+
+// اعتراض تسجيل متبرع جديد - نراقب users.push
+(function(){
+  var originalPush = Array.prototype.push;
+  // لا نعدل الـ prototype، بل نراقب دالة الإضافة المخصصة
+})();
+
+// دالة إضافة متبرع جديد مع تنبيه
+function hookNewDonorRegistration(){
+  // نراقب إضافة مستخدم جديد عبر مراقبة localStorage
+  let lastCount = (typeof users!=='undefined'?users.filter(u=>u.role==='donor'||!u.role).length:0);
+  setInterval(function(){
+    if(typeof users==='undefined') return;
+    let currentCount = users.filter(u=>u.role==='donor'||!u.role).length;
+    if(currentCount > lastCount){
+      // متبرع جديد تسجل
+      let newUsers = users.filter(u=>u.role==='donor'||!u.role).slice(-(currentCount-lastCount));
+      newUsers.forEach(function(u){
+        notifyManagers('🆕 متبرع جديد تسجل', `الاسم: ${u.name}\nالجوال: ${u.phone}\nالفصيلة: ${u.blood_type||u.blood}\nالمنطقة: ${u.area}`, 'new_donor');
+      });
+      lastCount = currentCount;
+    } else {
+      lastCount = currentCount;
+    }
+  }, 2000);
+}
+
+// تحسين دوال التعديل والحذف لترسل تنبيه
+const origEdit = window.editUserFull;
+window.editUserFull = function(idx){
+  var u=users[idx]; if(!u) return;
+  var oldName = u.name;
+  // استدعاء الفورم الأصلي
+  if(typeof origEdit==='function'){
+    // نعيد تعريف saveFullEdit ليرسل تنبيه بعد الحفظ
+    var originalSave = window.saveFullEdit;
+    window.saveFullEdit = function(idx){
+      var userBefore = JSON.parse(JSON.stringify(users[idx]));
+      originalSave(idx);
+      setTimeout(function(){
+        var userAfter = users[idx];
+        if(userAfter){
+          notifyManagers('✏️ تم تعديل بيانات متبرع', `المتبرع: ${oldName} → ${userAfter.name}\nالجوال: ${userAfter.phone}\nالفصيلة: ${userAfter.blood_type||userAfter.blood}\nالمنطقة: ${userAfter.area}\nتم التعديل بواسطة المدير`, 'edit_donor');
+        }
+        // إرجاع الدالة الأصلية
+        window.saveFullEdit = originalSave;
+      }, 100);
+    };
+  }
+  origEdit(idx);
+};
+
+const origDelete = window.deleteUserFull;
+window.deleteUserFull = function(idx){
+  var u=users[idx]; if(!u) return;
+  if(!confirm('حذف '+u.name+'؟ سيتم نقله لسلة المحذوفات')) return;
+  var deletedUser = JSON.parse(JSON.stringify(u));
+  // تنفيذ الحذف
+  var del=JSON.parse(localStorage.getItem('dami_deleted')||'[]');
+  del.unshift({name:deletedUser.name,phone:deletedUser.phone,blood:deletedUser.blood_type||deletedUser.blood,area:deletedUser.area,username:deletedUser.username,password:deletedUser.password,deletedAt:new Date().toLocaleString(),deletedBy:'مدير النظام'});
+  localStorage.setItem('dami_deleted',JSON.stringify(del));
+  users.splice(idx,1);
+  localStorage.setItem('dami_users', JSON.stringify(users));
+  try{ if(typeof supabaseClient!=='undefined') supabaseClient.from('users').delete().eq('phone',deletedUser.phone).then(()=>{}); }catch(e){}
+  if(typeof render==='function') render();
+  if(typeof renderAdminDonors==='function') renderAdminDonors();
+  
+  notifyManagers('🗑️ تم حذف متبرع', `المتبرع: ${deletedUser.name}\nالجوال: ${deletedUser.phone}\nنقل إلى سلة المحذوفات`, 'delete_donor');
+};
+
+// سلة محذوفات محسنة - استعادة أو حذف نهائي
+window.showDeletedDonors = function(){
+  var del=JSON.parse(localStorage.getItem('dami_deleted')||'[]');
+  if(del.length===0){ 
+    if(typeof customAlert==='function') customAlert('سلة المحذوفات','فارغة ✅');
+    else alert('فارغة');
+    return; 
+  }
+  
+  // إنشاء مودال لسلة المحذوفات
+  var existing = document.getElementById('deletedModal');
+  if(existing) existing.remove();
+  
+  var modal = document.createElement('div');
+  modal.id='deletedModal';
+  modal.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:16px';
+  
+  var listHtml = del.map(function(item, i){
+    return `<div style="background:white;border:1.5px solid #FECACA;border-radius:12px;padding:10px;margin-bottom:8px">
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="width:36px;height:36px;border-radius:10px;background:#FFF1F2;display:flex;align-items:center;justify-content:center;font-size:14px">🗑️</div>
+        <div style="flex:1">
+          <b style="font-size:11px">${item.name||''}</b>
+          <div style="font-size:9px;color:#666">📞 ${item.phone||''} • 🩸 ${item.blood||''} • 📍 ${item.area||''}</div>
+          <div style="font-size:7px;color:#999;margin-top:2px">حذف: ${item.deletedAt||''}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px">
+        <button onclick="restoreDeleted(${i})" style="padding:8px;border-radius:999px;background:#E8F5E9;color:#1B5E20;border:1px solid #C8E6C9;font-weight:800;font-size:9px;cursor:pointer">♻️ استعادة</button>
+        <button onclick="permanentDelete(${i})" style="padding:8px;border-radius:999px;background:#FFF1F2;color:#BE123C;border:1px solid #FECACA;font-weight:800;font-size:9px;cursor:pointer">❌ حذف نهائي</button>
+      </div>
+    </div>`;
+  }).join('');
+  
+  modal.innerHTML = `
+    <div style="background:#FEF2F2;border-radius:20px;padding:16px;width:100%;max-width:400px;max-height:85vh;overflow-y:auto;border:2px solid #FECACA">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <b style="font-size:13px;color:#BE123C">♻️ سلة المحذوفات (${del.length})</b>
+        <div style="display:flex;gap:6px">
+          <button onclick="clearAllDeleted()" style="padding:6px 10px;border-radius:999px;background:white;border:1px solid #FECACA;font-size:8px;font-weight:800;color:#BE123C;cursor:pointer">🗑️ إفراغ الكل</button>
+          <button onclick="document.getElementById('deletedModal').remove()" style="width:28px;height:28px;border-radius:50%;background:white;border:1px solid #FECACA;cursor:pointer">✕</button>
+        </div>
+      </div>
+      <div style="max-height:50vh;overflow-y:auto">${listHtml}</div>
+      <div style="margin-top:12px;background:white;border-radius:10px;padding:8px;border:1px dashed #FECACA">
+        <p style="font-size:8px;color:#888;text-align:center">♻️ استعادة = يرجع المتبرع للقائمة<br>❌ حذف نهائي = يحذف للأبد</p>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+};
+
+window.restoreDeleted = function(i){
+  var del=JSON.parse(localStorage.getItem('dami_deleted')||'[]');
+  if(i<0||i>=del.length) return;
+  var r=del.splice(i,1)[0];
+  users.push({name:r.name,phone:r.phone,blood_type:r.blood,blood:r.blood,area:r.area,username:r.username,password:r.password,role:'donor'});
+  localStorage.setItem('dami_users', JSON.stringify(users));
+  localStorage.setItem('dami_deleted', JSON.stringify(del));
+  if(typeof render==='function') render();
+  if(typeof renderAdminDonors==='function') renderAdminDonors();
+  notifyManagers('♻️ تم استعادة متبرع', `المتبرع: ${r.name}\nالجوال: ${r.phone}\nتمت استعادته من سلة المحذوفات`, 'restore_donor');
+  document.getElementById('deletedModal')?.remove();
+  if(del.length>0) setTimeout(showDeletedDonors, 300);
+  alert('✅ تمت استعادة '+r.name);
+};
+
+window.permanentDelete = function(i){
+  var del=JSON.parse(localStorage.getItem('dami_deleted')||'[]');
+  if(i<0||i>=del.length) return;
+  var r=del[i];
+  if(!confirm('⚠️ حذف نهائي لـ '+r.name+'؟\nلن يمكن استعادته أبداً!')) return;
+  del.splice(i,1);
+  localStorage.setItem('dami_deleted', JSON.stringify(del));
+  notifyManagers('❌ حذف نهائي', `المتبرع: ${r.name}\nتم حذفه نهائياً من سلة المحذوفات`, 'permanent_delete');
+  document.getElementById('deletedModal')?.remove();
+  if(del.length>0) setTimeout(showDeletedDonors, 300);
+  else alert('تم الحذف النهائي');
+};
+
+window.clearAllDeleted = function(){
+  var del=JSON.parse(localStorage.getItem('dami_deleted')||'[]');
+  if(del.length===0) return;
+  if(!confirm('⚠️ إفراغ سلة المحذوفات بالكامل؟\n'+del.length+' متبرع سيحذف نهائياً!')) return;
+  localStorage.setItem('dami_deleted', JSON.stringify([]));
+  notifyManagers('🗑️ إفراغ سلة المحذوفات', `تم حذف ${del.length} متبرع نهائياً`, 'clear_trash');
+  document.getElementById('deletedModal')?.remove();
+  if(typeof renderAdminDonors==='function') renderAdminDonors();
+  alert('✅ تم إفراغ السلة');
+};
+
+// مراقبة تسجيل جديد
+hookNewDonorRegistration();
+
+// اعتراض دالة التسجيل الأصلية لإرسال تنبيه
+setTimeout(function(){
+  // البحث عن زر التسجيل ودالة الإضافة
+  var addBtn = document.querySelector('[onclick*="addDonor"]') || document.querySelector('button');
+  // Hook لزر الإضافة
+  var origCloseAdd = window.closeAdd;
+  if(typeof window.closeAdd==='function'){
+    window.closeAdd = function(){
+      var wasCount = users.filter(u=>u.role==='donor'||!u.role).length;
+      origCloseAdd();
+      setTimeout(function(){
+        var nowCount = users.filter(u=>u.role==='donor'||!u.role).length;
+        if(nowCount > wasCount){
+          var newUser = users[users.length-1];
+          notifyManagers('🆕 متبرع جديد تسجل', `الاسم: ${newUser.name}\nالجوال: ${newUser.phone}\nالفصيلة: ${newUser.blood||newUser.blood_type}\nالمنطقة: ${newUser.area}\nاسم المستخدم: ${newUser.username}`, 'new_donor');
+        }
+      }, 500);
+    };
+  }
+}, 2000);
+
+console.log('✅ نظام تنبيهات المدراء + سلة محذوفات محسنة جاهز');
+</script>
+
+
+
+
+
+<script>
+// === فحص حقيقي - ليس وهمي ===
+async function checkConnection(showAlert){
+  var dot = document.getElementById('connDot');
+  var text = document.getElementById('connText');
+  var statusDiv = document.getElementById('connStatus');
+  if(!dot || !text) return;
+
+  dot.style.background='#F59E0B';
+  dot.style.boxShadow='0 0 0 3px rgba(245,158,11,0.2)';
+  text.textContent='فحص حقيقي...';
+  text.style.color='#D97706';
+
+  try{
+    if(typeof supabaseClient==='undefined' || !supabaseClient){
+      throw {type:'no_client', msg:'مكتبة Supabase لم تحمل'};
+    }
+
+    console.log('🔍 فحص حقيقي - محاولة قراءة فعلية من قاعدة البيانات...');
+    
+    var start = Date.now();
+    
+    // محاولة قراءة حقيقية - ليس وهمي
+    var {data, error, count} = await supabaseClient.from('users').select('*', {count:'exact'}).limit(1);
+    var elapsed = Date.now() - start;
+    
+    console.log('نتيجة الفحص:', {data, error, count});
+    
+    if(error){
+      console.error('خطأ Supabase:', error);
+      
+      // تحليل نوع الخطأ
+      if(error.message.includes('Failed to fetch') || error.message.includes('Network') || error.message.includes('fetch')){
+        // خطأ شبكة حقيقي
+        dot.style.background='#EF4444';
+        dot.style.boxShadow='0 0 0 3px rgba(239,68,68,0.3)';
+        text.textContent='غير متصل - لا إنترنت';
+        text.style.color='#DC2626';
+        statusDiv.style.borderColor='#FECACA';
+        statusDiv.style.background='#FFF1F2';
+        
+        if(showAlert){
+          alert('❌ غير متصل حقيقي\n\nالسبب: لا يوجد إنترنت أو السيرفر لا يستجيب\nالخطأ: '+error.message+'\n\nالحل:\n- تأكد من الإنترنت\n- تأكد من URL صحيح');
+        }
+        return false;
+      }
+      
+      if(error.code==='42501' || error.message.includes('policy') || error.message.includes('permission') || error.code==='PGRST301'){
+        // RLS يمنع - متصل وهمي
+        dot.style.background='#F59E0B';
+        dot.style.boxShadow='0 0 0 3px rgba(245,158,11,0.3)';
+        text.textContent='متصل وهمي - RLS يمنع';
+        text.style.color='#D97706';
+        statusDiv.style.borderColor='#FDE68A';
+        statusDiv.style.background='#FFFBEB';
+        
+        if(showAlert){
+          var msg = `⚠️ متصل وهمي - RLS يمنع القراءة\n\n`;
+          msg += `الكلاينت يتصل بالسيرفر، لكن سياسات الأمان تمنع قراءة البيانات\n`;
+          msg += `الخطأ: ${error.message}\n`;
+          msg += `الكود: ${error.code}\n\n`;
+          msg += `الحل في Supabase Dashboard:\n`;
+          msg += `1. اذهب إلى Authentication > Policies\n`;
+          msg += `2. لكل جدول (users, notifications)\n`;
+          msg += `3. احذف السياسات القديمة\n`;
+          msg += `4. أنشئ سياسة جديدة:\n`;
+          msg += `   CREATE POLICY "Allow all" ON users FOR ALL USING (true) WITH CHECK (true);\n\n`;
+          msg += `أو عطل RLS مؤقتاً:\n`;
+          msg += `   ALTER TABLE users DISABLE ROW LEVEL SECURITY;`;
+          
+          if(typeof customAlert==='function') customAlert('⚠️ متصل وهمي', msg);
+          else alert(msg);
+        }
+        return 'fake';
+      }
+      
+      // خطأ آخر
+      dot.style.background='#EF4444';
+      text.textContent='خطأ: '+error.code;
+      text.style.color='#DC2626';
+      statusDiv.style.borderColor='#FECACA';
+      statusDiv.style.background='#FFF1F2';
+      
+      if(showAlert) alert('❌ خطأ:\n'+error.message+'\nالكود: '+error.code);
+      return false;
+    }
+    
+    // نجح - قراءة حقيقية
+    dot.style.background='#22C55E';
+    dot.style.boxShadow='0 0 0 3px rgba(34,197,94,0.3)';
+    dot.style.animation='pulse 2s infinite';
+    text.textContent='متصل حقيقي ✓';
+    text.style.color='#16A34A';
+    statusDiv.style.borderColor='#BBF7D0';
+    statusDiv.style.background='#F0FDF4';
+    
+    if(showAlert){
+      var msg = `✅ متصل حقيقي بقاعدة البيانات\n\n`;
+      msg += `الوقت: ${elapsed}ms\n`;
+      msg += `عدد السجلات: ${count||data?.length||0}\n`;
+      msg += `المتبرعين المحليين: ${users.length}\n`;
+      msg += `البيانات: ${data&&data.length>0?'موجودة ✓':'فارغة'}\n\n`;
+      msg += `URL: ${SUPABASE_URL}`;
+      if(typeof customAlert==='function') customAlert('✅ متصل حقيقي', msg);
+      else alert(msg);
+    }
+    
+    console.log(`✅ متصل حقيقي - ${elapsed}ms - ${count} سجل`);
+    return true;
+    
+  }catch(e){
+    console.error('❌ فشل الفحص:', e);
+    var dot = document.getElementById('connDot');
+    var text = document.getElementById('connText');
+    var statusDiv = document.getElementById('connStatus');
+    
+    dot.style.background='#EF4444';
+    dot.style.boxShadow='0 0 0 3px rgba(239,68,68,0.3)';
+    text.textContent='غير متصل';
+    text.style.color='#DC2626';
+    statusDiv.style.borderColor='#FECACA';
+    statusDiv.style.background='#FFF1F2';
+    
+    if(showAlert){
+      alert('❌ غير متصل\n\n'+(e.msg||e.message||JSON.stringify(e)));
+    }
+    return false;
+  }
+}
+
+function createConnectionStatus(){
+  setTimeout(function(){
+    var themeBtn = document.getElementById('themeBtn');
+    var container = themeBtn?.parentElement || document.querySelector('header div.flex.items-center.gap-2');
+    if(!container) return;
+    if(document.getElementById('connStatus')) return;
+    
+    var statusDiv = document.createElement('div');
+    statusDiv.id='connStatus';
+    statusDiv.style.cssText='display:flex;align-items:center;gap:6px;background:white;border:1.5px solid #E8F5E9;border-radius:999px;padding:6px 10px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.05)';
+    statusDiv.title='اضغط لفحص حقيقي - يقرأ من قاعدة البيانات فعلاً';
+    statusDiv.onclick=function(){ checkConnection(true); };
+    statusDiv.innerHTML = `
+      <div id="connDot" style="width:10px;height:10px;border-radius:50%;background:#9CA3AF"></div>
+      <span id="connText" style="font-size:8px;font-weight:900;color:#6B7280">فحص حقيقي...</span>
+    `;
+    
+    if(themeBtn && container.contains(themeBtn)){
+      container.insertBefore(statusDiv, themeBtn);
+    } else {
+      container.prepend(statusDiv);
+    }
+    
+    var style = document.createElement('style');
+    style.textContent = `
+      @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,0.4)}70%{box-shadow:0 0 0 6px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+    `;
+    document.head.appendChild(style);
+    
+    checkConnection(false);
+    setInterval(function(){ checkConnection(false); }, 60000);
+  }, 1500);
+}
+
+// إصلاح مفتاح Supabase - جرب المفتاح الصحيح
+setTimeout(function(){
+  console.log('🔧 فحص مفاتيح Supabase...');
+  console.log('URL:', typeof SUPABASE_URL!=='undefined'?SUPABASE_URL:'غير موجود');
+  console.log('KEY موجود:', typeof SUPABASE_KEY!=='undefined'?'نعم - '+SUPABASE_KEY.substring(0,20)+'...':'لا');
+  
+  // إذا كان المفتاح بصيغة publishable الجديدة، قد يحتاج تحويل
+  if(typeof SUPABASE_KEY!=='undefined' && SUPABASE_KEY.startsWith('sb_publishable_')){
+    console.log('⚠️ المفتاح بصيغة publishable الجديدة - قد يحتاج anon key');
+    console.log('جرب استخدام anon key من Supabase Dashboard > Settings > API');
+  }
+}, 2000);
+
+createConnectionStatus();
+</script>
 </body>
 </html>
