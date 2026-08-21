@@ -1,119 +1,1085 @@
+
 <!DOCTYPE html>
-<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>
-دمي -دليل الحامي والمقد للدم</title><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet"><script src="https://cdn.tailwindcss.com"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.3/dist/umd/supabase.min.js"></script><style>body{font-family:'Cairo'} @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}} .animate-slideUp{animation:slideUp 0.3s ease-out}</style></head>
-<body class="bg-[#FFF8F8]"><div class="max-w-[440px] mx-auto bg-white min-h-screen pb-28 relative">
-<header class="sticky top-0 bg-white border-b z-20"><div class="px-5 py-4 flex justify-between items-center"><div class="flex gap-3 items-center"><div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center text-white">❤</div><div><h1 class="font-black">
-دمي -دليل الحامي والمقد للدم</h1></div></div><div class="flex gap-2 items-center"><span class="text-[10px] bg-green-50 border px-3 py-1 rounded-full">متصل</span><button onclick="openNotifs()" class="w-9 h-9 bg-white border rounded-full relative">🔔<span id="notifBadgeTop" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-white text-[8px] rounded-full flex items-center justify-center">0</span></button></div></div></header>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>دمي - دليل الحامي والمقد</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.3/dist/umd/supabase.min.js"></script>
+<style>
+body{font-family:'Cairo',sans-serif;background:#f0fdf4;margin:0}
+.flat-card{box-shadow:0 1px 3px rgba(0,0,0,.06);border:1px solid #E8F5E9}
+.filter-active{background:#4CAF50;color:#fff;border-color:#4CAF50}
+.filter-inactive{background:#fff;color:#555;border:1px solid #E0E0E0}
+.tab-active{background:#4CAF50;color:#fff}
+.tab-inactive{background:#fff;color:#4CAF50;border:1px solid #C8E6C9}
+</style>
 
-<div id="adminPanel" class="hidden mx-4 mt-4 bg-black text-white rounded-[20px] p-4">
-<div class="flex justify-between"><p class="font-black text-[12px]">لوحة الإدارة</p><span id="roleBadge" class="hidden text-[9px] px-2 py-1 rounded-full"></span></div>
-<div id="superAdminSection" class="hidden mt-3 bg-amber-500/10 border rounded-xl p-3"><p class="text-[10px] text-amber-200 mb-2 font-black">👑 المدراء - تغيير كلمة السر</p><div id="adminsList" class="space-y-2 mb-3"></div><input id="newAdminName" placeholder="اسم المدير" class="w-full bg-white text-black rounded-xl p-2.5 text-[11px] mb-2"><input id="newAdminUser" placeholder="اسم المستخدم" class="w-full bg-white text-black rounded-xl p-2.5 text-[11px] mb-2"><input id="newAdminPass" placeholder="كلمة السر" class="w-full bg-white text-black rounded-xl p-2.5 text-[11px] mb-2"><button onclick="addSubAdmin()" class="w-full bg-amber-500 text-black py-2.5 rounded-xl font-black text-[11px]">➕ إضافة مدير</button></div>
-<div class="mt-3 bg-white/10 rounded-xl p-3 border-2 border-red-500/30"><p class="font-black text-[11px] mb-3">📢 إرسال إشعارات</p><input id="notifTitle" placeholder="عنوان الإشعار" class="w-full bg-white text-black rounded-xl p-2.5 text-[11px] font-bold mb-2"><textarea id="notifMsg" placeholder="نص الإشعار..." class="w-full bg-white text-black rounded-xl p-2.5 text-[11px] h-16 mb-3"></textarea><select id="notifTarget" onchange="toggleNotifTarget()" class="w-full bg-white text-black rounded-xl p-2.5 text-[11px] font-bold mb-2"><option value="all">🌍 الجميع</option><option value="الحامي">📍 الحامي فقط</option><option value="المقد">📍 المقد فقط</option><option value="donor">👤 متبرع محدد</option></select><div id="donorSelectBox" class="hidden mb-2"><select id="notifDonor" class="w-full bg-amber-50 border border-amber-200 text-black rounded-xl p-2.5 text-[11px] font-bold"><option value="">اختر المتبرع...</option></select></div><button onclick="sendNotif()" class="w-full bg-red-600 text-white py-3 rounded-xl font-black text-[11px]">🚀 إرسال</button></div>
-<div class="mt-3 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3"><p class="font-black text-[10px] text-amber-200 mb-2">🔔 إشعارات المتبرعين الجدد - للإدارة فقط</p><div id="adminNewDonorList" class="space-y-2 max-h-[200px] overflow-y-auto"></div></div>
-<div class="mt-3 bg-red-500/10 border border-red-500/20 rounded-xl p-3"><div class="flex justify-between items-center mb-3"><p class="font-black text-[11px] text-red-200">🗑️ حذف الإشعارات</p><span id="notifCount" class="text-[9px] bg-red-500 text-white px-2 py-1 rounded-full">0</span></div><div id="adminNotifList" class="space-y-2 max-h-[300px] overflow-y-auto"></div><div class="flex gap-2 mt-3"><button onclick="deleteAllNotifs()" class="flex-1 bg-red-600 text-white py-2 rounded-full text-[9px] font-black">🗑️ حذف الكل</button><button onclick="loadNotifications()" class="flex-1 bg-white/10 py-2 rounded-full text-[9px] font-bold">🔄 تحديث</button></div></div>
-<div class="mt-3 bg-white/10 rounded-xl p-3"><p class="font-black text-[10px] mb-2">👥 المتبرعين</p><input id="adminSearch" oninput="renderAdminDonors()" placeholder="ابحث..." class="w-full bg-white text-black rounded-xl p-2.5 text-[11px] mb-3"><div id="adminDonorsList" class="space-y-2 max-h-[300px] overflow-y-auto"></div></div>
+<style>
+/* UI/UX PRO IMPROVEMENTS */
+:root{ --green:#1B5E20; --green2:#2E7D32; --light:#E8F5E9; --amber:#F59E0B; }
+body{ background:#F8FAF8 !important; font-family:'Cairo','Tajawal',system-ui !important; }
+.flat-card{ box-shadow:0 1px 3px rgba(0,0,0,0.05) !important; border:1px solid #EEF2EE !important; transition:all 0.2s ease !important; }
+.flat-card:hover{ box-shadow:0 8px 24px rgba(27,94,32,0.08) !important; transform:translateY(-2px) !important; border-color:#C8E6C9 !important; }
+.donor-card{ background:white; border-radius:20px !important; padding:14px !important; border:1px solid #E8F5E9 !important; }
+.donor-card .donor-avatar{ width:44px; height:44px; background:linear-gradient(135deg,#1B5E20,#4CAF50); border-radius:14px; display:flex; align-items:center; justify-content:center; color:white; font-weight:900; font-size:14px; }
+.search-input{ background:white !important; border:1.5px solid #E0E0E0 !important; border-radius:16px !important; padding:12px 14px !important; font-size:13px !important; transition:all 0.2s !important; }
+.search-input:focus{ border-color:var(--green2) !important; box-shadow:0 0 0 3px rgba(46,125,50,0.1) !important; }
+.filter-chip{ border-radius:999px !important; padding:7px 14px !important; font-size:10px !important; font-weight:700 !important; border:1.5px solid #E0E0E0 !important; background:white !important; transition:all 0.2s !important; }
+.filter-chip.active{ background:var(--green2) !important; color:white !important; border-color:var(--green2) !important; }
+.bottom-nav{ background:white !important; border-top:1px solid #E8F5E9 !important; backdrop-filter:blur(20px) !important; box-shadow:0 -4px 24px rgba(0,0,0,0.04) !important; }
+.bottom-tab{ border-radius:16px !important; transition:all 0.2s !important; }
+.bottom-tab:active{ transform:scale(0.95) !important; }
+.marquee-bar{ background:linear-gradient(90deg,#1B5E20,#2E7D32) !important; letter-spacing:0.5px !important; }
+.notif-card{ animation:slideIn 0.4s ease !important; }
+@keyframes slideIn{ from{opacity:0; transform:translateY(-10px)} to{opacity:1; transform:translateY(0)} }
+.btn-primary{ background:linear-gradient(135deg,#1B5E20,#388E3C) !important; box-shadow:0 4px 12px rgba(27,94,32,0.25) !important; border-radius:14px !important; font-weight:800 !important; letter-spacing:0.3px !important; }
+.btn-primary:active{ transform:scale(0.98) !important; }
+.shimmer{ background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; }
+@keyframes shimmer{ 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+</style>
+
+<style>
+.header-title-single{ white-space:nowrap !important; display:flex !important; align-items:center !important; gap:4px !important; font-size:12px !important; font-weight:900 !important; line-height:1 !important; }
+.header-title-single span{ white-space:nowrap !important; }
+</style>
+
+<style>
+/* FIX MARQUEE - small neat red */
+.marquee-bar, .marquee, div.bg-\[\#2E7D32\].text-white.overflow-hidden, div.bg-\[\#111827\].text-white.overflow-hidden{
+  height:28px !important;
+  min-height:28px !important;
+  max-height:28px !important;
+  background:linear-gradient(90deg,#F43F5E,#E11D48) !important;
+  display:flex !important;
+  align-items:center !important;
+  overflow:hidden !important;
+  padding:0 !important;
+}
+.marquee-bar > div, .marquee > div, .marquee-track{
+  font-size:8.5px !important;
+  line-height:1 !important;
+  white-space:nowrap !important;
+  animation:marqFixed 40s linear infinite !important;
+  padding-left:0 !important;
+  transform:translateX(100%);
+}
+@keyframes marqFixed{
+  from{transform:translateX(100%)}
+  to{transform:translateX(-100%)}
+}
+/* BANK COLORS */
+body{background:#FEF6EE !important}
+header{background:rgba(255,255,255,0.94) !important;backdrop-filter:blur(18px) !important}
+button.bg-\[\#1B5E20\], button.bg-\[\#2E7D32\], button.bg-\[\#4CAF50\], button.bg-green-600{background:#0D9488 !important}
+button.bg-\[\#111827\]{background:#0D9488 !important}
+.bg-red-500{background:#F43F5E !important}
+/* Cards */
+div[class*="rounded-2xl"], div[class*="rounded-3xl"]{border:1px solid #F1F5F9 !important}
+</style>
+
+<style>
+/* THEME SWITCHER */
+.theme-btn{width:40px;height:40px;border-radius:999px;background:white;border:1px solid #F1F5F9;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;transition:all 0.2s;position:relative}
+.theme-btn:active{transform:scale(0.92)}
+.theme-menu{position:absolute;top:48px;left:0;right:auto;background:white;border-radius:20px;border:1px solid #F1F5F9;box-shadow:0 20px 40px rgba(0,0,0,0.12);padding:12px;min-width:200px;z-index:100;display:none}
+.theme-menu.open{display:block}
+.theme-option{width:100%;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;border:1.5px solid transparent;cursor:pointer;transition:all 0.2s;background:white;margin-bottom:6px}
+.theme-option:hover{border-color:#E2E8F0;background:#F8FAFC}
+.theme-option.active{border-color:#0D9488;background:#F0FDFA}
+.theme-dot{width:28px;height:28px;border-radius:999px;flex-shrink:0;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.15)}
+.theme-info{flex:1;text-align:right}
+.theme-name{font-size:11px;font-weight:900;color:#0F172A}
+.theme-desc{font-size:8px;color:#64748B;margin-top:1px}
+
+/* THEMES */
+[data-theme="dark"] body{background:#0B1220 !important}
+[data-theme="dark"] header{background:rgba(15,23,42,0.92) !important;border-bottom-color:#1E293B !important}
+[data-theme="dark"] .title, [data-theme="dark"] .title-bank{color:white !important}
+[data-theme="dark"] .sub, [data-theme="dark"] .subtitle-bank{color:#94A3B8 !important}
+[data-theme="dark"] .card, [data-theme="dark"] .donor-bank, [data-theme="dark"] div[class*="bg-white"]{background:#162032 !important;border-color:#1E293B !important;color:white}
+[data-theme="dark"] .search, [data-theme="dark"] .search-bank{background:#162032 !important;border-color:#1E293B !important}
+[data-theme="dark"] .search input{color:white !important}
+[data-theme="dark"] .pill, [data-theme="dark"] .pill-bank{background:#1E293B !important;border-color:#334155 !important;color:#94A3B8 !important}
+[data-theme="dark"] .stat, [data-theme="dark"] .stat-bank{background:#162032 !important;border-color:#1E293B !important}
+[data-theme="dark"] #s1, [data-theme="dark"] #statTotal{color:white !important}
+
+[data-theme="gold"] body{background:#FEF7ED !important}
+[data-theme="gold"] header{background:rgba(255,251,235,0.92) !important;border-bottom-color:#FDE68A !important}
+[data-theme="gold"] .card, [data-theme="gold"] .donor-bank{background:#FFFFFF !important;border-color:#FDE68A !important}
+[data-theme="gold"] .search, [data-theme="gold"] .search-bank{background:white !important;border-color:#FDE68A !important}
+[data-theme="gold"] .pill, [data-theme="gold"] .pill-bank{background:white !important;border-color:#FDE68A !important;color:#92400E !important}
+[data-theme="gold"] .pill.active{background:#D97706 !important;border-color:#D97706 !important;color:white !important;box-shadow:0 6px 16px rgba(217,119,6,0.25) !important}
+[data-theme="gold"] .pill.blood.active{background:#92400E !important;border-color:#92400E !important}
+[data-theme="gold"] .btn-teal, [data-theme="gold"] button.bg-\[\#0D9488\], [data-theme="gold"] .btn-call-bank{background:#D97706 !important;box-shadow:0 6px 16px rgba(217,119,6,0.22) !important}
+[data-theme="gold"] .marquee-bar{background:linear-gradient(90deg,#D97706,#92400E) !important}
+[data-theme="gold"] .badge, [data-theme="gold"] .blood-bank{background:#FEF3C7 !important;color:#92400E !important;border-color:#FDE68A !important}
+</style>
+</head>
+<body>
+<div class="max-w-[460px] mx-auto bg-white min-h-screen pb-28 shadow-sm">
+<header class="sticky top-0 bg-white z-30 border-b">
+<div class="px-3 py-2.5 flex justify-between items-center">
+<div class="flex gap-2.5 items-center">
+<div class="w-[48px] h-[48px] rounded-[12px] bg-[#2E7D32] flex items-center justify-center text-white text-[22px] leading-none shrink-0">♥</div>
+<div class="flex items-center"><h1 class="font-black text-[20px] text-[#1B5E20] leading-none whitespace-nowrap tracking-tight">دمي دليل الحامي والمقد</h1></div>
 </div>
 
-<div id="notifFeed" class="mx-4 mt-3 space-y-2 hidden"></div>
-<div id="homeContent"><div class="px-4 mt-4"><input id="search" placeholder="ابحث..." class="w-full bg-gray-50 border rounded-full px-5 py-3 text-[12px]"><div id="donors" class="px-4 mt-4 space-y-3"></div></div></div>
-
-<div id="myAccountPage" class="hidden px-4 mt-4">
-<div class="bg-white border rounded-[22px] p-5"><div id="myAccountContent"></div></div>
-<!-- هذا الفوتر اللي كان ناقص -->
-<div class="mt-4 bg-red-50 border border-red-100 rounded-[22px] p-5 text-center">
-<p class="font-black text-[14px] text-black">تطبيق الحامي والمقد - دمي</p>
-<div class="w-12 h-1 bg-red-600 mx-auto rounded-full my-3"></div>
-<p class="font-bold text-[12px] text-black">برمجة وتصميم م/ عوض باعامر</p>
-<p class="font-black text-[13px] text-red-600 mt-1">جوال 775233773</p>
-<div class="my-3 h-[1px] bg-red-100"></div>
-<p class="text-[11px] text-gray-700">فكرة قروب الحامي تجمعنا</p>
-<p class="font-bold text-[11px] text-black">د. عوض عمر باعباد</p>
-<div class="flex gap-2 mt-4">
-<a href="https://wa.me/967775233773" target="_blank" class="flex-1 bg-green-600 text-white py-3 rounded-full text-[11px] font-black text-center flex items-center justify-center gap-1">💬 واتساب</a>
-<a href="tel:777701487" class="flex-1 bg-red-600 text-white py-3 rounded-full text-[11px] font-black text-center flex items-center justify-center gap-1">🚨 طوارئ 777701487</a>
-</div>
-<p class="text-[8px] text-gray-400 mt-3">جميع الحقوق محفوظة © 2026</p>
+<div style="display:flex;align-items:center;gap:8px;position:relative">
+<div id="themeBtn" style="position:relative">
+<button onclick="toggleThemeMenu()" class="theme-btn"><span id="themeBtnIcon">🎨</span></button>
+<div id="themeMenu" class="theme-menu">
+<button onclick="setTheme('default')" id="theme-default" class="theme-option active">
+<div class="theme-dot" style="background:linear-gradient(135deg,#0D9488,#F43F5E)"></div>
+<div class="theme-info"><div class="theme-name">الحالي - بنكي فاتح</div><div class="theme-desc">بيج + Teal + Rose</div></div>
+</button>
+<button onclick="setTheme('dark')" id="theme-dark" class="theme-option">
+<div class="theme-dot" style="background:linear-gradient(135deg,#0F172A,#334155)"></div>
+<div class="theme-info"><div class="theme-name">الداكن - ليلي</div><div class="theme-desc">كحلي غامق مريح للعين</div></div>
+</button>
+<button onclick="setTheme('gold')" id="theme-gold" class="theme-option">
+<div class="theme-dot" style="background:linear-gradient(135deg,#D97706,#92400E)"></div>
+<div class="theme-info"><div class="theme-name">الذهبي - كريمي</div><div class="theme-desc">ذهبي + بني + كريمي فاخر</div></div>
+</button>
 </div>
 </div>
+<button onclick="openNotifs()" class="w-8 h-8 bg-[#E8F5E9] border border-green-200 rounded-full flex items-center justify-center text-[14px] relative shrink-0">🔔<span id="notifBadgeTop" class="hidden absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 text-white text-[7px] rounded-full flex items-center justify-center">0</span></button>
+</div>
 
-<div class="h-24"></div></div>
+</div>
+<div class="marquee-bar bg-[#2E7D32] text-white overflow-hidden whitespace-nowrap py-1.5 relative">
+<div class="animate-marquee inline-block text-[9px] font-bold tracking-wide">﴿ وَمَنْ أَحْيَاهَا فَكَأَنَّمَا أَحْيَا النَّاسَ جَمِيعًا ﴾ &nbsp;&nbsp;•&nbsp;&nbsp; قطرة دم تنقذ حياة &nbsp;&nbsp;•&nbsp;&nbsp; تطبيق الحامي والمقد - دمي &nbsp;&nbsp;•&nbsp;&nbsp; ﴿ وَمَنْ أَحْيَاهَا فَكَأَنَّمَا أَحْيَا النَّاسَ جَمِيعًا ﴾ &nbsp;&nbsp;•&nbsp;&nbsp; قطرة دم تنقذ حياة</div>
+</div>
+<style>@keyframes marquee{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}} .animate-marquee{animation:marqFixed 40s linear infinite; transform:translateX(100%);}</style>
+</header>
 
-<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[440px] z-30"><div class="mx-3 mb-3 bg-white border shadow-xl rounded-[24px] px-2 py-2 flex justify-between items-center"><button onclick="switchTab('home')" id="tab-home" class="tab-btn flex-1 flex flex-col items-center py-2 rounded-xl bg-black text-white"><span>🏠</span><span class="text-[8px]">الرئيسية</span></button><button onclick="switchTab('notifs')" id="tab-notifs" class="tab-btn flex-1 flex flex-col items-center py-2 rounded-xl text-gray-400 relative"><span>🔔</span><span class="text-[8px]">الإشعارات</span><span id="notifBadgeBottom" class="hidden absolute top-0 right-4 w-4 h-4 bg-red-600 text-white text-[7px] rounded-full flex items-center justify-center">0</span></button><button onclick="openAdd()" class="w-11 h-11 bg-red-600 rounded-full text-white text-xl">+</button><button onclick="switchTab('search')" id="tab-search" class="tab-btn flex-1 flex flex-col items-center py-2 rounded-xl text-gray-400"><span>🔍</span><span class="text-[8px]">بحث</span></button><button onclick="switchTab('account')" id="tab-account" class="tab-btn flex-1 flex flex-col items-center py-2 rounded-xl text-gray-400"><span>👤</span><span class="text-[8px]">حسابي</span></button></div></div>
+<div id="notifFeed" class="mx-3 mt-2 space-y-2 relative z-10"></div>
+<div id="adminPanel" class="hidden mx-3 mt-3">
+<button onclick="toggleControlPanel()" class="w-full bg-white rounded-[12px] p-2.5 flat-card border-2 border-green-200 flex justify-between items-center">
+<div class="flex items-center gap-2"><div class="w-8 h-8 bg-[#4CAF50] rounded-lg flex items-center justify-center text-white text-[12px]">⚙️</div><div class="text-right leading-[0.9]"><p class="font-black text-[11px] text-green-800 leading-none">لوحة التحكم</p><p class="text-[7px] text-green-600 mt-1">قابل للطي</p></div></div>
+<span id="controlPanelArrow" class="w-6 h-6 bg-green-50 border rounded-full flex items-center justify-center text-[10px]">▼</span>
+</button>
+<div id="controlPanelContent" class="hidden mt-2 bg-white rounded-[14px] p-3 flat-card border-2 border-green-200">
+<div class="grid grid-cols-5 gap-1 mb-3 bg-green-50 p-1 rounded-xl border">
+<button onclick="switchAdminTab('overview')" id="adminTab-overview" class="admin-tab tab-active py-2 rounded-lg text-[7px] font-bold">📊<br>نظرة</button>
+<button onclick="switchAdminTab('managers')" id="adminTab-managers" class="admin-tab tab-inactive py-2 rounded-lg text-[7px] font-bold">👑<br>المدراء</button>
+<button onclick="switchAdminTab('donors')" id="adminTab-donors" class="admin-tab tab-inactive py-2 rounded-lg text-[7px] font-bold">👥<br>المتبرعين</button>
+<button onclick="switchAdminTab('notifs')" id="adminTab-notifs" class="admin-tab tab-inactive py-2 rounded-lg text-[7px] font-bold">🔔<br>إشعارات</button>
+<button onclick="switchAdminTab('account')" id="adminTab-account" class="admin-tab tab-inactive py-2 rounded-lg text-[7px] font-bold">👤<br>حسابي</button>
+</div>
+<div id="adminTabContent-overview" class="admin-tab-content"><div class="grid grid-cols-3 gap-1.5 mb-2"><div class="bg-green-50 border rounded-xl p-2 text-center"><p class="text-[16px] font-black text-green-700" id="statDonors">0</p><p class="text-[7px]">متبرع</p></div><div class="bg-amber-50 border rounded-xl p-2 text-center"><p class="text-[16px] font-black text-amber-700" id="statManagers">0</p><p class="text-[7px]">مدير</p></div><div class="bg-red-50 border rounded-xl p-2 text-center"><p class="text-[16px] font-black text-red-700" id="statLocked">0</p><p class="text-[7px]">موقف</p></div></div><div id="lockedList" class="space-y-1"></div></div>
+<div id="adminTabContent-managers" class="admin-tab-content hidden"><div id="adminsList" class="space-y-1.5 mb-2"></div><div class="bg-amber-50 border rounded-xl p-2.5"><input id="newAdminName" placeholder="اسم المدير" class="w-full bg-white border rounded-lg p-2 text-[10px] mb-1"><input id="newAdminUser" placeholder="اسم المستخدم" class="w-full bg-white border rounded-lg p-2 text-[10px] mb-1"><input id="newAdminPass" placeholder="كلمة السر" class="w-full bg-white border rounded-lg p-2 text-[10px] mb-1"><button onclick="addSubAdmin()" class="w-full bg-amber-400 text-amber-900 py-2 rounded-lg font-bold text-[10px]">➕ إضافة مدير</button></div></div>
+<div id="adminTabContent-donors" class="admin-tab-content hidden"><input id="adminSearch" oninput="renderAdminDonors()" placeholder="ابحث باسم أو فصيلة..." class="w-full bg-white border rounded-lg p-2 text-[10px] mb-2"><div id="adminDonorsList" class="space-y-1 max-h-[300px] overflow-y-auto"></div></div>
+<div id="adminTabContent-notifs" class="admin-tab-content hidden">
+<div class="bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 rounded-[16px] p-3 mb-2.5">
+<p class="text-[9px] font-black text-amber-900 mb-2 flex items-center gap-1">🎯 إرسال الإشعار حسب:</p>
 
-<div id="customAlert" class="hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6"><div class="bg-white w-full max-w-[320px] rounded-[24px] p-6 shadow-2xl animate-slideUp text-center"><div id="customAlertIcon" class="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center text-2xl bg-green-50">✅</div><p id="customAlertTitle" class="font-black text-[15px] mb-2">تم</p><p id="customAlertMsg" class="text-[12px] text-gray-600 leading-relaxed whitespace-pre-line"></p><button onclick="closeCustomAlert()" class="w-full mt-5 bg-black text-white py-3 rounded-full font-black text-[13px]">حسناً</button></div></div>
-<div id="customConfirm" class="hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6"><div class="bg-white w-full max-w-[320px] rounded-[24px] p-6 shadow-2xl animate-slideUp text-center"><div class="w-16 h-16 mx-auto mb-4 bg-amber-50 rounded-full flex items-center justify-center text-2xl">⚠️</div><p id="customConfirmTitle" class="font-black text-[15px] mb-2">تأكيد</p><p id="customConfirmMsg" class="text-[12px] text-gray-600 leading-relaxed mb-5 whitespace-pre-line"></p><div class="flex gap-3"><button onclick="closeCustomConfirm(false)" class="flex-1 bg-gray-100 text-black py-3 rounded-full font-bold text-[13px]">إلغاء</button><button id="customConfirmOk" onclick="closeCustomConfirm(true)" class="flex-1 bg-red-600 text-white py-3 rounded-full font-black text-[13px]">حسناً</button></div></div></div>
-<div id="customPrompt" class="hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-6"><div class="bg-white w-full max-w-[320px] rounded-[24px] p-6 shadow-2xl animate-slideUp"><p id="customPromptTitle" class="font-black text-[14px] mb-3 text-center">أدخل البيانات</p><p id="customPromptMsg" class="text-[11px] text-gray-600 mb-3 text-center whitespace-pre-line"></p><input id="customPromptInput" placeholder="" class="w-full bg-gray-50 border rounded-xl p-3.5 text-[13px] font-bold mb-4"><div class="flex gap-3"><button onclick="closeCustomPrompt(false)" class="flex-1 bg-gray-100 py-3 rounded-full font-bold text-[13px]">إلغاء</button><button onclick="closeCustomPrompt(true)" class="flex-1 bg-black text-white py-3 rounded-full font-black text-[13px]">تأكيد</button></div></div></div>
+<p class="text-[7px] font-bold text-gray-600 mb-1">📍 المنطقة:</p>
+<div class="flex gap-1.5 mb-2.5">
+<button onclick="setNotifTarget('all')" id="nt-all" class="flex-1 bg-[#1B5E20] text-white py-2 rounded-full text-[8px] font-black shadow">🌍 الكل</button>
+<button onclick="setNotifTarget('الحامي')" id="nt-الحامي" class="flex-1 bg-white border-2 border-gray-100 py-2 rounded-full text-[8px] font-bold">⚓ الحامي</button>
+<button onclick="setNotifTarget('المقد')" id="nt-المقد" class="flex-1 bg-white border-2 border-gray-100 py-2 rounded-full text-[8px] font-bold">🌴 المقد</button>
+</div>
 
-<div id="addModal" class="hidden fixed inset-0 z-50 bg-black/40 flex items-end justify-center"><div class="bg-white w-full max-w-[440px] rounded-t-[24px] p-6"><p class="font-black mb-3">إضافة متبرع</p><input id="dName" placeholder="الاسم" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><input id="dUsername" placeholder="اسم المستخدم" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><input id="dPass" placeholder="كلمة السر" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><input id="dPhone" placeholder="الجوال" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><select id="dBlood" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select><select id="dArea" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><option>الحامي</option><option>المقد</option></select><input id="dHood" placeholder="الحارة" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><div class="bg-gray-50 border rounded-xl p-3 mb-3"><label class="text-[10px] font-black">📅 آخر مرة تبرعت (اختياري)</label><input id="dLast" type="date" class="w-full mt-2 bg-white border rounded-xl p-2 text-[11px]"></div><button onclick="doAdd()" class="w-full bg-black text-white py-3 rounded-xl font-black">حفظ  بياناتك</button><button onclick="closeAdd()" class="w-full mt-2 bg-gray-100 py-2 rounded-xl">إغلاق</button></div></div>
-<div id="editModal" class="hidden fixed inset-0 z-50 bg-black/40 flex items-end justify-center"><div class="bg-white w-full max-w-[440px] rounded-t-[24px] p-6"><p class="font-black mb-3">تعديل حالتي</p><select id="eStatus" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-3"><option>متاح الآن</option><option>تبرع قبل قليل</option><option>غير متاح</option></select><input id="eReason" placeholder="السبب" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-3"><button onclick="doEdit()" class="w-full bg-black text-white py-3 rounded-xl font-black">حفظ</button><button onclick="closeEdit()" class="w-full mt-2 bg-gray-100 py-2 rounded-xl">إغلاق</button></div></div>
-<div id="adminEditModal" class="hidden fixed inset-0 z-[70] bg-black/60 flex items-center justify-center p-4"><div class="bg-white w-full max-w-[440px] rounded-[24px] p-6 max-h-[90vh] overflow-y-auto"><div class="flex justify-between mb-4"><p class="font-black">تعديل كامل</p><button onclick="closeAdminEdit()" class="w-8 h-8 bg-gray-100 rounded-full">✕</button></div><input id="adName" placeholder="الاسم" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><input id="adUsername" placeholder="اسم المستخدم" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><input id="adPhone" placeholder="الجوال" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><div class="grid grid-cols-2 gap-2 mb-2"><select id="adBlood" class="bg-gray-50 border rounded-xl p-3 text-[11px]"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select><select id="adArea" class="bg-gray-50 border rounded-xl p-3 text-[11px]"><option>الحامي</option><option>المقد</option></select></div><input id="adHood" placeholder="الحارة" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><select id="adStatus" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><option>متاح الآن</option><option>تبرع قبل قليل</option><option>غير متاح</option></select><input id="adReason" placeholder="السبب" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-2"><input id="adLast" type="date" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-3"><div class="bg-amber-50 border rounded-xl p-3 mb-3"><div class="flex gap-2"><input id="adNewPass" placeholder="كلمة جديدة" class="flex-1 bg-white border rounded-xl p-2 text-[10px]"><button onclick="resetDonorPassword()" class="bg-amber-500 text-black px-4 py-2 rounded-xl text-[10px] font-black">إعادة</button></div></div><button onclick="doAdminEdit()" class="w-full bg-black text-white py-3 rounded-xl font-black">💾 حفظ</button></div></div>
-<div id="notifModal" class="hidden fixed inset-0 z-50 bg-black/40 flex items-end justify-center"><div class="bg-white w-full max-w-[440px] rounded-t-[24px] p-6 max-h-[80vh] overflow-y-auto"><div class="flex justify-between mb-3"><p class="font-black">الإشعارات</p><button onclick="closeNotifs()" class="w-8 h-8 bg-gray-100 rounded-full">✕</button></div><div id="notifList" class="space-y-3"></div></div></div>
+<p class="text-[7px] font-bold text-gray-600 mb-1">🩸 نوع الفصيلة:</p>
+<div class="grid grid-cols-4 gap-1.5 mb-2.5">
+<button onclick="setBloodTarget('all')" id="bt-all" class="bg-[#C62828] text-white py-1.5 rounded-full text-[8px] font-black">كل الفصائل</button>
+<button onclick="setBloodTarget('O+')" id="bt-O+" class="bg-white border-2 py-1.5 rounded-full text-[8px] font-bold">O+</button>
+<button onclick="setBloodTarget('O-')" id="bt-O-" class="bg-white border-2 py-1.5 rounded-full text-[8px] font-bold">O-</button>
+<button onclick="setBloodTarget('A+')" id="bt-A+" class="bg-white border-2 py-1.5 rounded-full text-[8px] font-bold">A+</button>
+<button onclick="setBloodTarget('A-')" id="bt-A-" class="bg-white border-2 py-1.5 rounded-full text-[8px] font-bold">A-</button>
+<button onclick="setBloodTarget('B+')" id="bt-B+" class="bg-white border-2 py-1.5 rounded-full text-[8px] font-bold">B+</button>
+<button onclick="setBloodTarget('B-')" id="bt-B-" class="bg-white border-2 py-1.5 rounded-full text-[8px] font-bold">B-</button>
+<button onclick="setBloodTarget('AB+')" id="bt-AB+" class="bg-white border-2 py-1.5 rounded-full text-[8px] font-bold">AB+</button>
+</div>
+
+<p class="text-[7px] font-bold text-gray-600 mb-1">👤 أو عميل محدد:</p>
+<select id="notifClientTarget" class="w-full bg-white border-2 border-gray-100 rounded-xl p-2 text-[8px] font-bold"><option value="">-- اختر عميل --</option></select>
+
+<p id="notifTargetPreview" class="mt-2 bg-white border border-dashed border-amber-300 rounded-lg p-1.5 text-[7px] text-amber-800 font-bold text-center">🎯 سيصل إلى: الجميع 🌍 + كل الفصائل 🩸</p>
+</div>
+<input id="notifTitle" placeholder="عنوان الإشعار" class="w-full bg-white border rounded-lg p-2 text-[10px] mb-1"><textarea id="notifMsg" placeholder="نص الإشعار..." class="w-full bg-white border rounded-lg p-2 text-[10px] h-12 mb-1"></textarea><button onclick="sendNotif()" class="w-full bg-[#4CAF50] text-white py-2 rounded-lg font-bold text-[10px]">🚀 إرسال</button><div id="adminNotifList" class="space-y-1 mt-2 max-h-[200px] overflow-y-auto"></div></div>
+<div id="adminTabContent-account" class="admin-tab-content hidden"><div class="bg-green-50 border rounded-xl p-3"><p class="text-[9px] text-gray-500">المدير الرئيسي - محمي ⛔</p><p id="accountName" class="font-black text-[13px] text-green-800 mt-1">المدير الرئيسي</p><div class="mt-2 bg-white border rounded-lg p-2 flex justify-between"><span id="accUsername" class="font-bold text-[11px]">admin</span><span class="text-[7px] bg-green-100 border px-1.5 rounded-full">محمي</span></div><div class="mt-2 bg-white border rounded-lg p-2 flex justify-between items-center"><span id="accPassHidden" class="font-bold text-[11px]">••••••••</span><span id="accPassReal" class="hidden font-bold text-[11px]">admin777</span><button onclick="toggleAccountPass()" class="bg-green-50 border px-2 py-0.5 rounded-full text-[8px] font-bold">عرض</button></div><div class="mt-2 grid grid-cols-2 gap-1"><button onclick="openEditMyAccount()" class="bg-[#4CAF50] text-white py-2 rounded-full font-bold text-[10px]">تعديل</button><button onclick="logout()" class="bg-red-50 border text-red-600 py-2 rounded-full font-bold text-[10px]">خروج</button></div><div id="editMyAccountBox" class="hidden mt-2 bg-white border rounded-lg p-2"><input id="myNameEdit" class="w-full bg-green-50 border rounded-lg p-2 text-[10px] mb-1"><input id="myPhoneEdit" class="w-full bg-green-50 border rounded-lg p-2 text-[10px] mb-1"><input id="myNewPass" type="password" placeholder="جديدة" class="w-full bg-amber-50 border rounded-lg p-2 text-[10px] mb-1"><button onclick="saveMyAccountData()" class="w-full bg-[#4CAF50] text-white py-1.5 rounded-lg font-bold text-[10px]">حفظ</button></div></div></div>
+</div>
+</div>
+
+<div id="notifFeed" class="mx-3 mt-3 space-y-1.5 hidden"></div>
+
+<div id="homeContent" class="px-3 mt-3">
+<div class="bg-white border rounded-[14px] p-3 flat-card">
+<div class="relative">
+<input id="search" placeholder="ابحث باسم أو فصيلة أو منطقة..." class="w-full bg-[#F9FFFA] border border-[#C8E6C9] rounded-full pl-9 pr-4 py-2.5 text-[11px] text-[#1B5E20] placeholder:text-gray-400 focus:outline-none focus:border-[#4CAF50] focus:bg-white">
+<span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[12px]">🔍</span>
+</div>
+<div class="mt-3"><p class="text-[8px] font-bold text-gray-500 mb-1.5">🧭 المنطقة:</p><div class="flex gap-1.5"><button onclick="setAreaFilter('all')" id="area-all" class="filter-active px-3.5 py-1.5 rounded-full text-[9px] font-bold border">🌍 الكل</button><button onclick="setAreaFilter('الحامي')" id="area-الحامي" class="filter-inactive px-3.5 py-1.5 rounded-full text-[9px] font-bold">⚓ الحامي</button><button onclick="setAreaFilter('المقد')" id="area-المقد" class="filter-inactive px-3.5 py-1.5 rounded-full text-[9px] font-bold">🌴 المقد</button></div></div>
+<div class="mt-2.5"><p class="text-[8px] font-bold text-gray-500 mb-1.5">🩸 فصيلة الدم:</p><div class="flex gap-1 flex-wrap"><button onclick="setBloodFilter('all')" id="blood-all" class="filter-active px-2.5 py-1 rounded-full text-[8px] font-bold border">الكل</button><button onclick="setBloodFilter('O+')" id="blood-O+" class="filter-inactive px-2.5 py-1 rounded-full text-[8px] font-bold">O+</button><button onclick="setBloodFilter('O-')" id="blood-O-" class="filter-inactive px-2.5 py-1 rounded-full text-[8px] font-bold">O-</button><button onclick="setBloodFilter('A+')" id="blood-A+" class="filter-inactive px-2.5 py-1 rounded-full text-[8px] font-bold">A+</button><button onclick="setBloodFilter('A-')" id="blood-A-" class="filter-inactive px-2.5 py-1 rounded-full text-[8px] font-bold">A-</button><button onclick="setBloodFilter('B+')" id="blood-B+" class="filter-inactive px-2.5 py-1 rounded-full text-[8px] font-bold">B+</button><button onclick="setBloodFilter('B-')" id="blood-B-" class="filter-inactive px-2.5 py-1 rounded-full text-[8px] font-bold">B-</button><button onclick="setBloodFilter('AB+')" id="blood-AB+" class="filter-inactive px-2.5 py-1 rounded-full text-[8px] font-bold">AB+</button><button onclick="setBloodFilter('AB-')" id="blood-AB-" class="filter-inactive px-2.5 py-1 rounded-full text-[8px] font-bold">AB-</button></div></div>
+</div>
+<div id="donors" class="mt-3 space-y-2 min-h-[400px]"></div>
+</div>
+
+<div id="myAccountPage" class="hidden px-3 mt-3">
+<div class="bg-white border rounded-[14px] p-4 flat-card"><div id="myAccountContent"></div></div>
+<div class="mt-3 bg-[#E8F5E9] border rounded-[14px] p-4 text-center">
+<div class="flex justify-center gap-2.5 items-center mb-3"><div class="w-9 h-9 bg-[#2E7D32] rounded-[10px] flex items-center justify-center text-white text-[18px] shrink-0">♥</div><div class="flex flex-col items-start leading-[0.9]"><p class="font-black text-[12px] leading-none whitespace-nowrap tracking-tight">دمي دليل الحامي والمقد</p></div></div>
+<div class="space-y-1.5">
+<p class="font-black text-[12px] text-[#1B5E20]">تطبيق الحامي والمقد - دمي</p>
+<p class="font-bold text-[10px] text-gray-700">برمجة وتصميم م/ عوض باعامر</p>
+<p class="font-bold text-[10px] text-[#4CAF50]">جوال 775233773</p>
+<div class="pt-1.5 mt-1.5 border-t border-green-200/50">
+<p class="font-bold text-[10px] text-gray-700">فكرة قروب الحامي تجمعنا</p>
+<p class="font-bold text-[10px] text-[#2E7D32]">د. عوض عمر باعباد</p>
+</div>
+</div>
+<div class="flex gap-2 mt-3"><a href="https://wa.me/967775233773" target="_blank" class="flex-1 bg-[#25D366] text-white py-2.5 rounded-full text-[9px] font-bold text-center">💬 واتساب</a><a href="tel:777701487" class="flex-1 bg-[#EF5350] text-white py-2.5 rounded-full text-[9px] font-bold text-center">🚨 طوارئ 777701487</a></div>
+<p class="text-[8px] text-gray-500 mt-3 font-bold">جميع الحقوق محفوظة © 2026</p>
+</div>
+</div>
+
+</div>
+
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[460px] z-50">
+<div class="mx-3 mb-3 bg-white border shadow-xl rounded-[18px] px-1.5 py-1.5 flex justify-between items-center">
+<button onclick="switchTab('home')" id="tab-home" class="tab-btn flex-1 flex flex-col items-center py-1.5 rounded-[12px] bg-[#4CAF50] text-white"><span class="text-[15px]">🏠</span><span class="text-[7px] font-bold">الرئيسية</span></button>
+<button onclick="switchTab('notifs')" id="tab-notifs" class="tab-btn flex-1 flex flex-col items-center py-1.5 rounded-[12px] text-gray-400 relative"><span class="text-[15px]">🔔</span><span class="text-[7px] font-bold">الإشعارات</span><span id="notifBadgeBottom" class="hidden absolute top-0 right-2 w-3 h-3 bg-red-500 text-white text-[6px] rounded-full flex items-center justify-center">0</span></button>
+<button onclick="openAdd()" class="w-11 h-11 bg-[#4CAF50] rounded-full text-white text-[20px] shadow-md mx-1">+</button>
+<button onclick="switchTab('search')" id="tab-search" class="tab-btn flex-1 flex flex-col items-center py-1.5 rounded-[12px] text-gray-400"><span class="text-[15px]">🔍</span><span class="text-[7px] font-bold">بحث</span></button>
+<button onclick="switchTab('account')" id="tab-account" class="tab-btn flex-1 flex flex-col items-center py-1.5 rounded-[12px] text-gray-400"><span class="text-[15px]">👤</span><span class="text-[7px] font-bold">حسابي</span></button>
+</div>
+</div>
+
+<div id="customAlert" class="hidden fixed inset-0 z-[100] bg-black/20 flex items-center justify-center p-6"><div class="bg-white w-full max-w-[300px] rounded-[16px] p-5 shadow-xl border text-center"><p id="customAlertTitle" class="font-bold text-[13px] mb-1">تم</p><p id="customAlertMsg" class="text-[10px]"></p><button onclick="closeCustomAlert()" class="w-full mt-4 bg-[#4CAF50] text-white py-2 rounded-full font-bold text-[10px]">حسناً</button></div></div>
+
+<div id="addModal" class="hidden fixed inset-0 z-50 bg-black/30 flex items-end justify-center"><div class="bg-white w-full max-w-[460px] rounded-t-[16px] p-4 border-t shadow-2xl"><p class="font-bold mb-2 text-[12px]">إضافة متبرع</p><input id="dName" placeholder="الاسم" class="w-full bg-green-50 border rounded-lg p-2.5 text-[10px] mb-1"><input id="dUsername" placeholder="اسم المستخدم" class="w-full bg-green-50 border rounded-lg p-2.5 text-[10px] mb-1"><input id="dPass" placeholder="كلمة السر" class="w-full bg-green-50 border rounded-lg p-2.5 text-[10px] mb-1"><input id="dPhone" placeholder="777..." class="w-full bg-green-50 border rounded-lg p-2.5 text-[10px] mb-1"><select id="dBlood" class="w-full bg-green-50 border rounded-lg p-2.5 text-[10px] mb-1"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select><select id="dArea" class="w-full bg-green-50 border rounded-lg p-2.5 text-[10px] mb-1"><option>الحامي</option><option>المقد</option></select><input id="dHood" placeholder="الحارة" class="w-full bg-green-50 border rounded-lg p-2.5 text-[10px] mb-2"><button onclick="doAdd()" class="w-full bg-[#4CAF50] text-white py-2.5 rounded-xl font-bold text-[11px]">حفظ</button><button onclick="closeAdd()" class="w-full mt-1 bg-gray-100 py-2 rounded-xl text-[10px]">إغلاق</button></div></div>
+
+<div id="notifModal" class="hidden fixed inset-0 z-50 bg-black/30 flex items-end justify-center"><div class="bg-white w-full max-w-[460px] rounded-t-[16px] p-4 max-h-[80vh] overflow-y-auto"><div class="flex justify-between mb-2"><p class="font-bold text-[11px]">الإشعارات</p><button onclick="closeNotifs()" class="w-6 h-6 bg-green-50 rounded-full text-[10px]">✕</button></div><div id="notifList" class="space-y-2"></div></div></div>
 
 <script>
-let confirmCallback=null, promptCallback=null;
-function customAlert(title, msg, icon='✅'){ document.getElementById('customAlertIcon').textContent=icon; document.getElementById('customAlertTitle').textContent=title; document.getElementById('customAlertMsg').textContent=msg; document.getElementById('customAlert').classList.remove('hidden'); }
-function closeCustomAlert(){ document.getElementById('customAlert').classList.add('hidden'); }
-function customConfirm(title, msg, callback){ document.getElementById('customConfirmTitle').textContent=title; document.getElementById('customConfirmMsg').textContent=msg; confirmCallback=callback; document.getElementById('customConfirm').classList.remove('hidden'); }
-function closeCustomConfirm(result){ document.getElementById('customConfirm').classList.add('hidden'); if(confirmCallback) confirmCallback(result); confirmCallback=null; }
-function customPrompt(title, msg, placeholder, callback){ document.getElementById('customPromptTitle').textContent=title; document.getElementById('customPromptMsg').textContent=msg; document.getElementById('customPromptInput').placeholder=placeholder; document.getElementById('customPromptInput').value=''; promptCallback=callback; document.getElementById('customPrompt').classList.remove('hidden'); setTimeout(()=>document.getElementById('customPromptInput').focus(),100); }
-function closeCustomPrompt(result){ const val=document.getElementById('customPromptInput').value; document.getElementById('customPrompt').classList.add('hidden'); if(promptCallback) promptCallback(result?val:null); promptCallback=null; }
-window.alert=function(msg){ customAlert('تنبيه', msg, '✅'); };
+let currentAdminTab='overview',isControlPanelOpen=false,areaFilter='all',bloodFilter='all';
+function customAlert(t,m){document.getElementById('customAlertTitle').textContent=t;document.getElementById('customAlertMsg').textContent=m;document.getElementById('customAlert').classList.remove('hidden');}
+function closeCustomAlert(){document.getElementById('customAlert').classList.add('hidden');}
+window.alert=function(m){customAlert('تنبيه',m);};
+function formatPhoneForWhatsApp(p){if(!p)return'';let c=p.replace(/\D/g,'');if(c.startsWith('967'))return c;if(c.startsWith('0'))c=c.substring(1);if(c.length===9&&c.startsWith('7'))return '967'+c;return c;}
+function getWhatsAppLink(p){return 'https://wa.me/'+formatPhoneForWhatsApp(p)+'?text='+encodeURIComponent('السلام عليكم، أحتاج متبرع دم');}
+function getAttemptsData(){try{return JSON.parse(localStorage.getItem('dami_login_attempts')||'{}');}catch(e){return {};}}
+function renderLockedList(){}
+function toggleControlPanel(){const c=document.getElementById('controlPanelContent');const a=document.getElementById('controlPanelArrow');isControlPanelOpen=!isControlPanelOpen;if(isControlPanelOpen){c.classList.remove('hidden');a.textContent='▲';switchAdminTab('overview');}else{c.classList.add('hidden');a.textContent='▼';}}
+function switchAdminTab(tab){document.querySelectorAll('.admin-tab').forEach(b=>{b.classList.remove('tab-active');b.classList.add('tab-inactive');});const el=document.getElementById('adminTab-'+tab);if(el){el.classList.remove('tab-inactive');el.classList.add('tab-active');}document.querySelectorAll('.admin-tab-content').forEach(c=>c.classList.add('hidden'));const ct=document.getElementById('adminTabContent-'+tab);if(ct)ct.classList.remove('hidden');if(tab==='managers')renderAdminsList();if(tab==='donors')renderAdminDonors();if(tab==='notifs')renderAdminNotifList();if(tab==='overview')updateOverviewStats();if(tab==='account')renderAccountTab();}
+function updateOverviewStats(){const donors=users.filter(u=>u.role==='donor'||!u.role).length;const managers=users.filter(u=>u.role==='admin').length;const d=document.getElementById('statDonors');if(d)d.textContent=donors;const m=document.getElementById('statManagers');if(m)m.textContent=managers;}
+function setAreaFilter(area){areaFilter=area;document.querySelectorAll('[id^="area-"]').forEach(b=>{b.classList.remove('filter-active');b.classList.add('filter-inactive');});const a=document.getElementById('area-'+area);if(a){a.classList.remove('filter-inactive');a.classList.add('filter-active');}render();}
+function setBloodFilter(blood){bloodFilter=blood;document.querySelectorAll('[id^="blood-"]').forEach(b=>{b.classList.remove('filter-active');b.classList.add('filter-inactive');});const a=document.getElementById('blood-'+blood);if(a){a.classList.remove('filter-inactive');a.classList.add('filter-active');}render();}
+function renderAccountTab(){if(!currentUser)return;const an=document.getElementById('accountName');if(an)an.textContent=currentUser.name;const au=document.getElementById('accUsername');if(au)au.textContent=currentUser.username;const pr=document.getElementById('accPassReal');if(pr)pr.textContent=currentUser.pass;}
+function toggleAccountPass(){const r=document.getElementById('accPassReal');const h=document.getElementById('accPassHidden');if(!r||!h)return;if(r.classList.contains('hidden')){r.classList.remove('hidden');h.classList.add('hidden');}else{r.classList.add('hidden');h.classList.remove('hidden');}}
+function openEditMyAccount(){const b=document.getElementById('editMyAccountBox');if(b)b.classList.toggle('hidden');}
+async function saveMyAccountData(){const n=document.getElementById('myNameEdit').value.trim();const p=document.getElementById('myPhoneEdit').value.trim();const np=document.getElementById('myNewPass').value.trim();if(!n){customAlert('تنبيه','عبي الاسم');return;}currentUser.name=n;currentUser.phone=p;if(np)currentUser.pass=np;localStorage.setItem('dami_users_v2',JSON.stringify(users));localStorage.setItem('dami_current_v2',JSON.stringify(currentUser));await syncToSupabase(currentUser);renderAccountTab();renderMyAccount();render();customAlert('تم','✅ تم الحفظ');}
 
-const SUPABASE_URL='https://peauprygfxfqtzgimtyh.supabase.co';const SUPABASE_KEY='sb_publishable_lRkk7HRJVxrbzAV8rJe7zw_dgOV-HSy';const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);const SUPER_ADMIN_USERNAME='admin';let users=[],currentUser=null,notifications=JSON.parse(localStorage.getItem('dami_notifs')||'[]'),areaFilter='all',bloodFilter='all',editTarget=null,adminEditTarget=null,filteredAdminDonors=[];
+const SUPABASE_URL='https://peauprygfxfqtzgimtyh.supabase.co';const SUPABASE_KEY='sb_publishable_lRkk7HRJVxrbzAV8rJe7zw_dgOV-HSy';const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let users=[],currentUser=null,notifications=JSON.parse(localStorage.getItem('dami_notifs')||'[]');
 
-async function loadFromSupabase(){try{const {data,error}=await supabaseClient.from('donors').select('*').order('created_at',{ascending:false});if(error) throw error;users=data.map(d=>({name:d.name,username:d.username,pass:d.pass,phone:d.phone,blood:d.blood,area:d.area,hood:d.hood,last:d.last_donation||'',status:d.status||'متاح الآن',reason:d.reason||'',role:d.role||'donor'}));if(!users.find(u=>u.username==='admin')){users.unshift({name:'المدير الرئيسي',username:'admin',pass:localStorage.getItem('dami_admin_pass_v2')||'admin777',phone:'775233773',blood:'AB+',area:'الحامي',hood:'الإدارة',last:'',status:'متاح الآن',reason:'',role:'super_admin'});await syncToSupabase(users[0]);}users.forEach(u=>{if(u.username==='admin') u.role='super_admin';});localStorage.setItem('dami_users_v2',JSON.stringify(users));render();updateAuth();loadNotifications();setupRealtime();}catch(e){const local=JSON.parse(localStorage.getItem('dami_users_v2')||'[]');if(local.length){users=local;render();updateAuth();}}}
-async function syncToSupabase(u){try{const p={name:u.name,username:u.username,pass:u.pass,phone:u.phone,blood:u.blood,area:u.area,hood:u.hood,last_donation:u.last||null,status:u.status,reason:u.reason,role:u.role||'donor'};const {data:ex}=await supabaseClient.from('donors').select('id').eq('username',u.username).maybeSingle();if(ex) await supabaseClient.from('donors').update(p).eq('username',u.username);else await supabaseClient.from('donors').insert(p);}catch(e){}}
-async function loadNotifications(){try{const {data,error}=await supabaseClient.from('notifications').select('*').order('created_at',{ascending:false}).limit(100);if(!error&&data){notifications=data.map(n=>({id:n.id,title:n.title,msg:n.message,area:n.area||'all',target:n.target_username||'all',type:n.type||'urgent',time:new Date(n.created_at).toLocaleString('ar-YE'),readBy:[] }));localStorage.setItem('dami_notifs',JSON.stringify(notifications));renderNotifs();renderAdminNotifList();renderAdminNewDonorList();updateBadge();}}catch(e){}}
-function setupRealtime(){try{const channel=supabaseClient.channel('notif-channel-v2').on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications'},payload=>{const n=payload.new;const notif={id:n.id,title:n.title,msg:n.message,area:n.area||'all',target:n.target_username||'all',type:n.type||'urgent',time:new Date(n.created_at).toLocaleString('ar-YE'),readBy:[]};notifications.unshift(notif);localStorage.setItem('dami_notifs',JSON.stringify(notifications));renderNotifs();renderAdminNotifList();renderAdminNewDonorList();updateBadge();if(notif.area==='admin'){showAdminToast(notif);}else{showToast(notif);}}).on('postgres_changes',{event:'DELETE',schema:'public',table:'notifications'},payload=>{const id=payload.old.id;notifications=notifications.filter(n=>n.id!==id);localStorage.setItem('dami_notifs',JSON.stringify(notifications));renderNotifs();renderAdminNotifList();renderAdminNewDonorList();updateBadge();}).subscribe();}catch(e){}}
-function showToast(notif){if(currentUser&&notif.target!=='all'&&notif.target!==currentUser.username&&notif.area!=='admin') return;if(currentUser&&notif.area!=='all'&&notif.area!=='donor'&&notif.area!=='admin'&&notif.area!==currentUser.area&&notif.area!=='all') return;const toast=document.createElement('div');toast.className='fixed top-20 left-1/2 -translate-x-1/2 z-[100] bg-black text-white rounded-2xl p-4 shadow-2xl max-w-[90%] animate-slideUp';toast.innerHTML='<p class="font-black text-[12px]">🔔 '+notif.title+'</p><p class="text-[11px] mt-1 whitespace-pre-line">'+notif.msg+'</p>';document.body.appendChild(toast);setTimeout(()=>toast.remove(),5000);}
-function showAdminToast(notif){if(!currentUser||(currentUser.role!=='super_admin'&&currentUser.role!=='admin')) return;const toast=document.createElement('div');toast.className='fixed top-20 left-1/2 -translate-x-1/2 z-[101] bg-gradient-to-br from-amber-400 to-orange-500 text-black rounded-2xl p-4 shadow-2xl max-w-[90%] animate-slideUp border-2 border-amber-300';toast.innerHTML='<p class="font-black text-[13px]">👑 '+notif.title+'</p><p class="text-[11px] mt-2 font-bold whitespace-pre-line">'+notif.msg+'</p><p class="text-[8px] mt-2 opacity-70">إشعار للإدارة فقط - متبرع جديد</p><button onclick="this.parentElement.remove()" class="mt-3 w-full bg-black text-white py-2 rounded-full text-[10px] font-black">عرض في الإدارة</button>';document.body.appendChild(toast);setTimeout(()=>toast.remove(),8000);}
-async function syncNotifToSupabase(notif){try{const {data,error}=await supabaseClient.from('notifications').insert({title:notif.title,message:notif.msg,area:notif.area,type:notif.type,target_username:notif.target}).select();if(error) throw error;return true;}catch(e){return false;}}
-function toggleNotifTarget(){const t=document.getElementById('notifTarget').value;const box=document.getElementById('donorSelectBox');if(t==='donor'){box.classList.remove('hidden');updateDonorSelect();}else box.classList.add('hidden');}
-function updateDonorSelect(){const sel=document.getElementById('notifDonor');const donors=users.filter(u=>u.role==='donor'||!u.role);sel.innerHTML='<option value="">اختر المتبرع...</option>'+donors.map(u=>'<option value="'+u.username+'">'+u.name+' - '+u.phone+'</option>').join('');}
-function switchTab(tab){document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.remove('bg-black','text-white');b.classList.add('text-gray-400');});const a=document.getElementById('tab-'+tab);if(a){a.classList.remove('text-gray-400');a.classList.add('bg-black','text-white');}document.getElementById('homeContent').classList.add('hidden');document.getElementById('myAccountPage').classList.add('hidden');document.getElementById('adminPanel').classList.add('hidden');document.getElementById('notifFeed').classList.add('hidden');if(tab==='home'){document.getElementById('homeContent').classList.remove('hidden');document.getElementById('notifFeed').classList.remove('hidden');if(currentUser&&(currentUser.role==='super_admin'||currentUser.role==='admin')) document.getElementById('adminPanel').classList.remove('hidden');}else if(tab==='account'){document.getElementById('myAccountPage').classList.remove('hidden');renderMyAccount();if(currentUser&&(currentUser.role==='super_admin'||currentUser.role==='admin')) document.getElementById('adminPanel').classList.remove('hidden');}else if(tab==='notifs'){openNotifs();document.getElementById('homeContent').classList.remove('hidden');}else if(tab==='search'){document.getElementById('homeContent').classList.remove('hidden');document.getElementById('notifFeed').classList.remove('hidden');}}
+async function loadData(){
+  // Load local first - instant show
+  try{
+    const local = JSON.parse(localStorage.getItem('dami_users_v2')||'[]');
+    if(local.length>0){ users=local; render(); updateAuth(); }
+    else{
+      users=[
+        {name:'المدير الرئيسي',username:'admin',pass:'admin777',phone:'775233773',blood:'AB+',area:'الحامي',hood:'الإدارة',status:'متاح الآن',role:'super_admin'},
+        {name:'أحمد الحامي',username:'ahmed1',pass:'123',phone:'777123456',blood:'O+',area:'الحامي',hood:'السوق',status:'متاح الآن',role:'donor'},
+        {name:'سعيد المقد',username:'saeed1',pass:'123',phone:'777654321',blood:'A+',area:'المقد',hood:'الوسط',status:'متاح الآن',role:'donor'},
+        {name:'محمد الحامي',username:'mohamed2',pass:'123',phone:'777111222',blood:'B+',area:'الحامي',hood:'الميناء',status:'متاح الآن',role:'donor'},
+        {name:'علي المقد',username:'ali3',pass:'123',phone:'777333444',blood:'AB+',area:'المقد',hood:'الجول',status:'متاح الآن',role:'donor'}
+      ];
+      localStorage.setItem('dami_users_v2',JSON.stringify(users));
+      render(); updateAuth();
+    }
+  }catch(e){}
+
+  // Then try Supabase merge
+  try{
+    const {data} = await supabaseClient.from('donors').select('*').order('created_at',{ascending:false}).limit(100);
+    if(data && data.length>0){
+      let supa = data.map(d=>({name:d.name,username:d.username,pass:d.pass,phone:d.phone,blood:d.blood,area:d.area,hood:d.hood,status:d.status||'متاح الآن',role:d.role||'donor'}));
+      // merge local not in supa
+      const local = JSON.parse(localStorage.getItem('dami_users_v2')||'[]');
+      local.forEach(lu=>{ if(!supa.find(s=>s.username===lu.username)) supa.push(lu); });
+      users=supa;
+      if(!users.find(u=>u.username==='admin')) users.unshift({name:'المدير الرئيسي',username:'admin',pass:'admin777',phone:'775233773',blood:'AB+',area:'الحامي',hood:'الإدارة',status:'متاح الآن',role:'super_admin'});
+      users.forEach(u=>{if(u.username==='admin') u.role='super_admin';});
+      localStorage.setItem('dami_users_v2',JSON.stringify(users));
+      render(); updateAuth();
+    }
+  }catch(e){ console.log(e); }
+}
+
+async function syncToSupabase(u){try{const p={name:u.name,username:u.username,pass:u.pass,phone:u.phone,blood:u.blood,area:u.area,hood:u.hood,status:u.status,role:u.role};const {data:ex}=await supabaseClient.from('donors').select('id').eq('username',u.username).maybeSingle();if(ex) await supabaseClient.from('donors').update(p).eq('username',u.username); else await supabaseClient.from('donors').insert(p);}catch(e){}}
+
+function render(){
+  const q=(document.getElementById('search')?.value||'').toLowerCase().trim();
+  const container=document.getElementById('donors');
+  if(!container) return;
+  let filtered=users.filter(u=>u.role==='donor'||!u.role);
+  if(areaFilter!=='all') filtered=filtered.filter(u=>u.area===areaFilter);
+  if(bloodFilter!=='all') filtered=filtered.filter(u=>u.blood===bloodFilter);
+  if(q) filtered=filtered.filter(u=> u.name.toLowerCase().includes(q) || u.blood.toLowerCase().includes(q) || u.area.toLowerCase().includes(q) || (u.hood&&u.hood.toLowerCase().includes(q)) || (u.phone&&u.phone.includes(q)) );
+  if(filtered.length===0){
+    container.innerHTML='<div class="bg-white border rounded-[12px] p-6 text-center"><p class="font-bold text-[12px] text-gray-500">لا يوجد نتائج</p><p class="text-[9px] text-gray-400 mt-1">جرب تغيير الفلتر: 🌍 الكل</p><button onclick="setAreaFilter(\'all\');setBloodFilter(\'all\');document.getElementById(\'search\').value=\'\';render();" class="mt-3 bg-[#4CAF50] text-white px-4 py-1.5 rounded-full text-[9px] font-bold">عرض الكل</button></div>';
+    return;
+  }
+  container.innerHTML=filtered.map(u=>`
+    <div class="bg-white border border-green-100 rounded-[12px] p-3">
+      <div class="flex gap-2.5">
+        <div class="w-10 h-10 bg-red-50 border border-red-100 rounded-[10px] flex items-center justify-center font-black text-[#E53935] text-[11px]">${u.blood}</div>
+        <div class="flex-1">
+          <p class="font-black text-[12px] text-[#1B5E20] leading-none">${u.name}</p>
+          <p class="text-[9px] text-gray-500 mt-1">${u.area==='الحامي'?'⚓':'🌴'} ${u.area} - ${u.hood||''} • ${u.phone}</p>
+          <span class="inline-block mt-1.5 text-[7px] px-2 py-0.5 rounded-full font-bold border ${u.status&&u.status.includes('متاح')?'bg-green-50 text-green-700 border-green-100':'bg-amber-50 text-amber-700 border-amber-100'}">${u.status||'متاح الآن'}</span>
+        </div>
+      </div>
+      <div class="flex gap-1.5 mt-2.5">
+        <a href="${getWhatsAppLink(u.phone)}" target="_blank" class="flex-1 bg-[#25D366] text-white py-2 rounded-full text-[10px] font-bold text-center">💬 واتساب</a>
+        <a href="tel:${u.phone}" class="flex-1 bg-[#4CAF50] text-white py-2 rounded-full text-[10px] font-bold text-center">📞 اتصال</a>
+      </div>
+    </div>
+  `).join('');
+  renderAdminsList(); renderAdminDonors(); updateOverviewStats();
+}
+
+function renderAdminsList(){const l=document.getElementById('adminsList');if(!l)return;const admins=users.filter(u=>u.role==='admin');if(admins.length===0){l.innerHTML='<p class="text-[9px] text-center py-2 text-gray-400">لا يوجد</p>';return;}l.innerHTML=admins.map(a=>`<div class="bg-white border rounded-lg p-2 flex justify-between"><div><p class="font-bold text-[10px]">${a.name}</p><p class="text-[8px] text-gray-500">${a.username} • ${a.pass}</p></div><button onclick="deleteSubAdmin('${a.username}')" class="w-6 h-6 bg-red-50 text-red-500 rounded-full text-[9px]">✕</button></div>`).join('');}
+function renderAdminDonors(){const l=document.getElementById('adminDonorsList');if(!l)return;let donors=users.filter(u=>u.role==='donor'||!u.role);const q=(document.getElementById('adminSearch')?.value||'').toLowerCase();if(q) donors=donors.filter(u=>u.name.toLowerCase().includes(q)||u.phone.includes(q));l.innerHTML=donors.map(u=>`<div class="bg-white border rounded-lg p-2"><p class="font-bold text-[10px]">${u.name} - ${u.blood} - ${u.area}</p><p class="text-[8px] text-gray-500">${u.phone}</p></div>`).join('');}
+function renderAdminNotifList(){const l=document.getElementById('adminNotifList');if(!l)return;l.innerHTML=notifications.map(n=>`<div class="bg-white border rounded-lg p-2"><p class="font-bold text-[9px]">${n.title||''}</p><p class="text-[8px] text-gray-500">${(n.msg||n.message||'').substring(0,60)}</p></div>`).join('');}
+async function sendNotif(){const t=document.getElementById('notifTitle').value.trim();const m=document.getElementById('notifMsg').value.trim();if(!t||!m){customAlert('تنبيه','عبي الحقول');return;}notifications.unshift({title:t,msg:m,time:new Date().toLocaleString('ar-YE')});localStorage.setItem('dami_notifs',JSON.stringify(notifications));try{await supabaseClient.from('notifications').insert({title:t,message:m,area:'all',type:'urgent',target_username:'all'});}catch(e){}document.getElementById('notifTitle').value='';document.getElementById('notifMsg').value='';renderNotifs();renderAdminNotifList();updateBadge();customAlert('تم','✅ تم الإرسال');}
+function renderNotifs(){const f=document.getElementById('notifFeed');const l=document.getElementById('notifList');let visible=notifications;if(visible.length){if(f){f.classList.remove('hidden');f.innerHTML=visible.slice(0,3).map(n=>`<div class="bg-white border rounded-[12px] p-2.5 flat-card"><p class="font-bold text-[10px] text-green-800">${n.title||''}</p><p class="text-[9px] mt-1">${n.msg||n.message||''}</p></div>`).join('');}}else{if(f)f.classList.add('hidden');}if(l){l.innerHTML=visible.map(n=>`<div class="bg-white border rounded-[12px] p-2.5"><p class="font-bold text-[10px]">${n.title||''}</p><p class="text-[9px] mt-1">${n.msg||n.message||''}</p></div>`).join('');}}
+function openNotifs(){document.getElementById('notifModal').classList.remove('hidden');renderNotifs();}
+function closeNotifs(){document.getElementById('notifModal').classList.add('hidden');}
+function updateBadge(){const c=notifications.length;['notifBadgeBottom','notifBadgeTop'].forEach(id=>{const b=document.getElementById(id);if(!b)return;if(c>0){b.textContent=c>9?'9+':c;b.classList.remove('hidden');}else b.classList.add('hidden');});}
+
+function switchTab(tab){
+  try{
+    document.querySelectorAll('.tab-btn').forEach(b=>{b.classList.remove('bg-[#4CAF50]','text-white');b.classList.add('text-gray-400');});
+    const btn=document.getElementById('tab-'+tab); if(btn){btn.classList.remove('text-gray-400');btn.classList.add('bg-[#4CAF50]','text-white');}
+    document.getElementById('homeContent').classList.add('hidden');
+    document.getElementById('myAccountPage').classList.add('hidden');
+    document.getElementById('adminPanel').classList.add('hidden');
+    document.getElementById('notifFeed').classList.add('hidden');
+    if(tab==='home'){
+      document.getElementById('homeContent').classList.remove('hidden');
+      document.getElementById('notifFeed').classList.remove('hidden');
+      if(currentUser&&(currentUser.role==='super_admin'||currentUser.role==='admin')) document.getElementById('adminPanel').classList.remove('hidden');
+      render();
+    }else if(tab==='account'){
+      document.getElementById('myAccountPage').classList.remove('hidden');
+      renderMyAccount();
+      if(currentUser&&(currentUser.role==='super_admin'||currentUser.role==='admin')) document.getElementById('adminPanel').classList.remove('hidden');
+    }else if(tab==='search'){
+      document.getElementById('homeContent').classList.remove('hidden');
+      document.getElementById('notifFeed').classList.remove('hidden');
+      if(currentUser&&(currentUser.role==='super_admin'||currentUser.role==='admin')) document.getElementById('adminPanel').classList.remove('hidden');
+      render();
+      setTimeout(()=>{const s=document.getElementById('search'); if(s){s.focus();}},200);
+    }else if(tab==='notifs'){
+      openNotifs();
+      document.getElementById('homeContent').classList.remove('hidden');
+      document.getElementById('notifFeed').classList.remove('hidden');
+      if(currentUser&&(currentUser.role==='super_admin'||currentUser.role==='admin')) document.getElementById('adminPanel').classList.remove('hidden');
+    }
+  }catch(e){console.error(e);}
+}
+
 function renderMyAccount(){
-  const c=document.getElementById('myAccountContent');
+  const c=document.getElementById('myAccountContent'); if(!c) return;
   if(!currentUser){
-    c.innerHTML='<div class="text-center"><div class="w-14 h-14 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-2">👤</div><p class="font-black">تسجيل الدخول</p><p class="text-[10px] text-gray-500">ادخل بياناتك لعرض حسابك</p></div><input id="loginUserInline" placeholder="اسم المستخدم" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mt-4 mb-2"><input id="loginPassInline" type="password" placeholder="كلمة المرور" class="w-full bg-gray-50 border rounded-xl p-3 text-[11px] mb-3"><button onclick="doLoginInline()" class="w-full bg-black text-white py-3 rounded-xl font-black">دخول</button><p class="text-center text-[11px] mt-3">متبرع جديد؟ <button onclick="openAdd()" class="text-red-600 font-black">إنشاء حساب</button></p>';
+    c.innerHTML=`<div class="text-center"><p class="font-bold text-[12px] text-green-800">تسجيل الدخول</p></div>
+    <input id="loginUserInline" placeholder="اسم المستخدم" class="w-full bg-green-50 border rounded-lg p-2.5 text-[10px] mt-3 mb-1.5">
+    <input id="loginPassInline" type="password" placeholder="كلمة المرور" class="w-full bg-green-50 border rounded-lg p-2.5 text-[10px] mb-2.5">
+    <button onclick="doLoginInline()" class="w-full bg-[#4CAF50] text-white py-2.5 rounded-full font-bold text-[11px]">دخول</button>`;
   }else{
-    c.innerHTML='<div class="text-center"><div class="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto text-white font-black text-xl">'+currentUser.name.charAt(0)+'</div><p class="font-black mt-3 text-[14px]">'+currentUser.name+'</p><p class="text-[10px] text-gray-500 mt-1">'+(currentUser.role==='super_admin'?'المدير الرئيسي 👑 محمي مع المصمم':currentUser.role==='admin'?'مدير فرعي':'متبرع')+'</p><div class="mt-2 inline-block bg-green-50 border border-green-200 px-3 py-1 rounded-full"><p class="text-[9px] text-green-700 font-bold">✅ مسجل دخول</p></div></div><div class="mt-5 bg-gray-50 border rounded-[16px] p-4"><div class="space-y-3"><div><p class="text-[9px] text-gray-400">اسم المستخدم</p><p class="font-black text-[13px] text-black">'+currentUser.username+'</p></div><div><p class="text-[9px] text-gray-400">كلمة المرور</p><div class="flex gap-2 items-center mt-1"><span id="passText" class="font-black text-[13px]">••••••••</span><button onclick="togglePass()" class="text-[9px] bg-white border px-3 py-1 rounded-full">👁️ عرض</button></div><p id="realPass" class="hidden mt-2 bg-amber-50 border border-amber-200 rounded-xl p-3 text-[12px] font-mono font-bold">'+currentUser.pass+'</p></div><div class="grid grid-cols-2 gap-3"><div><p class="text-[9px] text-gray-400">الجوال</p><p class="text-[11px] font-bold mt-1">'+(currentUser.phone||'—')+'</p></div><div><p class="text-[9px] text-gray-400">فصيلة الدم</p><p class="text-[11px] font-black mt-1 text-red-600">'+(currentUser.blood||'—')+'</p></div></div><div class="grid grid-cols-2 gap-3"><div><p class="text-[9px] text-gray-400">المنطقة</p><p class="text-[11px] font-bold mt-1">'+(currentUser.area||'—')+'</p></div><div><p class="text-[9px] text-gray-400">الحارة</p><p class="text-[11px] font-bold mt-1">'+(currentUser.hood||'—')+'</p></div></div><div><p class="text-[9px] text-gray-400">الحالة</p><p class="text-[10px] font-bold mt-1 '+(currentUser.status&&currentUser.status.includes('متاح')?'text-green-600':'text-amber-600')+'">'+(currentUser.status||'—')+'</p></div></div></div><div class="mt-4 flex gap-2"><button onclick="openEdit(currentUser.username)" class="flex-1 bg-black text-white py-2.5 rounded-full text-[11px] font-black">✏️ تعديل حالتي</button><button onclick="logout()" class="flex-1 bg-red-50 text-red-600 border border-red-100 py-2.5 rounded-full text-[11px] font-bold">خروج</button></div>';
+    c.innerHTML=`<div class="text-center">
+    <div class="w-12 h-12 bg-[#4CAF50] rounded-full flex items-center justify-center mx-auto text-white font-black text-lg">${currentUser.name.charAt(0)}</div>
+    <p class="font-black mt-2 text-[13px] text-green-800">${currentUser.name}</p>
+    <p class="text-[8px] bg-green-50 border inline-block px-2 py-0.5 rounded-full mt-1 text-green-700">${currentUser.role==='super_admin'?'المدير الرئيسي - محمي ⛔':currentUser.role==='admin'?'مدير':'متبرع'}</p>
+    <div class="mt-3"><button onclick="toggleMyAccountDetails()" class="w-full bg-white border-2 border-green-200 rounded-xl p-2.5 flex justify-between items-center"><span class="flex items-center gap-2 text-[11px] font-bold text-green-800">👤 بيانات الحساب</span><span id="myAccountArrow" class="w-6 h-6 bg-green-50 border rounded-full flex items-center justify-center text-[10px]">▼</span></button>
+    <div id="myAccountDetails" class="hidden mt-2 bg-green-50 border rounded-xl p-3 text-right"><div class="bg-white border rounded-lg p-2 mb-2"><p class="text-[8px] text-gray-500">المدير الرئيسي - محمي</p><p class="font-black text-[11px] text-green-800 mt-1">${currentUser.role==='super_admin'?'المدير الرئيسي 👑':currentUser.name}</p></div><div class="bg-white border rounded-lg p-2 mb-2 flex justify-between"><div><p class="text-[8px] text-gray-500">اسم المستخدم</p><p class="font-bold text-[11px] mt-0.5">${currentUser.username}</p></div><span class="text-[7px] bg-green-100 border px-1.5 rounded-full">محمي</span></div><div class="bg-white border rounded-lg p-2 mb-2 flex justify-between items-center"><div><p class="text-[8px] text-gray-500">كلمة المرور</p><div class="flex gap-2 items-center mt-1"><span id="myAccPassHidden">••••••••</span><span id="myAccPassReal" class="hidden">${currentUser.pass}</span><button onclick="toggleMyAccPass()" class="bg-green-50 border px-2 py-0.5 rounded-full text-[8px] font-bold">عرض</button></div></div></div><div class="grid grid-cols-2 gap-1.5 mt-2"><button onclick="openEditMyAccount2()" class="bg-[#4CAF50] text-white py-2 rounded-full font-bold text-[10px]">✏️ تعديل</button><button onclick="logout()" class="bg-red-50 border text-red-600 py-2 rounded-full font-bold text-[10px]">خروج</button></div><div id="editMyAccountBox2" class="hidden mt-2 bg-white border rounded-lg p-2"><input id="myNameEdit2" value="${currentUser.name}" class="w-full bg-green-50 border rounded-lg p-2 text-[10px] mb-1"><input id="myPhoneEdit2" value="${currentUser.phone||''}" class="w-full bg-green-50 border rounded-lg p-2 text-[10px] mb-1"><input id="myNewPass2" type="password" placeholder="جديدة" class="w-full bg-amber-50 border rounded-lg p-2 text-[10px] mb-1"><button onclick="saveMyAccountData2()" class="w-full bg-[#4CAF50] text-white py-2 rounded-lg font-bold text-[10px]">حفظ</button></div></div></div></div>`;
   }
 }
-function logout(){currentUser=null; localStorage.removeItem('dami_current_v2'); updateAuth(); renderMyAccount(); switchTab('home');}
-function doLoginInline(){const u=document.getElementById('loginUserInline').value.trim();const p=document.getElementById('loginPassInline').value.trim();if(!u||!p){customAlert('تنبيه','عبي الحقول','⚠️');return;}const f=users.find(x=>x.username===u&&x.pass===p);if(!f){customAlert('خطأ','اسم المستخدم أو كلمة المرور خطأ','❌');return;}currentUser=f;if(currentUser.username==='admin') currentUser.role='super_admin';localStorage.setItem('dami_current_v2',JSON.stringify(currentUser));updateAuth();render();renderMyAccount();switchTab('account');}
-function togglePass(){const t=document.getElementById('passText');const r=document.getElementById('realPass');if(!r) return;if(r.classList.contains('hidden')){r.classList.remove('hidden');t.textContent=currentUser.pass;}else{r.classList.add('hidden');t.textContent='••••••••';}}
-function renderAdminDonors(){const list=document.getElementById('adminDonorsList');const q=(document.getElementById('adminSearch')?.value||'').toLowerCase();if(!list) return;let donors=users.filter(u=>u.role==='donor'||!u.role);if(q) donors=donors.filter(u=>u.name.toLowerCase().includes(q)||u.username.toLowerCase().includes(q));filteredAdminDonors=donors;if(donors.length===0){list.innerHTML='<p class="text-[10px] text-white/40 text-center">لا يوجد</p>';return;}list.innerHTML=donors.map((u,idx)=>'<div class="bg-white rounded-xl p-3"><div class="flex gap-2 items-center"><div class="w-8 h-8 bg-red-50 border rounded-lg flex items-center justify-center font-black text-red-600 text-[10px]">'+u.blood+'</div><div><p class="font-black text-black text-[11px]">'+u.name+'</p><p class="text-[9px] text-gray-500">'+u.username+' • '+u.phone+'</p></div></div><div class="flex gap-1.5 mt-3"><button onclick="openAdminEditByIndex('+idx+')" class="flex-1 bg-black text-white py-2 rounded-full text-[10px] font-black">✏️ تعديل كامل</button><button onclick="deleteDonorByIndex('+idx+')" class="w-10 h-8 bg-red-500 text-white rounded-full text-[10px]">🗑️</button></div></div>').join('');}
-function openAdminEditByIndex(idx){const u=filteredAdminDonors[idx];if(!u) return; openAdminEdit(u.username);}
-function deleteDonorByIndex(idx){const u=filteredAdminDonors[idx];if(!u) return; deleteDonor(u.username);}
-function openAdminEdit(username){adminEditTarget=users.find(u=>u.username===username);if(!adminEditTarget){customAlert('خطأ','لم أجد '+username,'❌');return;}if(adminEditTarget.username==='admin'){customAlert('⛔ محمي','لا يمكن تعديل الرئيسي','⚠️');return;}document.getElementById('adName').value=adminEditTarget.name||'';document.getElementById('adUsername').value=adminEditTarget.username||'';document.getElementById('adPhone').value=adminEditTarget.phone||'';document.getElementById('adBlood').value=adminEditTarget.blood||'O+';document.getElementById('adArea').value=adminEditTarget.area||'الحامي';document.getElementById('adHood').value=adminEditTarget.hood||'';document.getElementById('adStatus').value=adminEditTarget.status||'متاح الآن';document.getElementById('adReason').value=adminEditTarget.reason||'';document.getElementById('adLast').value=adminEditTarget.last||'';document.getElementById('adNewPass').value='';document.getElementById('adminEditModal').classList.remove('hidden');}
-function closeAdminEdit(){document.getElementById('adminEditModal').classList.add('hidden');adminEditTarget=null;}
-function resetDonorPassword(){const np=document.getElementById('adNewPass').value.trim();if(!np){customAlert('تنبيه','اكتب كلمة جديدة','⚠️');return;}if(!adminEditTarget) return;adminEditTarget.pass=np;document.getElementById('adNewPass').value='';customAlert('تم','تم تعيين: '+np+' - اضغط حفظ','✅');}
-async function doAdminEdit(){if(!adminEditTarget) return;const oldU=adminEditTarget.username;const newU=document.getElementById('adUsername').value.trim();if(newU!==oldU&&users.find(u=>u.username===newU)){customAlert('خطأ','اسم المستخدم موجود','❌');return;}adminEditTarget.name=document.getElementById('adName').value.trim();adminEditTarget.username=newU;adminEditTarget.phone=document.getElementById('adPhone').value.trim();adminEditTarget.blood=document.getElementById('adBlood').value;adminEditTarget.area=document.getElementById('adArea').value;adminEditTarget.hood=document.getElementById('adHood').value.trim();adminEditTarget.status=document.getElementById('adStatus').value;adminEditTarget.reason=document.getElementById('adReason').value.trim();adminEditTarget.last=document.getElementById('adLast').value||'';const extra=document.getElementById('adNewPass').value.trim();if(extra) adminEditTarget.pass=extra;localStorage.setItem('dami_users_v2',JSON.stringify(users));try{if(oldU!==newU){await supabaseClient.from('donors').delete().eq('username',oldU);}await syncToSupabase(adminEditTarget);}catch(e){}closeAdminEdit();render();customAlert('تم','تم حفظ التعديلات','✅');}
-function deleteDonor(username){if(!currentUser||(currentUser.role!=='super_admin'&&currentUser.role!=='admin')){customAlert('تنبيه','للإدارة فقط','⚠️');return;}if(username==='admin'){customAlert('⛔ محمي','لا يمكن حذف الرئيسي','⚠️');return;}customConfirm('تأكيد الحذف','متأكد حذف المتبرع '+username+' نهائياً؟',async function(ok){if(!ok) return; users=users.filter(u=>u.username!==username);localStorage.setItem('dami_users_v2',JSON.stringify(users));try{await supabaseClient.from('donors').delete().eq('username',username);}catch(e){}render();customAlert('تم','تم حذف المتبرع','✅');});}
-function render(){const q=document.getElementById('search')?.value?.toLowerCase()||'';const container=document.getElementById('donors');if(!container) return;let filtered=users.filter(u=>u.role==='donor'||!u.role);if(areaFilter!=='all') filtered=filtered.filter(u=>u.area===areaFilter);if(bloodFilter!=='all') filtered=filtered.filter(u=>u.blood===bloodFilter);if(q) filtered=filtered.filter(u=>u.name.toLowerCase().includes(q)||u.blood.toLowerCase().includes(q));if(!filtered.length){container.innerHTML='<div class="text-center py-10"><p class="font-bold">لا يوجد</p></div>';return;}container.innerHTML=filtered.map(u=>{let lt='';if(!u.last) lt='🆕 متبرع جديد';else{try{lt='📅 '+new Date(u.last).toLocaleDateString('ar-YE');}catch(e){lt=u.last;}}return '<div class="bg-white border rounded-[16px] p-3 shadow-sm cursor-pointer" onclick="openEdit(\''+u.username+'\')"><div class="flex gap-2"><div class="w-10 h-10 bg-red-50 border rounded-xl flex items-center justify-center font-black text-red-600 text-[11px]">'+u.blood+'</div><div class="flex-1"><p class="font-black text-[12px]">'+u.name+'</p><p class="text-[10px] text-gray-500">'+u.area+' - '+u.hood+' • '+u.phone+'</p><div class="flex gap-1 mt-1"><span class="text-[9px] px-2 py-1 rounded-full font-black '+(u.status.includes('متاح الآن')?'bg-green-50 text-green-700 border':'bg-amber-50 text-amber-700 border')+'">'+u.status+'</span><span class="text-[8px] px-2 py-1 rounded-full bg-gray-50 border">'+lt+'</span></div></div></div><div class="flex gap-2 mt-2"><a href="https://wa.me/'+(u.phone||'').replace(/[^0-9]/g,'')+'" onclick="event.stopPropagation()" target="_blank" class="flex-1 bg-green-600 text-white py-2 rounded-full text-[10px] font-black text-center">💬 واتساب</a><a href="tel:'+u.phone+'" onclick="event.stopPropagation()" class="flex-1 bg-black text-white py-2 rounded-full text-[10px] font-black text-center">📞 اتصال</a></div></div>';}).join('');renderAdminsList();renderAdminDonors();renderAdminNotifList();renderAdminNewDonorList();}
-function renderAdminsList(){const list=document.getElementById('adminsList');const admins=users.filter(u=>u.role==='admin');if(!list) return;if(admins.length===0){list.innerHTML='<p class="text-[9px] text-white/40 text-center py-2">لا يوجد مدراء</p>';return;}list.innerHTML=admins.map(a=>'<div class="bg-white rounded-xl p-3"><div class="flex justify-between"><div><p class="font-black text-black text-[11px]">'+a.name+'</p><p class="text-[9px] text-gray-500">'+a.username+' - 🔑 '+a.pass+'</p></div><button onclick="deleteSubAdmin(\''+a.username+'\')" class="w-6 h-6 bg-red-100 text-red-600 rounded-full text-[10px]">✕</button></div><div class="flex gap-1.5 mt-2"><button onclick="changeManagerPassword(\''+a.username+'\')" class="flex-1 bg-amber-500 text-black py-1.5 rounded-full text-[9px] font-black">🔑 تغيير</button><button onclick="resetManagerPassword(\''+a.username+'\')" class="flex-1 bg-black text-white py-1.5 rounded-full text-[9px]">♻️ 123456</button></div></div>').join('');}
-function changeManagerPassword(username){const admin=users.find(u=>u.username===username&&u.role==='admin');if(!admin) return;customPrompt('تغيير كلمة السر','المدير: '+admin.name+'\nالحالية: '+admin.pass,'اكتب كلمة السر الجديدة',function(newPass){if(!newPass) return; admin.pass=newPass;localStorage.setItem('dami_users_v2',JSON.stringify(users));syncToSupabase(admin);renderAdminsList();customAlert('تم','تم تغيير كلمة سر '+admin.name+' إلى: '+newPass,'✅');});}
-function resetManagerPassword(username){const admin=users.find(u=>u.username===username&&u.role==='admin');if(!admin) return;customConfirm('إعادة تعيين','إعادة تعيين '+admin.name+' إلى 123456؟',function(ok){if(!ok) return; admin.pass='123456';localStorage.setItem('dami_users_v2',JSON.stringify(users));syncToSupabase(admin);renderAdminsList();customAlert('تم','تمت إعادة التعيين إلى 123456','✅');});}
-function openAdd(){document.getElementById('dName').value='';document.getElementById('dUsername').value='';document.getElementById('dPass').value='';document.getElementById('dPhone').value='';document.getElementById('dHood').value='';document.getElementById('dLast').value='';document.getElementById('addModal').classList.remove('hidden');}
+function toggleMyAccountDetails(){const d=document.getElementById('myAccountDetails');const a=document.getElementById('myAccountArrow');if(!d||!a)return;if(d.classList.contains('hidden')){d.classList.remove('hidden');a.textContent='▲';}else{d.classList.add('hidden');a.textContent='▼';}}
+function toggleMyAccPass(){const h=document.getElementById('myAccPassHidden');const r=document.getElementById('myAccPassReal');if(!h||!r)return;if(r.classList.contains('hidden')){r.classList.remove('hidden');h.classList.add('hidden');}else{r.classList.add('hidden');h.classList.remove('hidden');}}
+function openEditMyAccount2(){const b=document.getElementById('editMyAccountBox2');if(b)b.classList.toggle('hidden');}
+function saveMyAccountData2(){const n=document.getElementById('myNameEdit2').value.trim();const p=document.getElementById('myPhoneEdit2').value.trim();const np=document.getElementById('myNewPass2').value.trim();if(!n){customAlert('تنبيه','عبي الاسم');return;}currentUser.name=n;currentUser.phone=p;if(np)currentUser.pass=np;const idx=users.findIndex(u=>u.username===currentUser.username);if(idx>=0)users[idx]=currentUser;localStorage.setItem('dami_users_v2',JSON.stringify(users));localStorage.setItem('dami_current_v2',JSON.stringify(currentUser));syncToSupabase(currentUser);renderMyAccount();render();customAlert('تم','✅ تم الحفظ');}
+function logout(){currentUser=null;localStorage.removeItem('dami_current_v2');updateAuth();renderMyAccount();switchTab('home');}
+function doLoginInline(){const u=document.getElementById('loginUserInline').value.trim();const p=document.getElementById('loginPassInline').value.trim();if(!u||!p){customAlert('تنبيه','عبي الحقول');return;}const f=users.find(x=>x.username===u&&x.pass===p);if(!f){customAlert('خطأ','بيانات خاطئة');return;}currentUser=f;if(currentUser.username==='admin')currentUser.role='super_admin';localStorage.setItem('dami_current_v2',JSON.stringify(currentUser));updateAuth();render();renderMyAccount();switchTab('home');}
+function updateAuth(){const p=document.getElementById('adminPanel');if(!p)return;if(currentUser&&(currentUser.role==='super_admin'||currentUser.role==='admin')) p.classList.remove('hidden'); else p.classList.add('hidden'); updateOverviewStats();}
+function doAdd(){const name=document.getElementById('dName').value.trim();const username=document.getElementById('dUsername').value.trim();const pass=document.getElementById('dPass').value.trim();const phone=document.getElementById('dPhone').value.trim();const blood=document.getElementById('dBlood').value;const area=document.getElementById('dArea').value;const hood=document.getElementById('dHood').value.trim()||area;if(!name||!username||!pass){customAlert('تنبيه','عبي الحقول');return;}if(users.find(u=>u.username===username)){customAlert('خطأ','موجود');return;}const nu={name,username,pass,phone,blood,area,hood,status:'متاح الآن',role:'donor'};users.push(nu);localStorage.setItem('dami_users_v2',JSON.stringify(users));syncToSupabase(nu);closeAdd();render();customAlert('تم','✅ تمت الإضافة');}
+function openAdd(){document.getElementById('addModal').classList.remove('hidden');}
 function closeAdd(){document.getElementById('addModal').classList.add('hidden');}
-async function notifyAdminsNewDonor(newDonor){try{const title='🆕 متبرع جديد سجل!';const msg='👤 الاسم: '+newDonor.name+'\n📱 الجوال: '+newDonor.phone+'\n🩸 الفصيلة: '+newDonor.blood+'\n📍 المنطقة: '+newDonor.area+' - '+newDonor.hood+'\n👤 اسم المستخدم: '+newDonor.username;const {data,error}=await supabaseClient.from('notifications').insert({title:title,message:msg,area:'admin',type:'new_donor',target_username:'all'}).select();if(error) throw error;return true;}catch(e){const notif={id:Date.now(),title:'🆕 متبرع جديد سجل!',msg:'👤 '+newDonor.name+'\n📱 '+newDonor.phone+'\n🩸 '+newDonor.blood,area:'admin',target:'all',type:'new_donor',time:new Date().toLocaleString('ar-YE'),readBy:[]};notifications.unshift(notif);localStorage.setItem('dami_notifs',JSON.stringify(notifications));return false;}}
-async function doAdd(){const name=document.getElementById('dName').value.trim();const username=document.getElementById('dUsername').value.trim();const pass=document.getElementById('dPass').value.trim();const phone=document.getElementById('dPhone').value.trim();const blood=document.getElementById('dBlood').value;const area=document.getElementById('dArea').value;const hood=document.getElementById('dHood').value.trim()||area;const last=document.getElementById('dLast').value||'';if(!name||!username||!pass){customAlert('تنبيه','عبي الاسم واسم المستخدم وكلمة السر','⚠️');return;}if(users.find(u=>u.username===username)){customAlert('خطأ','اسم المستخدم موجود','❌');return;}const nu={name,username,pass,phone,blood,area,hood,last,status:'متاح الآن',reason:'',role:'donor'};users.push(nu);localStorage.setItem('dami_users_v2',JSON.stringify(users));await syncToSupabase(nu);await notifyAdminsNewDonor(nu);closeAdd();render();customAlert('تمت الإضافة','✅ تمت إضافة المتبرع\n\n✅ تم إرسال إشعار ','✅');}
-function openEdit(username){editTarget=users.find(u=>u.username===username);if(!editTarget) return;if(editTarget.username==='admin'&&(!currentUser||currentUser.role!=='super_admin')){customAlert('⛔ محمي','لا يمكن تعديل الرئيسي','⚠️');return;}if(!currentUser||(currentUser.role!=='super_admin'&&currentUser.role!=='admin'&&currentUser.username!==username)){customPrompt('تأكيد الهوية','أدخل كلمة سر حسابك ('+username+') للتعديل:','كلمة السر',function(p){if(!p||p!==editTarget.pass){customAlert('خطأ','كلمة السر خطأ','❌');return;}document.getElementById('eStatus').value=editTarget.status;document.getElementById('eReason').value=editTarget.reason||'';document.getElementById('editModal').classList.remove('hidden');});return;}document.getElementById('eStatus').value=editTarget.status;document.getElementById('eReason').value=editTarget.reason||'';document.getElementById('editModal').classList.remove('hidden');}
-function closeEdit(){document.getElementById('editModal').classList.add('hidden');editTarget=null;}
-async function doEdit(){if(!editTarget) return;editTarget.status=document.getElementById('eStatus').value;editTarget.reason=document.getElementById('eReason').value;localStorage.setItem('dami_users_v2',JSON.stringify(users));await syncToSupabase(editTarget);closeEdit();render();customAlert('تم','تم حفظ التعديلات','✅');}
-async function addSubAdmin(){if(!currentUser||currentUser.role!=='super_admin'){customAlert('تنبيه','فقط الرئيسي','⚠️');return;}const admins=users.filter(u=>u.role==='admin');if(admins.length>=5){customAlert('تنبيه','5 مدراء فقط','⚠️');return;}const name=document.getElementById('newAdminName').value.trim();const username=document.getElementById('newAdminUser').value.trim();const pass=document.getElementById('newAdminPass').value.trim();if(!name||!username||!pass){customAlert('تنبيه','عبي كل الحقول','⚠️');return;}if(users.find(u=>u.username===username)){customAlert('خطأ','اسم المستخدم موجود','❌');return;}const na={name,username,pass,phone:'',blood:'O+',area:'الحامي',hood:'الإدارة',last:'',status:'متاح الآن',reason:'',role:'admin'};users.push(na);localStorage.setItem('dami_users_v2',JSON.stringify(users));await syncToSupabase(na);document.getElementById('newAdminName').value='';document.getElementById('newAdminUser').value='';document.getElementById('newAdminPass').value='';render();customAlert('تم','تمت إضافة المدير','✅');}
-async function deleteSubAdmin(username){if(!currentUser||currentUser.role!=='super_admin'){customAlert('تنبيه','فقط الرئيسي','⚠️');return;}if(username==='admin'){customAlert('⛔ محمي','لا يمكن حذف الرئيسي','⚠️');return;}customConfirm('حذف مدير','حذف المدير '+username+'؟',async function(ok){if(!ok) return; users=users.filter(u=>u.username!==username);localStorage.setItem('dami_users_v2',JSON.stringify(users));try{await supabaseClient.from('donors').delete().eq('username',username);}catch(e){}render();customAlert('تم','تم حذف المدير','✅');});}
-async function sendNotif(){const t=document.getElementById('notifTitle').value.trim();const m=document.getElementById('notifMsg').value.trim();const targetType=document.getElementById('notifTarget').value;let area='all'; let target='all';if(targetType==='الحامي'||targetType==='المقد') area=targetType;else if(targetType==='donor'){ const sel=document.getElementById('notifDonor').value; if(!sel){customAlert('تنبيه','اختر المتبرع','⚠️');return;} target=sel; area='donor'; }if(!t||!m){customAlert('تنبيه','عبي العنوان والنص','⚠️');return;}const notif={id:Date.now(),title:t,msg:m,area:area,target:target,type:'urgent',time:new Date().toLocaleString('ar-YE'),readBy:[]};notifications.unshift(notif);localStorage.setItem('dami_notifs',JSON.stringify(notifications));await syncNotifToSupabase(notif);document.getElementById('notifTitle').value='';document.getElementById('notifMsg').value='';renderNotifs();renderAdminNotifList();renderAdminNewDonorList();updateBadge();customAlert('تم الإرسال','✅ تم إرسال الإشعار','✅');}
-function renderAdminNotifList(){const list=document.getElementById('adminNotifList');const count=document.getElementById('notifCount');if(!list) return;if(count) count.textContent=notifications.length;if(notifications.length===0){list.innerHTML='<p class="text-[9px] text-white/40 text-center py-3">لا توجد إشعارات</p>';return;}list.innerHTML=notifications.map(n=>'<div class="bg-white rounded-xl p-3"><div class="flex justify-between items-start"><div class="flex-1"><p class="font-black text-black text-[11px]">'+n.title+'</p><p class="text-[9px] text-gray-500 mt-1 whitespace-pre-line">'+n.msg+'</p></div><button onclick="deleteNotif('+n.id+')" class="w-8 h-8 bg-red-50 border border-red-100 text-red-600 rounded-full text-[12px] ml-2">🗑️</button></div></div>').join('');}
-function renderAdminNewDonorList(){const list=document.getElementById('adminNewDonorList');if(!list) return;const newDonorNotifs=notifications.filter(n=>n.area==='admin');if(newDonorNotifs.length===0){list.innerHTML='<p class="text-[8px] text-white/30 text-center py-2">لا يوجد متبرعين جدد - أي شخص يسجل بيظهر هنا</p>';return;}list.innerHTML=newDonorNotifs.map(n=>'<div class="bg-white rounded-xl p-3 border-l-4 border-amber-500"><div class="flex justify-between"><div class="flex-1"><p class="font-black text-black text-[11px]">🆕 '+n.title+'</p><p class="text-[9px] text-gray-700 mt-1 whitespace-pre-line font-bold">'+n.msg+'</p><p class="text-[7px] text-gray-400 mt-2">'+n.time+'</p></div><button onclick="deleteNotif('+n.id+')" class="w-6 h-6 bg-red-50 text-red-500 rounded-full text-[9px]">✕</button></div></div>').join('');}
-async function deleteNotif(id){if(!currentUser||(currentUser.role!=='super_admin'&&currentUser.role!=='admin')){customAlert('تنبيه','للإدارة فقط','⚠️');return;}customConfirm('حذف الإشعار','حذف هذا الإشعار من عند كل المستخدمين؟',async function(ok){if(!ok) return; try{ await supabaseClient.from('notifications').delete().eq('id',id); }catch(e){} notifications=notifications.filter(n=>n.id!==id);localStorage.setItem('dami_notifs',JSON.stringify(notifications));renderNotifs();renderAdminNotifList();renderAdminNewDonorList();updateBadge();customAlert('تم','تم حذف الإشعار من عند الجميع','✅');});}
-async function deleteAllNotifs(){if(!currentUser||currentUser.role!=='super_admin'){customAlert('تنبيه','فقط الرئيسي','⚠️');return;}customConfirm('حذف الكل','حذف جميع الإشعارات ('+notifications.length+') نهائياً؟',async function(ok){if(!ok) return; try{ await supabaseClient.from('notifications').delete().neq('id',0); }catch(e){} notifications=[];localStorage.setItem('dami_notifs',JSON.stringify(notifications));renderNotifs();renderAdminNotifList();renderAdminNewDonorList();updateBadge();customAlert('تم','تم حذف جميع الإشعارات','✅');});}
-function renderNotifs(){const f=document.getElementById('notifFeed');const l=document.getElementById('notifList');let visible=notifications;if(currentUser){visible=notifications.filter(n=>{if(n.area==='admin') return currentUser.role==='super_admin'||currentUser.role==='admin';if(n.target==='all'&&n.area==='all') return true;if(n.target!=='all') return n.target===currentUser.username||currentUser.role==='super_admin'||currentUser.role==='admin';if(n.area!=='all'&&n.area!=='donor'&&n.area!=='admin') return currentUser.area===n.area||n.area==='all'||currentUser.role==='super_admin'||currentUser.role==='admin';return true;});}else{visible=notifications.filter(n=>n.area==='all'&&n.target==='all');}if(visible.length){f.classList.remove('hidden');f.innerHTML=visible.slice(0,3).map(n=>{let badge=n.area==='admin'?'👑 للإدارة':n.target!=='all'?'👤 خاص':n.area!=='all'&&n.area!=='donor'?'📍 '+n.area:'🌍 للجميع';let bg=n.area==='admin'?'bg-gradient-to-br from-amber-50 to-orange-50 border-amber-300':'bg-white border';return '<div class="'+bg+' border rounded-[16px] p-3 shadow-sm flex justify-between"><div><div class="flex gap-2"><p class="font-black text-[11px]">'+n.title+'</p><span class="text-[8px] bg-black/10 px-2 py-0.5 rounded-full">'+badge+'</span></div><p class="text-[10px] mt-1 text-gray-600 whitespace-pre-line">'+n.msg+'</p><p class="text-[8px] text-gray-400 mt-1">'+n.time+'</p></div>'+(currentUser&&(currentUser.role==='super_admin'||currentUser.role==='admin')?'<button onclick="deleteNotif('+n.id+')" class="w-7 h-7 bg-red-50 text-red-500 rounded-full text-[10px]">✕</button>':'')+'</div>';}).join('');}else{f.classList.add('hidden');}if(l){let listVisible=currentUser&&(currentUser.role==='super_admin'||currentUser.role==='admin')?notifications:visible;l.innerHTML=listVisible.length?listVisible.map(n=>'<div class="bg-white border rounded-[16px] p-3 flex justify-between"><div class="flex-1"><div class="flex gap-2"><p class="font-black text-[11px]">'+n.title+'</p><span class="text-[8px] bg-gray-100 px-2 py-0.5 rounded-full">'+(n.area==='admin'?'👑 للإدارة':n.target!=='all'?'👤 '+n.target:n.area!=='all'&&n.area!=='donor'?'📍 '+n.area:'🌍 الجميع')+'</span></div><p class="text-[10px] mt-1 whitespace-pre-line">'+n.msg+'</p></div><button onclick="deleteNotif('+n.id+')" class="w-8 h-8 bg-red-50 border text-red-600 rounded-full ml-2 '+(currentUser&&(currentUser.role==='super_admin'||currentUser.role==='admin')?'':'hidden')+'">🗑️</button></div>').join(''):'<p class="text-center py-6 text-[11px]">لا توجد إشعارات</p>';}}
-function openNotifs(){document.getElementById('notifModal').classList.remove('hidden');renderNotifs();loadNotifications();}
-function closeNotifs(){document.getElementById('notifModal').classList.add('hidden');}
-function updateBadge(){let visible=notifications;if(currentUser){visible=notifications.filter(n=>{if(n.area==='admin') return currentUser.role==='super_admin'||currentUser.role==='admin'; if(n.target==='all'&&n.area==='all') return true; if(n.target!=='all') return n.target===currentUser.username; if(n.area!=='all'&&n.area!=='donor'&&n.area!=='admin') return currentUser.area===n.area; return true;});}const u=visible.length;['notifBadgeBottom','notifBadgeTop'].forEach(id=>{const b=document.getElementById(id);if(!b) return;if(u>0){b.textContent=u>9?'9+':u;b.classList.remove('hidden');}else{b.classList.add('hidden');}});}
-function setArea(a){areaFilter=a;render();renderNotifs();updateBadge();}
-function setBlood(b){bloodFilter=b;render();}
-function updateAuth(){const p=document.getElementById('adminPanel');if(currentUser&&(currentUser.role==='super_admin'||currentUser.role==='admin')){p.classList.remove('hidden');const b=document.getElementById('roleBadge');if(currentUser.role==='super_admin'){b.classList.remove('hidden');b.textContent='رئيسي محمي 👑';b.className='text-[8px] bg-amber-500 text-black px-2 py-1 rounded-full font-black';document.getElementById('superAdminSection').classList.remove('hidden');}else{b.classList.remove('hidden');b.textContent='مدير فرعي';b.className='text-[8px] bg-white/10 px-2 py-1 rounded-full';document.getElementById('superAdminSection').classList.add('hidden');}}else{p.classList.add('hidden');}}
-const saved=localStorage.getItem('dami_current_v2');if(saved){try{currentUser=JSON.parse(saved);if(currentUser.username==='admin') currentUser.role='super_admin';}catch(e){}}loadFromSupabase();updateAuth();renderNotifs();updateBadge();
-</script></body></html>
+async function addSubAdmin(){if(!currentUser||currentUser.role!=='super_admin'){customAlert('تنبيه','فقط الرئيسي');return;}const admins=users.filter(u=>u.role==='admin');if(admins.length>=5){customAlert('تنبيه','5 فقط');return;}const name=document.getElementById('newAdminName').value.trim();const username=document.getElementById('newAdminUser').value.trim();const pass=document.getElementById('newAdminPass').value.trim();if(!name||!username||!pass){customAlert('تنبيه','عبي الحقول');return;}if(users.find(u=>u.username===username)){customAlert('خطأ','موجود');return;}const na={name,username,pass,phone:'',blood:'O+',area:'الحامي',hood:'الإدارة',status:'متاح الآن',role:'admin'};users.push(na);localStorage.setItem('dami_users_v2',JSON.stringify(users));await syncToSupabase(na);document.getElementById('newAdminName').value='';document.getElementById('newAdminUser').value='';document.getElementById('newAdminPass').value='';render();customAlert('تم','✅ تمت الإضافة');}
+async function deleteSubAdmin(username){if(username==='admin'){customAlert('محمي','لا يمكن حذفه');return;}users=users.filter(u=>u.username!==username);localStorage.setItem('dami_users_v2',JSON.stringify(users));try{await supabaseClient.from('donors').delete().eq('username',username);}catch(e){}render();}
+
+const saved=localStorage.getItem('dami_current_v2');if(saved){try{currentUser=JSON.parse(saved);if(currentUser.username==='admin')currentUser.role='super_admin';}catch(e){}}
+loadData();updateAuth();renderNotifs();updateBadge();
+document.addEventListener('DOMContentLoaded',()=>{
+  const s=document.getElementById('search');
+  if(s){ s.addEventListener('input', render); }
+});
+</script>
+
+<script>
+// --- إضافات بدون كسر التبويبات ---
+let notifTargetArea='all';
+function setNotifTarget(a){
+  notifTargetArea=a;
+  ['all','الحامي','المقد'].forEach(x=>{
+    const el=document.getElementById('nt-'+x);
+    if(!el) return;
+    el.className = (x===a) ? 'flex-1 bg-green-600 text-white py-1.5 rounded-full text-[8px] font-bold' : 'flex-1 bg-white border py-1.5 rounded-full text-[8px] font-bold';
+  });
+  const sel=document.getElementById('notifClientTarget');
+  if(a!=='all' && sel) sel.value='';
+}
+function refreshClientTargetList(){
+  const sel=document.getElementById('notifClientTarget'); if(!sel) return;
+  try{
+    const donors = (typeof users!=='undefined'? users: []).filter(u=>u.role==='donor'||!u.role);
+    sel.innerHTML='<option value="">-- أو عميل محدد --</option>'+donors.map(u=>`<option value="${u.username}">${u.name} - ${u.area||''} - ${u.blood||''}</option>`).join('');
+  }catch(e){}
+}
+function editNotif(i){
+  try{
+    const n=notifications[i]; if(!n) return;
+    const t=prompt('عدل العنوان:', n.title||''); if(t===null) return;
+    const m=prompt('عدل النص:', n.msg||n.message||''); if(m===null) return;
+    n.title=t; n.msg=m; n.message=m;
+    localStorage.setItem('dami_notifs', JSON.stringify(notifications));
+    if(typeof renderNotifsNew==='function') renderNotifsNew();
+    if(typeof renderAdminNotifList==='function') renderAdminNotifList();
+    alert('✅ تم التعديل');
+  }catch(e){alert(e.message)}
+}
+function deleteNotif(i){
+  if(!confirm('هل تريد حذف هذا الإشعار؟')) return;
+  notifications.splice(i,1);
+  localStorage.setItem('dami_notifs', JSON.stringify(notifications));
+  if(typeof renderNotifsNew==='function') renderNotifsNew();
+  if(typeof renderAdminNotifList==='function') renderAdminNotifList();
+  alert('🗑️ تم الحذف');
+}
+function renderNotifsNew(){
+  const f=document.getElementById('notifFeed'); if(!f) return;
+  if(!notifications || notifications.length===0){ f.innerHTML=''; f.classList.add('hidden'); return; }
+  f.classList.remove('hidden'); f.style.display='block';
+  f.innerHTML='<p class="text-[8px] font-black text-amber-700 mb-1.5">🔔 إشعارات مهمة - فوق</p>'+notifications.slice(0,3).map((n,i)=>`
+    <div class="bg-white border-2 border-amber-400 rounded-[12px] p-2.5 mb-2 shadow-sm">
+      <p class="font-black text-[11px] text-[#1B5E20]">${n.title||''}</p>
+      <p class="text-[9px] mt-1 text-gray-700 leading-[1.4]">${n.msg||n.message||''}</p>
+      <p class="text-[7px] text-gray-400 mt-1">${n.targetDesc||''} ${n.area? '• '+n.area : ''}</p>
+      <div class="flex gap-2 mt-2">
+        <button onclick="editNotif(${i})" style="flex:1;background:#16A34A;color:white;border:none;border-radius:999px;padding:7px 0;font-size:10px;font-weight:800">✏️ تعديل</button>
+        <button onclick="deleteNotif(${i})" style="flex:1;background:#DC2626;color:white;border:none;border-radius:999px;padding:7px 0;font-size:10px;font-weight:800">🗑️ حذف</button>
+      </div>
+    </div>`).join('');
+}
+// احفظ الأصلي ثم استبدل
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    if(typeof renderNotifs==='function'){
+      const orig=renderNotifs;
+      window.renderNotifs=function(){ try{orig();}catch(e){}; renderNotifsNew(); };
+      renderNotifsNew();
+    }
+    refreshClientTargetList();
+  }, 1000);
+});
+// إرسال مع اختيار المنطقة/العميل
+const origSendNotif = window.sendNotif;
+window.sendNotif = async function(){
+  const tEl=document.getElementById('notifTitle'); const mEl=document.getElementById('notifMsg'); const cEl=document.getElementById('notifClientTarget');
+  const t=tEl?tEl.value.trim():''; const m=mEl?mEl.value.trim():''; const client=cEl?cEl.value:'';
+  if(!t||!m){ alert('عبي الحقول'); return; }
+  let area=notifTargetArea; let user=client||'all'; let desc='للجميع 🌍';
+  if(client){ area='all'; desc='لعميل: '+client+' 👤'; }
+  else if(area!=='all'){ desc=area==='الحامي'?'لمنطقة الحامي ⚓':'لمنطقة المقد 🌴'; }
+  try{
+    notifications.unshift({title:t,msg:m,message:m,area:area,target_username:user,targetDesc:desc,time:new Date().toLocaleString('ar-YE')});
+    localStorage.setItem('dami_notifs', JSON.stringify(notifications));
+    if(typeof supabaseClient!=='undefined') await supabaseClient.from('notifications').insert({title:t,message:m,area:area,target_username:user});
+  }catch(e){}
+  if(tEl) tEl.value=''; if(mEl) mEl.value=''; if(cEl) cEl.value=''; setNotifTarget('all');
+  renderNotifsNew(); if(typeof renderAdminNotifList==='function') renderAdminNotifList();
+  alert('✅ تم الإرسال '+desc);
+};
+</script>
+
+<script>
+// UX: Improve donor card rendering
+const origRenderDonors = window.renderDonors;
+window.renderDonors = function(){
+  try{
+    if(typeof origRenderDonors==='function') origRenderDonors();
+    // Add avatars and polish
+    document.querySelectorAll('.donor-card, [id^="donor-"]').forEach(card=>{
+      if(card.querySelector('.donor-avatar')) return;
+      const nameEl = card.querySelector('p.font-bold, .font-black');
+      if(nameEl){
+        const name = nameEl.textContent.trim();
+        const initials = name.split(' ').slice(0,2).map(w=>w[0]).join('');
+        const avatar = document.createElement('div');
+        avatar.className='donor-avatar';
+        avatar.textContent=initials;
+        const firstDiv = card.querySelector('div');
+        if(firstDiv) firstDiv.prepend(avatar);
+      }
+    });
+  }catch(e){ if(typeof origRenderDonors==='function') origRenderDonors(); }
+};
+</script>
+
+<script>
+let bloodTarget='all';
+function setBloodTarget(b){
+  bloodTarget=b;
+  document.querySelectorAll('[id^="bt-"]').forEach(el=>{
+    el.className='bg-white border-2 py-1.5 rounded-full text-[8px] font-bold';
+  });
+  const el=document.getElementById('bt-'+b);
+  if(el) el.className='bg-[#C62828] text-white py-1.5 rounded-full text-[8px] font-black shadow';
+  const sel=document.getElementById('notifClientTarget');
+  if(b!=='all' && sel) sel.value='';
+  updateTargetPreview();
+}
+function updateTargetPreview(){
+  const area = typeof notifTargetArea!=='undefined'? notifTargetArea : 'all';
+  const client = document.getElementById('notifClientTarget')?.value || '';
+  let txt='🎯 سيصل إلى: ';
+  if(client){ txt+= 'عميل محدد 👤'; }
+  else {
+    txt+= (area==='all'?'الجميع 🌍' : area==='الحامي'?'الحامي فقط ⚓':'المقد فقط 🌴');
+    txt+= ' + ' + (bloodTarget==='all'?'كل الفصائل 🩸' : 'فصيلة '+bloodTarget+' فقط 🩸');
+  }
+  const prev=document.getElementById('notifTargetPreview');
+  if(prev) prev.textContent=txt;
+}
+// Hook existing functions
+const _origSetNotifTarget = window.setNotifTarget;
+window.setNotifTarget = function(a){ _origSetNotifTarget(a); updateTargetPreview(); };
+
+// Override sendNotif to include blood type filtering logic
+const _origSendNotif2 = window.sendNotif;
+window.sendNotif = async function(){
+  const t=document.getElementById('notifTitle')?.value.trim()||'';
+  const m=document.getElementById('notifMsg')?.value.trim()||'';
+  const client=document.getElementById('notifClientTarget')?.value||'';
+  if(!t||!m){ alert('عبي العنوان والنص'); return; }
+  
+  let area = (typeof notifTargetArea!=='undefined'? notifTargetArea : 'all');
+  let blood = bloodTarget;
+  let user = client || 'all';
+  let desc='';
+  
+  if(client){
+    const u = (typeof users!=='undefined'? users.find(x=>x.username===client) : null);
+    desc = 'للعميل: '+(u?u.name:client)+' 👤';
+    area = u? (u.area||'all') : 'all';
+    blood = u? (u.blood||'all') : 'all';
+  } else {
+    if(area==='all' && blood==='all') desc='للجميع 🌍 + كل الفصائل 🩸';
+    else if(area!=='all' && blood==='all') desc='لمنطقة '+area+' فقط '+ (area==='الحامي'?'⚓':'🌴')+' + كل الفصائل';
+    else if(area==='all' && blood!=='all') desc='للجميع 🌍 + فصيلة '+blood+' فقط 🩸';
+    else desc='لمنطقة '+area+' + فصيلة '+blood+' 🩸';
+  }
+  
+  // Count how many will receive
+  let count=0;
+  try{
+    if(typeof users!=='undefined'){
+      count = users.filter(u=>{
+        if(u.role==='admin') return false;
+        if(client) return u.username===client;
+        if(area!=='all' && (u.area||'')!==area) return false;
+        if(blood!=='all' && (u.blood||'')!==blood) return false;
+        return true;
+      }).length;
+    }
+  }catch(e){}
+  
+  if(!confirm(`سيتم الإرسال إلى ${count} متبرع\n${desc}\nهل تريد المتابعة؟`)) return;
+  
+  const notifObj={title:t,msg:m,message:m,area:area,blood:blood,target_username:user,targetDesc:desc+' ('+count+' متبرع)',time:new Date().toLocaleString('ar-YE'),count:count};
+  notifications.unshift(notifObj);
+  localStorage.setItem('dami_notifs', JSON.stringify(notifications));
+  try{ if(typeof supabaseClient!=='undefined') await supabaseClient.from('notifications').insert({title:t,message:m,area:area,blood_type:blood,target_username:user}); }catch(e){}
+  
+  document.getElementById('notifTitle').value=''; document.getElementById('notifMsg').value=''; document.getElementById('notifClientTarget').value=''; 
+  setNotifTarget('all'); setBloodTarget('all');
+  if(typeof renderNotifsNew==='function') renderNotifsNew();
+  if(typeof renderAdminNotifList==='function') renderAdminNotifList();
+  alert('✅ تم الإرسال إلى '+count+' متبرع\n'+desc);
+};
+
+// Update preview on client select
+document.addEventListener('change', (e)=>{
+  if(e.target.id==='notifClientTarget') updateTargetPreview();
+});
+</script>
+
+<script>
+window.addEventListener('load', ()=>{
+  setTimeout(()=>{
+    document.querySelectorAll('*').forEach(el=>{
+      if(el.textContent && el.textContent.trim()==='دمي' && el.nextElementSibling && el.nextElementSibling.textContent.trim()==='دليل الحامي والمقد'){
+        const parent=el.parentElement;
+        if(parent){
+          parent.innerHTML='<p class="header-title-single">دمي دليل الحامي والمقد</p>';
+        }
+      }
+    });
+    // Also direct text replacement
+    const walker=document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let node;
+    while(node=walker.nextNode()){
+      if(node.nodeValue && node.nodeValue.includes('دمي') && node.nodeValue.includes('دليل الحامي والمقد')){
+        // keep as is but ensure no line break
+      }
+    }
+  }, 500);
+});
+</script>
+
+<script>
+let currentTheme = localStorage.getItem('dami_theme') || 'default';
+document.documentElement.setAttribute('data-theme', currentTheme);
+
+function toggleThemeMenu(){
+  const m=document.getElementById('themeMenu');
+  m.classList.toggle('open');
+}
+function setTheme(theme){
+  currentTheme=theme;
+  localStorage.setItem('dami_theme', theme);
+  document.documentElement.setAttribute('data-theme', theme);
+  document.querySelectorAll('.theme-option').forEach(o=>o.classList.remove('active'));
+  document.getElementById('theme-'+theme)?.classList.add('active');
+  document.getElementById('themeMenu').classList.remove('open');
+  // update button icon
+  const btn=document.getElementById('themeBtnIcon');
+  if(btn){
+    if(theme==='dark') btn.textContent='🌙';
+    else if(theme==='gold') btn.textContent='✨';
+    else btn.textContent='🎨';
+  }
+}
+// close menu when clicking outside
+document.addEventListener('click', (e)=>{
+  const menu=document.getElementById('themeMenu');
+  const btn=document.getElementById('themeBtn');
+  if(menu && btn && !btn.contains(e.target) && !menu.contains(e.target)){
+    menu.classList.remove('open');
+  }
+});
+setTimeout(()=>{
+  const saved = localStorage.getItem('dami_theme')||'default';
+  setTheme(saved);
+},500);
+</script>
+
+<script>
+// ===== USER MANAGEMENT: EDIT / DELETE / PASSWORD RESET =====
+function renderAdminDonorsList(){
+  const container = document.getElementById('ac-donors') || document.getElementById('adminDonorsContent');
+  if(!container) return;
+  const list = users.filter(u=>u.role!=='admin');
+  if(list.length===0){
+    container.innerHTML='<div style="text-align:center;padding:40px"><p style="font-weight:900">لا يوجد عملاء</p></div>';
+    return;
+  }
+  container.innerHTML = list.map((u,idx)=>{
+    const realIdx = users.indexOf(u);
+    return `<div style="background:white;border:1.5px solid #F1F5F9;border-radius:20px;padding:16px;margin-bottom:12px">
+      <div style="display:flex;gap:12px;align-items:center">
+        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#0D9488,#14B8A6);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:12px">${(u.name||'م').slice(0,2)}</div>
+        <div style="flex:1;min-width:0">
+          <b style="font-size:13px;color:#0F172A;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.name||'بدون اسم'}</b>
+          <div style="font-size:11px;color:#64748B;margin-top:2px">${u.phone||''} • ${u.blood||''} • ${u.area||''}</div>
+          <div style="font-size:10px;color:#94A3B8;margin-top:2px">👤 ${u.username||''} ${u.password ? '• 🔑 '+u.password : ''}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px">
+        <button onclick="editUser(${realIdx})" style="background:#F0FDFA;color:#0D9488;border:1.5px solid #CCFBF1;padding:10px;border-radius:999px;font-size:10px;font-weight:900">✏️ تعديل</button>
+        <button onclick="resetPassword(${realIdx})" style="background:#FEF3C7;color:#92400E;border:1.5px solid #FDE68A;padding:10px;border-radius:999px;font-size:10px;font-weight:900">🔑 كلمة السر</button>
+        <button onclick="deleteUser(${realIdx})" style="background:#FFF1F2;color:#F43F5E;border:1.5px solid #FFE4E6;padding:10px;border-radius:999px;font-size:10px;font-weight:900">🗑️ حذف</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function editUser(idx){
+  const u = users[idx];
+  if(!u) return;
+  const newName = prompt('عدل الاسم:', u.name||'');
+  if(newName===null) return;
+  const newPhone = prompt('عدل رقم الجوال:', u.phone||'');
+  if(newPhone===null) return;
+  const newArea = prompt('المنطقة (الحامي / المقد):', u.area||'الحامي');
+  if(newArea===null) return;
+  const newBlood = prompt('الفصيلة (O+, O-, A+, A-, B+, B-, AB+):', u.blood||'O+');
+  if(newBlood===null) return;
+  const newUsername = prompt('اسم المستخدم:', u.username||'');
+  if(newUsername===null) return;
+
+  u.name = newName.trim() || u.name;
+  u.phone = newPhone.trim() || u.phone;
+  u.area = newArea.trim() || u.area;
+  u.blood = newBlood.trim() || u.blood;
+  u.username = newUsername.trim() || u.username;
+
+  localStorage.setItem('dami_users', JSON.stringify(users));
+  // Update supabase if exists
+  if(window.supabaseClient){
+    try{
+      window.supabaseClient.from('users').update({name:u.name, phone:u.phone, area:u.area, blood:u.blood, username:u.username}).eq('username', u.username).then(()=>{});
+    }catch(e){}
+  }
+  render();
+  renderAdminDonorsList();
+  alert('✅ تم تعديل بيانات '+u.name);
+}
+
+function deleteUser(idx){
+  const u = users[idx];
+  if(!u) return;
+  if(!confirm(`هل أنت متأكد من حذف ${u.name}؟\nسيتم حذفه نهائياً`)) return;
+  // Backup for recovery
+  let deleted = JSON.parse(localStorage.getItem('dami_deleted')||'[]');
+  deleted.unshift({...u, deletedAt:new Date().toLocaleString()});
+  localStorage.setItem('dami_deleted', JSON.stringify(deleted));
+
+  users.splice(idx,1);
+  localStorage.setItem('dami_users', JSON.stringify(users));
+  render();
+  renderAdminDonorsList();
+  alert('🗑️ تم الحذف - يمكنك استعادته من سلة المحذوفات');
+}
+
+function resetPassword(idx){
+  const u = users[idx];
+  if(!u) return;
+  const newPass = prompt(`استعادة كلمة السر لـ ${u.name}\nأدخل كلمة سر جديدة:`, u.password||'123456');
+  if(newPass===null) return;
+  if(newPass.trim().length<3) return alert('كلمة السر قصيرة جداً');
+  u.password = newPass.trim();
+  localStorage.setItem('dami_users', JSON.stringify(users));
+  if(window.supabaseClient){
+    try{
+      window.supabaseClient.from('users').update({password:u.password}).eq('username', u.username).then(()=>{});
+    }catch(e){}
+  }
+  renderAdminDonorsList();
+  alert(`✅ تم تحديث كلمة السر لـ ${u.name}\nكلمة السر الجديدة: ${u.password}`);
+}
+
+function showDeleted(){
+  let deleted = JSON.parse(localStorage.getItem('dami_deleted')||'[]');
+  if(deleted.length===0) return alert('سلة المحذوفات فارغة');
+  let html = deleted.map((u,i)=>`${i+1}. ${u.name} - ${u.phone} - ${u.blood} - حذف: ${u.deletedAt}\n`).join('');
+  const idx = prompt(`المحذوفين:\n${html}\nأدخل رقم للاستعادة (أو إلغاء):`);
+  if(idx===null) return;
+  const num = parseInt(idx)-1;
+  if(isNaN(num) || num<0 || num>=deleted.length) return alert('رقم غير صحيح');
+  const restored = deleted.splice(num,1)[0];
+  delete restored.deletedAt;
+  users.push(restored);
+  localStorage.setItem('dami_users', JSON.stringify(users));
+  localStorage.setItem('dami_deleted', JSON.stringify(deleted));
+  render();
+  renderAdminDonorsList();
+  alert(`✅ تم استعادة ${restored.name}`);
+}
+
+// Override switchAdmin to call new render
+const origSwitchAdmin = window.switchAdmin;
+window.switchAdmin = function(t){
+  if(typeof origSwitchAdmin==='function') origSwitchAdmin(t);
+  else{
+    document.querySelectorAll('[id^="ac-"]').forEach(el=>el.style.display='none');
+    const target=document.getElementById('ac-'+t);
+    if(target) target.style.display='block';
+    document.querySelectorAll('[id^="at-"]').forEach(b=>b.classList.remove('active'));
+    document.getElementById('at-'+t)?.classList.add('active');
+  }
+  if(t==='donors') renderAdminDonorsList();
+  if(t==='overview'){
+    const el=document.getElementById('ac-overview');
+    if(el) el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div style="background:white;border-radius:16px;padding:14px;border:1px solid #F1F5F9;text-align:center"><div style="font-size:20px;font-weight:900">${users.filter(u=>u.role!=='admin').length}</div><div style="font-size:9px;color:#64748B">متبرع</div></div>
+      <div style="background:white;border-radius:16px;padding:14px;border:1px solid #F1F5F9;text-align:center"><div style="font-size:20px;font-weight:900;color:#0D9488">${notifs.length}</div><div style="font-size:9px;color:#64748B">إشعار</div></div>
+      <div style="background:white;border-radius:16px;padding:14px;border:1px solid #F1F5F9;text-align:center"><div style="font-size:20px;font-weight:900;color:#F43F5E">${users.filter(u=>u.blood==='O+').length}</div><div style="font-size:9px;color:#64748B">O+</div></div>
+    </div>
+    <button onclick="showDeleted()" style="width:100%;margin-top:12px;background:#F8FAFC;border:1.5px solid #E2E8F0;padding:12px;border-radius:999px;font-size:11px;font-weight:800">♻️ سلة المحذوفات (${JSON.parse(localStorage.getItem('dami_deleted')||'[]').length}) - استعادة</button>
+    `;
+  }
+};
+
+// Also add buttons to main donor cards for quick edit if admin
+setTimeout(()=>{
+  // Add quick action listener
+  const origRender2 = window.render;
+},300);
+</script>
+
+<style>
+.user-mgmt-card{background:white;border-radius:20px;border:1.5px solid #F1F5F9;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.03)}
+.user-mgmt-actions{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.btn-edit{background:#F0FDFA;color:#0D9488;border:1.5px solid #99F6E0;padding:11px;border-radius:999px;font-size:11px;font-weight:900;cursor:pointer;transition:all 0.2s}
+.btn-edit:hover{background:#CCFBF1;transform:translateY(-1px)}
+.btn-pass{background:#FFFBEB;color:#92400E;border:1.5px solid #FDE68A;padding:11px;border-radius:999px;font-size:11px;font-weight:900;cursor:pointer}
+.btn-pass:hover{background:#FEF3C7}
+.btn-del{background:#FFF1F2;color:#BE123C;border:1.5px solid #FECACA;padding:11px;border-radius:999px;font-size:11px;font-weight:900;cursor:pointer}
+.btn-del:hover{background:#FFE4E6}
+</style>
+<script>
+// Ensure renderAdminDonorsList is modern polished
+function renderAdminDonorsListPolished(){
+  const container = document.getElementById('ac-donors');
+  if(!container) return;
+  const list = users.filter(u=>u.role!=='admin');
+  if(list.length===0){
+    container.innerHTML='<div style="text-align:center;padding:50px 20px"><div style="width:72px;height:72px;background:white;border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px;border:1px solid #F1F5F9">👥</div><p style="font-weight:900;margin-top:16px;font-size:14px">لا يوجد متبرعين</p><p style="font-size:11px;color:#94A3B8;margin-top:4px">أضف متبرعين من صفحة التسجيل</p></div>';
+    return;
+  }
+  container.innerHTML = `
+    <div style="background:linear-gradient(135deg,#F0FDFA,#CCFBF1);border:1.5px solid #99F6E0;border-radius:16px;padding:14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+      <div><b style="font-size:12px;color:#0F172A">إجمالي المتبرعين: ${list.length}</b><div style="font-size:10px;color:#0D9488;margin-top:2px">اضغط تعديل / حذف / كلمة السر لكل عميل</div></div>
+      <button onclick="showDeleted()" style="background:white;border:1px solid #99F6E0;padding:8px 14px;border-radius:999px;font-size:10px;font-weight:900;color:#0D9488">♻️ المحذوفات (${JSON.parse(localStorage.getItem('dami_deleted')||'[]').length})</button>
+    </div>
+  ` + list.map(u=>{
+    const realIdx = users.indexOf(u);
+    return `<div class="user-mgmt-card">
+      <div style="display:flex;gap:12px">
+        <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#0D9488,#14B8A6);display:flex;align-items:center;justify-content:center;color:white;font-weight:900;font-size:13px;flex-shrink:0">${(u.name||'م').slice(0,2)}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13.5px;font-weight:900;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${u.name||'بدون اسم'}</div>
+          <div style="font-size:11px;color:#475569;margin-top:3px;font-weight:700">📞 ${u.phone||'---'} • 🩸 ${u.blood||'---'} • 📍 ${u.area||'---'}</div>
+          <div style="font-size:10px;color:#64748B;margin-top:4px;background:#F8FAFC;border-radius:8px;padding:6px 8px;display:inline-block">👤 ${u.username||'بدون يوزر'} • 🔑 ${u.password ? u.password : 'بدون كلمة سر'}</div>
+        </div>
+      </div>
+      <div class="user-mgmt-actions">
+        <button onclick="editUser(${realIdx})" class="btn-edit">✏️ تعديل المستخدم</button>
+        <button onclick="resetPassword(${realIdx})" class="btn-pass">🔑 استعادة كلمة السر</button>
+        <button onclick="deleteUser(${realIdx})" class="btn-del">🗑️ حذف المستخدم</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+// Override
+window.renderAdminDonorsList = renderAdminDonorsListPolished;
+setTimeout(()=>{ if(document.getElementById('ac-donors')) renderAdminDonorsListPolished(); },800);
+</script>
+
+<script>
+// OVERRIDE: إدارة المتبرعين داخل لوحة التحكم - آمن بدون كسر التبويبات
+let adminDonorsVisible = false;
+
+// نحفظ الدالة الأصلية
+const _origRenderAdminDonors = window.renderAdminDonors;
+
+window.renderAdminDonors = function(){
+  const l=document.getElementById('adminDonorsList');
+  const searchBox=document.getElementById('adminSearch');
+  if(!l) return;
+  
+  if(!adminDonorsVisible){
+    if(searchBox) searchBox.style.display='none';
+    let count = (typeof users!=='undefined'?users.filter(u=>u.role==='donor'||!u.role).length:0);
+    l.innerHTML = `
+      <div style="text-align:center;padding:30px 15px;background:white;border-radius:14px;border:1.5px solid #E8F5E9">
+        <div style="width:64px;height:64px;background:#E8F5E9;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto;font-size:28px">👥</div>
+        <p style="font-weight:900;margin-top:12px;font-size:12px;color:#1B5E20">إدارة المتبرعين داخل لوحة التحكم</p>
+        <p style="font-size:9px;color:#888;margin-top:4px">الأسماء لا تظهر إلا بعد الضغط على عرض المتبرعين</p>
+        <button onclick="showAdminDonors()" style="margin-top:14px;background:#1B5E20;color:white;border:none;padding:10px 22px;border-radius:999px;font-weight:900;font-size:11px;cursor:pointer">👁️ عرض المتبرعين (${count})</button>
+        <div style="margin-top:10px"><button onclick="showDeletedDonors()" style="background:#f8fafc;border:1px solid #E2E8F0;padding:6px 12px;border-radius:999px;font-size:8px;font-weight:800">♻️ المحذوفات (${JSON.parse(localStorage.getItem('dami_deleted')||'[]').length})</button></div>
+      </div>`;
+    return;
+  }
+  
+  if(searchBox) searchBox.style.display='block';
+  let donors=users.filter(u=>u.role==='donor'||!u.role);
+  const q=(document.getElementById('adminSearch')?.value||'').toLowerCase();
+  if(q) donors=donors.filter(u=>(u.name||'').toLowerCase().includes(q)||(u.phone||'').includes(q));
+  
+  if(donors.length===0){
+    l.innerHTML='<div style="text-align:center;padding:20px;color:#999;font-size:10px">لا يوجد متبرعين</div>';
+    return;
+  }
+  
+  l.innerHTML = `
+    <div style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border:1px solid #A5D6A7;border-radius:12px;padding:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">
+      <div><b style="font-size:10px;color:#1B5E20">👥 ${donors.length} متبرع - داخل لوحة التحكم</b><div style="font-size:8px;color:#2E7D32">الأسماء ظهرت بعد الضغط</div></div>
+      <div style="display:flex;gap:4px"><button onclick="hideAdminDonors()" style="background:white;border:1px solid #A5D6A7;padding:5px 8px;border-radius:999px;font-size:8px;font-weight:800">🙈 إخفاء</button><button onclick="showDeletedDonors()" style="background:white;border:1px solid #A5D6A7;padding:5px 8px;border-radius:999px;font-size:8px">♻️</button></div>
+    </div>
+  ` + donors.map(u=>{
+    let idx = users.indexOf(u);
+    return `<div style="background:white;border:1.5px solid #E8F5E9;border-radius:12px;padding:10px;margin-bottom:8px">
+      <div style="display:flex;gap:8px"><div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#1B5E20,#4CAF50);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:11px">${(u.name||'م').substring(0,2)}</div><div style="flex:1"><b style="font-size:11px;color:#111">${u.name||''}</b><div style="font-size:9px;color:#555;margin-top:2px">📞 ${u.phone||''} • 🩸 ${u.blood_type||u.blood||''} • 📍 ${u.area||''}</div><div style="font-size:8px;color:#888;margin-top:3px;background:#f8fafc;padding:3px 6px;border-radius:6px;display:inline-block">👤 ${u.username||''} • 🔑 ${u.password||''}</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:8px">
+        <button onclick="editUserFull(${idx})" style="padding:7px;border-radius:999px;font-size:8px;font-weight:900;background:#E8F5E9;color:#1B5E20;border:1px solid #C8E6C9;cursor:pointer">✏️ تعديل المستخدم</button>
+        <button onclick="resetPassFull(${idx})" style="padding:7px;border-radius:999px;font-size:8px;font-weight:900;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;cursor:pointer">🔑 استعادة كلمة السر</button>
+        <button onclick="deleteUserFull(${idx})" style="padding:7px;border-radius:999px;font-size:8px;font-weight:900;background:#FFF1F2;color:#BE123C;border:1px solid #FECACA;cursor:pointer">🗑️ حذف المستخدم</button>
+      </div>
+    </div>`;
+  }).join('');
+};
+
+window.showAdminDonors = function(){ adminDonorsVisible=true; renderAdminDonors(); }
+window.hideAdminDonors = function(){ adminDonorsVisible=false; renderAdminDonors(); }
+
+window.editUserFull = function(idx){
+  var u=users[idx]; if(!u) return;
+  var n=prompt('1/6 - الاسم الكامل:',u.name||''); if(n===null) return;
+  var ph=prompt('2/6 - رقم الجوال:',u.phone||''); if(ph===null) return;
+  var ar=prompt('3/6 - المنطقة (الحامي / المقد):',u.area||''); if(ar===null) return;
+  var bl=prompt('4/6 - الفصيلة:',u.blood_type||u.blood||''); if(bl===null) return;
+  var un=prompt('5/6 - اسم المستخدم:',u.username||''); if(un===null) return;
+  var pw=prompt('6/6 - كلمة السر:',u.password||''); if(pw===null) return;
+  u.name=n.trim()||u.name; u.phone=ph.trim()||u.phone; u.area=ar.trim()||u.area;
+  if(u.blood_type!==undefined) u.blood_type=bl.trim(); 
+  if(u.blood!==undefined) u.blood=bl.trim();
+  if(!u.blood_type && !u.blood) u.blood_type=bl.trim();
+  u.username=un.trim()||u.username; u.password=pw.trim()||u.password;
+  localStorage.setItem('dami_users', JSON.stringify(users));
+  try{ supabaseClient.from('users').update({name:u.name,phone:u.phone,area:u.area,blood_type:bl,blood:bl,username:u.username,password:u.password}).eq('phone',u.phone).then(()=>{}); }catch(e){}
+  if(typeof render==='function') render();
+  renderAdminDonors();
+  alert('✅ تم تعديل كل البيانات: '+u.name);
+}
+window.deleteUserFull = function(idx){
+  var u=users[idx]; if(!u) return;
+  if(!confirm('حذف '+u.name+'؟')) return;
+  var del=JSON.parse(localStorage.getItem('dami_deleted')||'[]');
+  del.unshift({name:u.name,phone:u.phone,blood:u.blood_type||u.blood,area:u.area,username:u.username,password:u.password,deletedAt:new Date().toLocaleString()});
+  localStorage.setItem('dami_deleted',JSON.stringify(del));
+  users.splice(idx,1);
+  localStorage.setItem('dami_users', JSON.stringify(users));
+  try{ supabaseClient.from('users').delete().eq('phone',u.phone).then(()=>{}); }catch(e){}
+  if(typeof render==='function') render();
+  renderAdminDonors();
+}
+window.resetPassFull = function(idx){
+  var u=users[idx]; if(!u) return;
+  var np=prompt('كلمة سر جديدة لـ '+u.name+':',u.password||''); if(np===null) return;
+  if(np.trim().length<3){ alert('قصيرة'); return; }
+  u.password=np.trim();
+  localStorage.setItem('dami_users', JSON.stringify(users));
+  try{ supabaseClient.from('users').update({password:u.password}).eq('phone',u.phone).then(()=>{}); }catch(e){}
+  renderAdminDonors();
+  alert('✅ الجديدة: '+u.password);
+}
+window.showDeletedDonors = function(){
+  var del=JSON.parse(localStorage.getItem('dami_deleted')||'[]');
+  if(del.length===0){ alert('فارغة'); return; }
+  var t=''; for(var i=0;i<del.length;i++){ t+=(i+1)+'. '+del[i].name+' - '+del[i].phone+'\n'; }
+  var a=prompt('المحذوفين:\n'+t+'\nرقم للاستعادة:'); if(a===null) return;
+  var num=parseInt(a)-1; if(isNaN(num)||num<0||num>=del.length){ alert('خطأ'); return; }
+  var r=del.splice(num,1)[0];
+  users.push({name:r.name,phone:r.phone,blood_type:r.blood,blood:r.blood,area:r.area,username:r.username,password:r.password,role:'donor'});
+  localStorage.setItem('dami_users', JSON.stringify(users));
+  localStorage.setItem('dami_deleted', JSON.stringify(del));
+  if(typeof render==='function') render();
+  renderAdminDonors();
+}
+
+// تأكد التبويبات تشتغل - إعادة تعريف آمنة
+setTimeout(function(){
+  console.log('Admin donors override loaded');
+  // render once
+  if(document.getElementById('adminDonorsList')) renderAdminDonors();
+}, 1000);
+</script>
+
+<script>
+// FULL EDIT - يعدل كل البيانات بفورم واحد
+window.editUserFull = function(idx){
+  var u=users[idx]; if(!u) return;
+  // Create modal for full edit
+  var existingModal = document.getElementById('fullEditModal');
+  if(existingModal) existingModal.remove();
+  
+  var modal = document.createElement('div');
+  modal.id='fullEditModal';
+  modal.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML = `
+    <div style="background:white;border-radius:20px;padding:20px;width:100%;max-width:380px;max-height:90vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <b style="font-size:14px;color:#1B5E20">✏️ تعديل المستخدم - كل البيانات</b>
+        <button onclick="document.getElementById('fullEditModal').remove()" style="width:32px;height:32px;border-radius:50%;background:#f1f5f9;border:none;cursor:pointer">✕</button>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;background:#E8F5E9;border-radius:12px;padding:10px;margin-bottom:14px">
+        <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#1B5E20,#4CAF50);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900">${(u.name||'م').substring(0,2)}</div>
+        <div><div style="font-size:12px;font-weight:900">${u.name||''}</div><div style="font-size:9px;color:#666">${u.phone||''}</div></div>
+      </div>
+      
+      <label style="font-size:10px;font-weight:800;color:#333;display:block;margin-bottom:4px">1. الاسم الكامل</label>
+      <input id="editName" value="${(u.name||'').replace(/"/g,'&quot;')}" style="width:100%;border:1.5px solid #E0E0E0;border-radius:10px;padding:10px;font-size:12px;margin-bottom:10px">
+      
+      <label style="font-size:10px;font-weight:800;color:#333;display:block;margin-bottom:4px">2. رقم الجوال</label>
+      <input id="editPhone" value="${(u.phone||'').replace(/"/g,'&quot;')}" style="width:100%;border:1.5px solid #E0E0E0;border-radius:10px;padding:10px;font-size:12px;margin-bottom:10px">
+      
+      <label style="font-size:10px;font-weight:800;color:#333;display:block;margin-bottom:4px">3. المنطقة</label>
+      <select id="editArea" style="width:100%;border:1.5px solid #E0E0E0;border-radius:10px;padding:10px;font-size:12px;margin-bottom:10px">
+        <option value="الحامي" ${u.area==='الحامي'?'selected':''}>الحامي ⚓</option>
+        <option value="المقد" ${u.area==='المقد'?'selected':''}>المقد 🌴</option>
+      </select>
+      
+      <label style="font-size:10px;font-weight:800;color:#333;display:block;margin-bottom:4px">4. فصيلة الدم</label>
+      <select id="editBlood" style="width:100%;border:1.5px solid #E0E0E0;border-radius:10px;padding:10px;font-size:12px;margin-bottom:10px">
+        <option value="O+" ${(u.blood_type||u.blood)==='O+'?'selected':''}>O+</option>
+        <option value="O-" ${(u.blood_type||u.blood)==='O-'?'selected':''}>O-</option>
+        <option value="A+" ${(u.blood_type||u.blood)==='A+'?'selected':''}>A+</option>
+        <option value="A-" ${(u.blood_type||u.blood)==='A-'?'selected':''}>A-</option>
+        <option value="B+" ${(u.blood_type||u.blood)==='B+'?'selected':''}>B+</option>
+        <option value="B-" ${(u.blood_type||u.blood)==='B-'?'selected':''}>B-</option>
+        <option value="AB+" ${(u.blood_type||u.blood)==='AB+'?'selected':''}>AB+</option>
+        <option value="AB-" ${(u.blood_type||u.blood)==='AB-'?'selected':''}>AB-</option>
+      </select>
+      
+      <label style="font-size:10px;font-weight:800;color:#333;display:block;margin-bottom:4px">5. اسم المستخدم</label>
+      <input id="editUsername" value="${(u.username||'').replace(/"/g,'&quot;')}" style="width:100%;border:1.5px solid #E0E0E0;border-radius:10px;padding:10px;font-size:12px;margin-bottom:10px">
+      
+      <label style="font-size:10px;font-weight:800;color:#333;display:block;margin-bottom:4px">6. كلمة السر</label>
+      <input id="editPassword" value="${(u.password||'').replace(/"/g,'&quot;')}" style="width:100%;border:1.5px solid #E0E0E0;border-radius:10px;padding:10px;font-size:12px;margin-bottom:16px">
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button onclick="document.getElementById('fullEditModal').remove()" style="padding:12px;border-radius:999px;border:1px solid #E0E0E0;background:#f8fafc;font-weight:800;font-size:11px;cursor:pointer">إلغاء</button>
+        <button onclick="saveFullEdit(${idx})" style="padding:12px;border-radius:999px;border:none;background:#1B5E20;color:white;font-weight:900;font-size:11px;cursor:pointer">✅ حفظ كل البيانات</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+};
+
+window.saveFullEdit = function(idx){
+  var u=users[idx]; if(!u) return;
+  var n=document.getElementById('editName').value.trim();
+  var ph=document.getElementById('editPhone').value.trim();
+  var ar=document.getElementById('editArea').value;
+  var bl=document.getElementById('editBlood').value;
+  var un=document.getElementById('editUsername').value.trim();
+  var pw=document.getElementById('editPassword').value.trim();
+  
+  if(!n){ alert('الاسم مطلوب'); return; }
+  if(!ph){ alert('الجوال مطلوب'); return; }
+  if(!un){ alert('اسم المستخدم مطلوب'); return; }
+  
+  u.name=n; u.phone=ph; u.area=ar;
+  if(u.blood_type!==undefined) u.blood_type=bl;
+  if(u.blood!==undefined) u.blood=bl;
+  if(!u.blood_type && !u.blood) u.blood_type=bl;
+  u.username=un; u.password=pw||u.password;
+  
+  localStorage.setItem('dami_users', JSON.stringify(users));
+  try{ if(typeof supabaseClient!=='undefined') supabaseClient.from('users').update({name:u.name,phone:u.phone,area:u.area,blood_type:bl,blood:bl,username:u.username,password:u.password}).eq('phone',u.phone).then(()=>{}); }catch(e){}
+  if(typeof render==='function') render();
+  renderAdminDonors();
+  document.getElementById('fullEditModal').remove();
+  alert('✅ تم تعديل كل بيانات المستخدم:\n\nالاسم: '+n+'\nالجوال: '+ph+'\nالمنطقة: '+ar+'\nالفصيلة: '+bl+'\nاليوزر: '+un+'\nكلمة السر: '+pw);
+};
+</script>
+</body>
+</html>
