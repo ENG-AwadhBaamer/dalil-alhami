@@ -2,39 +2,48 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>دمي - دليل الحامي والمقد</title>
+    <!-- ===== التعديل الأهم لمنع الحواف ===== -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ffffff">
+    
+    <title>دمي - دليل الحامي</title>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.50.3/dist/umd/supabase.min.js">
     </script>
     <style>
-        /* ===== تحسينات الجوال والحواف ===== */
+        /* ===== إعادة ضبط الحواف بالكامل ===== */
         * {
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            font-family: 'Cairo', 'Tajawal', system-ui, sans-serif !important;
-            background: #F8FAF8 !important;
             margin: 0;
             padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #F8FAF8 !important;
+            font-family: 'Cairo', 'Tajawal', system-ui, sans-serif !important;
             direction: rtl;
         }
 
-        /* الحاوية الرئيسية */
         .app-container {
-            max-width: 480px;
-            margin: 0 auto;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
             background: #ffffff;
-            min-height: 100vh;
-            padding-bottom: 80px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.04);
-            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* الهيدر */
         .app-header {
             position: sticky;
             top: 0;
@@ -43,6 +52,8 @@
             backdrop-filter: blur(12px);
             border-bottom: 1px solid #E8F5E9;
             padding: 12px 16px;
+            padding-top: max(12px, env(safe-area-inset-top, 12px));
+            flex-shrink: 0;
         }
 
         .header-content {
@@ -141,7 +152,6 @@
             border: 2px solid white;
         }
 
-        /* الماركي */
         .marquee-bar {
             background: linear-gradient(90deg, #F43F5E, #E11D48) !important;
             height: 32px;
@@ -152,6 +162,7 @@
             padding: 0 8px;
             margin-top: 8px;
             border-radius: 12px;
+            flex-shrink: 0;
         }
 
         .marquee-track {
@@ -173,12 +184,13 @@
             }
         }
 
-        /* المحتوى الرئيسي */
         .main-content {
+            flex: 1;
+            overflow-y: auto;
             padding: 12px 14px 20px;
+            overflow-x: hidden;
         }
 
-        /* بطاقات عامة */
         .flat-card {
             background: white;
             border-radius: 18px !important;
@@ -194,7 +206,6 @@
             border-color: #C8E6C9 !important;
         }
 
-        /* حقل البحث */
         .search-wrapper {
             position: relative;
             margin-bottom: 12px;
@@ -227,7 +238,6 @@
             font-size: 16px;
         }
 
-        /* أزرار الفلاتر */
         .filter-group {
             display: flex;
             flex-wrap: wrap;
@@ -258,7 +268,6 @@
             transform: scale(0.94);
         }
 
-        /* بطاقات المتبرعين */
         .donor-card {
             background: white;
             border-radius: 18px !important;
@@ -367,21 +376,20 @@
             transform: scale(0.96);
         }
 
-        /* شريط التنقل السفلي */
         .bottom-nav {
-            position: fixed;
+            position: sticky;
             bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 0;
+            right: 0;
             width: 100%;
-            max-width: 480px;
             z-index: 50;
             padding: 6px 10px 12px;
             background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(16px);
             border-top: 1px solid #E8F5E9;
             box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04);
-            border-radius: 24px 24px 0 0;
+            padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+            flex-shrink: 0;
         }
 
         .nav-inner {
@@ -467,7 +475,6 @@
             transform: scale(0.88);
         }
 
-        /* المودالات */
         .modal-overlay {
             position: fixed;
             inset: 0;
@@ -476,17 +483,16 @@
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            padding: 16px;
+            padding: 0;
             backdrop-filter: blur(2px);
         }
 
         .modal-content {
             background: white;
             width: 100%;
-            max-width: 460px;
             border-radius: 28px 28px 0 0;
             padding: 20px 16px 30px;
-            box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.08);
+            padding-bottom: max(30px, env(safe-area-inset-bottom, 30px));
             max-height: 80vh;
             overflow-y: auto;
         }
@@ -559,7 +565,6 @@
             transform: scale(0.96);
         }
 
-        /* لوحة التحكم */
         .admin-panel {
             margin: 12px 0;
             border-radius: 18px;
@@ -659,7 +664,6 @@
             font-weight: 700;
         }
 
-        /* إشعارات */
         .notif-item {
             background: white;
             border: 1px solid #E8F5E9;
@@ -686,7 +690,6 @@
             margin-top: 6px;
         }
 
-        /* حسابي */
         .account-card {
             background: white;
             border-radius: 18px;
@@ -788,7 +791,6 @@
             border: 1px solid #FECACA;
         }
 
-        /* تنبيه مخصص */
         .custom-alert {
             position: fixed;
             inset: 0;
@@ -844,7 +846,6 @@
             transform: scale(0.94);
         }
 
-        /* تحسينات متفرقة */
         .hidden {
             display: none !important;
         }
@@ -882,7 +883,6 @@
             flex-wrap: wrap;
         }
 
-        /* الألوان المخصصة */
         .bg-green-soft {
             background: #F0FDF4;
         }
@@ -893,23 +893,19 @@
             color: #1B5E20;
         }
 
-        /* تحسين التمرير */
         ::-webkit-scrollbar {
             width: 4px;
             height: 4px;
         }
-
         ::-webkit-scrollbar-track {
             background: #F1F5F9;
             border-radius: 8px;
         }
-
         ::-webkit-scrollbar-thumb {
             background: #A5D6A7;
             border-radius: 8px;
         }
 
-        /* أنيميشن بسيط */
         @keyframes fadeSlide {
             from {
                 opacity: 0;
@@ -920,12 +916,10 @@
                 transform: translateY(0);
             }
         }
-
         .fade-slide {
             animation: fadeSlide 0.25s ease;
         }
 
-        /* تحسين الشاشات الصغيرة جداً */
         @media (max-width: 400px) {
             .logo-text {
                 font-size: 14px;
@@ -959,6 +953,19 @@
                 padding: 6px 0;
             }
         }
+
+        /* دعم الحواف */
+        @supports (padding: max(0px)) {
+            .app-header {
+                padding-top: max(12px, env(safe-area-inset-top, 12px));
+            }
+            .bottom-nav {
+                padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+            }
+        }
+        .main-content {
+            overscroll-behavior: contain;
+        }
     </style>
 </head>
 <body>
@@ -969,11 +976,10 @@
         <header class="app-header">
             <div class="header-content">
                 <div class="header-logo">
-                    <div class="logo-icon">♥️</div>
+                    <div class="logo-icon">♥</div>
                     <h1 class="logo-text">دمي</h1>
                 </div>
                 <div class="header-actions">
-                    <!-- زر المظهر -->
                     <div id="themeBtn" style="position:relative;">
                         <button onclick="toggleThemeMenu()" class="theme-btn" id="themeBtnIcon">🎨</button>
                         <div id="themeMenu" class="theme-menu" style="position:absolute;top:48px;left:0;right:auto;background:white;border-radius:20px;border:1px solid #F1F5F9;box-shadow:0 20px 40px rgba(0,0,0,0.12);padding:12px;min-width:200px;z-index:100;display:none;">
@@ -992,7 +998,6 @@
                         </div>
                     </div>
 
-                    <!-- زر الإشعارات -->
                     <button onclick="openNotifs()" class="notif-btn">
                         🔔
                         <span id="notifBadgeTop" class="notif-badge hidden">0</span>
@@ -1000,7 +1005,6 @@
                 </div>
             </div>
 
-            <!-- الماركي -->
             <div class="marquee-bar">
                 <div class="marquee-track">
                     ﴿ وَمَنْ أَحْيَاهَا فَكَأَنَّمَا أَحْيَا النَّاسَ جَمِيعًا ﴾ &nbsp;&nbsp;•&nbsp;&nbsp; قطرة دم تنقذ حياة &nbsp;&nbsp;•&nbsp;&nbsp; تطبيق الحامي والمقد - دمي &nbsp;&nbsp;•&nbsp;&nbsp; ﴿ وَمَنْ أَحْيَاهَا فَكَأَنَّمَا أَحْيَا النَّاسَ جَمِيعًا ﴾ &nbsp;&nbsp;•&nbsp;&nbsp; قطرة دم تنقذ حياة
@@ -1011,17 +1015,14 @@
         <!-- ===== المحتوى الرئيسي ===== -->
         <div class="main-content">
 
-            <!-- لوحة الإشعارات المصغرة -->
             <div id="notifFeed" class="space-y-2 mb-3"></div>
 
-            <!-- لوحة التحكم (للمدراء) -->
             <div id="adminPanel" class="admin-panel hidden">
                 <button onclick="toggleControlPanel()" class="admin-toggle">
-                    <span>⚙️ لوحة التحكم</span>
+                    <span>⚙ لوحة التحكم</span>
                     <span class="arrow" id="controlPanelArrow">▼</span>
                 </button>
                 <div id="controlPanelContent" class="admin-content hidden">
-                    <!-- التبويبات -->
                     <div class="admin-tabs">
                         <button onclick="switchAdminTab('overview')" id="adminTab-overview" class="admin-tab active">📊<br>نظرة</button>
                         <button onclick="switchAdminTab('managers')" id="adminTab-managers" class="admin-tab">👑<br>المدراء</button>
@@ -1030,7 +1031,6 @@
                         <button onclick="switchAdminTab('account')" id="adminTab-account" class="admin-tab">👤<br>حسابي</button>
                     </div>
 
-                    <!-- المحتوى -->
                     <div id="adminTabContent-overview" class="admin-tab-content">
                         <div class="admin-stats">
                             <div class="stat-box"><div class="stat-number" id="statDonors">0</div><div class="stat-label">متبرع</div></div>
@@ -1057,7 +1057,7 @@
                             <button onclick="showAdminDonors()" class="bg-green-700 text-white px-4 rounded-xl font-bold text-xs">👁 عرض</button>
                             <button onclick="showDeletedDonors()" class="bg-red-600 text-white px-4 rounded-xl font-bold text-xs">🗑 سلة (<span id="trashCount">0</span>)</button>
                         </div>
-                        <div id="adminDonorsList" class="space-y-2 max-h-[300px] overflow-y-auto"></div>
+                        <div id="adminDonorsList" class="space-y-2 max-h- overflow-y-auto"></div>
                     </div>
 
                     <div id="adminTabContent-notifs" class="admin-tab-content hidden">
@@ -1066,7 +1066,7 @@
                             <p class="text-xs font-bold text-gray-600 mb-1">📍 المنطقة:</p>
                             <div class="flex gap-2 mb-3">
                                 <button onclick="setNotifTarget('all')" id="nt-all" class="flex-1 bg-green-700 text-white py-2 rounded-full text-xs font-bold">🌍 الكل</button>
-                                <button onclick="setNotifTarget('الحامي')" id="nt-الحامي" class="flex-1 bg-white border-2 border-gray-200 py-2 rounded-full text-xs font-bold">⚓️ الحامي</button>
+                                <button onclick="setNotifTarget('الحامي')" id="nt-الحامي" class="flex-1 bg-white border-2 border-gray-200 py-2 rounded-full text-xs font-bold">⚓ الحامي</button>
                                 <button onclick="setNotifTarget('المقد')" id="nt-المقد" class="flex-1 bg-white border-2 border-gray-200 py-2 rounded-full text-xs font-bold">🌴 المقد</button>
                             </div>
                             <p class="text-xs font-bold text-gray-600 mb-1">🩸 نوع الفصيلة:</p>
@@ -1089,12 +1089,12 @@
                         <input id="notifTitle" placeholder="عنوان الإشعار" class="w-full bg-white border rounded-xl p-3 text-sm mb-2">
                         <textarea id="notifMsg" placeholder="نص الإشعار..." class="w-full bg-white border rounded-xl p-3 text-sm h-16 mb-2"></textarea>
                         <button onclick="sendNotif()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold text-sm">🚀 إرسال</button>
-                        <div id="adminNotifList" class="space-y-2 mt-3 max-h-[200px] overflow-y-auto"></div>
+                        <div id="adminNotifList" class="space-y-2 mt-3 max-h- overflow-y-auto"></div>
                     </div>
 
                     <div id="adminTabContent-account" class="admin-tab-content hidden">
                         <div class="bg-green-50 border rounded-2xl p-4">
-                            <p class="text-xs text-gray-500">المدير الرئيسي - محمي ⛔️</p>
+                            <p class="text-xs text-gray-500">المدير الرئيسي - محمي ⛔</p>
                             <p id="accountName" class="font-black text-lg text-green-800 mt-1">المدير الرئيسي</p>
                             <div class="mt-2 bg-white border rounded-xl p-3 flex justify-between"><span id="accUsername" class="font-bold text-sm">admin</span><span class="text-xs bg-green-100 border px-2 rounded-full">محمي</span></div>
                             <div class="mt-2 bg-white border rounded-xl p-3 flex justify-between items-center"><span id="accPassHidden" class="font-bold text-sm">••••••••</span><span id="accPassReal" class="hidden font-bold text-sm">admin777</span><button onclick="toggleAccountPass()" class="bg-green-50 border px-3 py-1 rounded-full text-xs font-bold">عرض</button></div>
@@ -1113,9 +1113,7 @@
                 </div>
             </div>
 
-            <!-- ===== الصفحة الرئيسية ===== -->
             <div id="homeContent">
-                <!-- البحث والفلاتر -->
                 <div class="flat-card mb-3">
                     <div class="search-wrapper">
                         <input id="search" placeholder="ابحث باسم أو فصيلة أو منطقة..." oninput="render()">
@@ -1126,7 +1124,7 @@
                         <p class="text-xs font-bold text-gray-500 mb-1">🧭 المنطقة:</p>
                         <div class="filter-group">
                             <button onclick="setAreaFilter('all')" id="area-all" class="filter-chip active">🌍 الكل</button>
-                            <button onclick="setAreaFilter('الحامي')" id="area-الحامي" class="filter-chip">⚓️ الحامي</button>
+                            <button onclick="setAreaFilter('الحامي')" id="area-الحامي" class="filter-chip">⚓ الحامي</button>
                             <button onclick="setAreaFilter('المقد')" id="area-المقد" class="filter-chip">🌴 المقد</button>
                         </div>
                     </div>
@@ -1147,16 +1145,14 @@
                     </div>
                 </div>
 
-                <!-- قائمة المتبرعين -->
                 <div id="donors" class="space-y-2"></div>
             </div>
 
-            <!-- ===== صفحة حسابي ===== -->
             <div id="myAccountPage" class="hidden">
                 <div class="account-card" id="myAccountContent"></div>
                 <div class="mt-4 bg-green-50 border border-green-200 rounded-2xl p-4 text-center">
                     <div class="flex justify-center items-center gap-3 mb-3">
-                        <div class="logo-icon" style="width:40px;height:40px;font-size:18px;">♥️</div>
+                        <div class="logo-icon" style="width:40px;height:40px;font-size:18px;">♥</div>
                         <p class="font-black text-sm text-green-800">دمي دليل الحامي والمقد</p>
                     </div>
                     <p class="font-black text-sm text-green-800">تطبيق الحامي والمقد - دمي</p>
@@ -1174,9 +1170,8 @@
                 </div>
             </div>
 
-        </div><!-- end main-content -->
+        </div>
 
-        <!-- ===== الشريط السفلي ===== -->
         <div class="bottom-nav">
             <div class="nav-inner">
                 <button onclick="switchTab('home')" id="tab-home" class="nav-btn active">
@@ -1200,7 +1195,6 @@
             </div>
         </div>
 
-        <!-- ===== مودال الإضافة ===== -->
         <div id="addModal" class="modal-overlay hidden" onclick="if(event.target===this) closeAdd()">
             <div class="modal-content">
                 <p class="modal-title">➕ إضافة متبرع</p>
@@ -1219,7 +1213,6 @@
             </div>
         </div>
 
-        <!-- ===== مودال الإشعارات ===== -->
         <div id="notifModal" class="modal-overlay hidden" onclick="if(event.target===this) closeNotifs()">
             <div class="modal-content">
                 <div class="flex justify-between items-center mb-3">
@@ -1230,7 +1223,6 @@
             </div>
         </div>
 
-        <!-- ===== تنبيه مخصص ===== -->
         <div id="customAlert" class="custom-alert">
             <div class="custom-alert-box">
                 <p id="customAlertTitle" class="alert-title">تم</p>
@@ -1239,18 +1231,17 @@
             </div>
         </div>
 
-    </div><!-- end app-container -->
+    </div>
 
     <script>
         // =================================================================
-        //  التطبيق الكامل - إخفاء المدير الرئيسي من القائمة الرئيسية
+        //  التطبيق الكامل - تم دمج جسر Flutter مع حل الحواف
         // =================================================================
 
         const SUPABASE_URL = 'https://peauprygfxfqtzgimtyh.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_lRkk7HRJVxrbzAV8rJe7zw_dgOV-HSy';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // ===== متغيرات عامة =====
         let users = [];
         let currentUser = null;
         let notifications = JSON.parse(localStorage.getItem('dami_notifs') || '[]');
@@ -1262,11 +1253,8 @@
         let bloodTarget = 'all';
         let adminDonorsVisible = false;
 
-        // وقت الدخول للتطبيق
         const APP_START_TIME = new Date().toLocaleString('ar-YE');
-        const APP_START_TIMESTAMP = Date.now();
 
-        // ===== دوال مساعدة =====
         function customAlert(title, msg) {
             document.getElementById('customAlertTitle').textContent = title;
             document.getElementById('customAlertMsg').textContent = msg;
@@ -1291,7 +1279,6 @@
             return 'https://wa.me/' + formatPhoneForWhatsApp(p) + '?text=' + encodeURIComponent('السلام عليكم، أحتاج متبرع دم');
         }
 
-        // ===== المزامنة مع Supabase =====
         async function syncToSupabase(u) {
             try {
                 const p = {
@@ -1332,11 +1319,6 @@
                 return true;
             } catch (e) {
                 console.error('❌ فشل المزامنة:', e);
-                if (e.message && e.message.includes('permission denied')) {
-                    alert('⚠️ فشل المزامنة بسبب صلاحيات RLS.\nالرجاء تعطيل RLS مؤقتاً أو إضافة سياسة تسمح بكل العمليات.');
-                } else if (e.message && e.message.includes('does not exist')) {
-                    alert('⚠️ جدول donors غير موجود في Supabase.\nالرجاء إنشاء الجدول باستخدام زر "تهيئة" في لوحة التحكم.');
-                }
                 return false;
             }
         }
@@ -1356,7 +1338,6 @@
             }
         }
 
-        // ===== تحميل البيانات =====
         async function loadData() {
             try {
                 const local = JSON.parse(localStorage.getItem('dami_users_v2') || '[]');
@@ -1387,11 +1368,6 @@
 
                     if (error) {
                         console.error('خطأ في جلب Supabase:', error);
-                        if (error.message.includes('permission denied')) {
-                            alert('⚠️ فشل جلب البيانات: صلاحيات RLS تمنع القراءة.\nالرجاء تعطيل RLS أو إضافة سياسة تسمح بالقراءة.');
-                        } else if (error.message.includes('does not exist')) {
-                            alert('⚠️ جدول donors غير موجود في Supabase.\nيرجى إنشاء الجدول باستخدام زر "تهيئة" في لوحة التحكم.');
-                        }
                     } else if (data && data.length > 0) {
                         const supaUsers = data.map(d => ({
                             name: d.name,
@@ -1415,13 +1391,9 @@
                             }
                         });
                         localStorage.setItem('dami_users_v2', JSON.stringify(users));
-                        console.log('✅ تم دمج البيانات من Supabase (عدد:', data.length, ')');
-                    } else {
-                        console.log('⚠️ لا توجد بيانات في Supabase، استخدام localStorage فقط');
                     }
                 } catch (e) {
                     console.error('❌ فشل جلب Supabase:', e);
-                    alert('❌ فشل الاتصال بقاعدة البيانات. جارٍ استخدام النسخة المحلية.');
                 }
 
                 if (!users.find(u => u.username === 'admin')) {
@@ -1464,36 +1436,88 @@
             if (el) el.textContent = del.length;
         }
 
-        // ===== إرسال تنبيه للمدراء =====
-        function notifyManagers(title, msg, type = 'info') {
-            try {
-                const newNotif = {
-                    title: title,
-                    msg: msg,
-                    message: msg,
-                    time: new Date().toLocaleString('ar-YE'),
-                    type: type,
-                    forManagers: true,
-                    isAdminAlert: true
-                };
-                notifications.unshift(newNotif);
-                localStorage.setItem('dami_notifs', JSON.stringify(notifications));
-                renderNotifs();
-                updateBadge();
-                if (typeof renderAdminNotifList === 'function') renderAdminNotifList();
-                console.log('🔔 تنبيه للمدراء:', title);
-            } catch (e) {
-                console.error('خطأ في إرسال التنبيه:', e);
+        // ===== جسر Flutter للإشعارات المنبثقة =====
+        const FlutterBridge = {
+            sendMessage: function(action, data) {
+                if (window.flutter_inappwebview) {
+                    window.flutter_inappwebview.callHandler('flutterBridge', action, JSON.stringify(data));
+                } else if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers
+                    .flutterBridge) {
+                    window.webkit.messageHandlers.flutterBridge.postMessage({ action: action, data: data });
+                } else if (window.flutterBridge) {
+                    window.flutterBridge(action, JSON.stringify(data));
+                } else {
+                    console.log('[Bridge] Flutter غير متصل، عرض كتنبيه محلي:', action, data);
+                    if (action === 'showNotification') {
+                        showLocalAlert(data.title || 'إشعار', data.body || '');
+                    }
+                }
+            },
+            showLocalNotification: function(title, body) {
+                this.sendMessage('showNotification', { title: title, body: body });
+            }
+        };
+
+        function showLocalAlert(title, msg) {
+            const alertDiv = document.getElementById('customAlert');
+            if (alertDiv) {
+                document.getElementById('customAlertTitle').textContent = title || 'إشعار';
+                document.getElementById('customAlertMsg').textContent = msg || '';
+                alertDiv.style.display = 'flex';
+                setTimeout(() => { alertDiv.style.display = 'none'; }, 5000);
+            } else {
+                alert(title + '\n' + msg);
             }
         }
 
-        // ===== دالة العرض الرئيسية (مع إخفاء المديرين) =====
+        window.receivePushNotification = function(title, body, payload) {
+            console.log('📩 استلام إشعار من Flutter:', title, body);
+            const newNotif = {
+                title: title || 'إشعار جديد',
+                msg: body || '',
+                message: body || '',
+                time: new Date().toLocaleString('ar-YE'),
+                type: 'push'
+            };
+            if (typeof notifications !== 'undefined' && Array.isArray(notifications)) {
+                notifications.unshift(newNotif);
+                try { localStorage.setItem('dami_notifs', JSON.stringify(notifications)); } catch (e) {}
+                if (typeof renderNotifs === 'function') renderNotifs();
+                if (typeof updateBadge === 'function') updateBadge();
+            }
+            showLocalAlert(title, body);
+            return 'تم استلام الإشعار';
+        };
+
+        window.FlutterBridge = FlutterBridge;
+        window.showLocalAlert = showLocalAlert;
+        window.receivePushNotification = window.receivePushNotification;
+
+        window.testPushNotification = function() {
+            FlutterBridge.sendMessage('testNotification', { title: 'اختبار', body: 'تم الاتصال بـ Flutter بنجاح ✅' });
+            showLocalAlert('📱 اختبار الجسر', 'تم إرسال طلب إلى Flutter، انتظر الرد.');
+        };
+
+        // ===== دالة تنبيه المدراء مع إرسال لـ Flutter =====
+        const originalNotifyManagers = window.notifyManagers;
+        if (typeof window.notifyManagers === 'function') {
+            window.notifyManagers = function(title, msg, type) {
+                if (originalNotifyManagers) originalNotifyManagers(title, msg, type);
+                if (window.FlutterBridge) {
+                    window.FlutterBridge.sendMessage('showNotification', {
+                        title: '🔔 ' + title,
+                        body: msg.substring(0, 100)
+                    });
+                }
+            };
+        }
+
+        // ===== دوال العرض الرئيسية =====
         function render() {
             const q = (document.getElementById('search')?.value || '').toLowerCase().trim();
             const container = document.getElementById('donors');
             if (!container) return;
 
-            // 🔹 استبعاد المديرين (بما فيهم المدير الرئيسي admin)
             let filtered = users.filter(u => {
                 if (u.deleted) return false;
                 if (u.role === 'admin' || u.role === 'super_admin') return false;
@@ -1516,32 +1540,32 @@
             if (filtered.length === 0) {
                 container.innerHTML =
                     `
-                <div class="flat-card text-center py-8">
-                    <p class="font-bold text-sm text-gray-500">لا يوجد نتائج</p>
-                    <button onclick="setAreaFilter('all');setBloodFilter('all');document.getElementById('search').value='';render();" class="mt-3 bg-green-600 text-white px-5 py-2 rounded-full text-xs font-bold">عرض الكل</button>
-                </div>
-                `;
+                    <div class="flat-card text-center py-8">
+                        <p class="font-bold text-sm text-gray-500">لا يوجد نتائج</p>
+                        <button onclick="setAreaFilter('all');setBloodFilter('all');document.getElementById('search').value='';render();" class="mt-3 bg-green-600 text-white px-5 py-2 rounded-full text-xs font-bold">عرض الكل</button>
+                    </div>
+                    `;
                 return;
             }
 
             container.innerHTML = filtered.map(u => {
                 const isAvailable = u.status && u.status.includes('متاح');
                 return `
-                    <div class="donor-card fade-slide">
-                        <div class="flex gap-3">
-                            <div class="donor-avatar">${u.blood}</div>
-                            <div class="donor-info">
-                                <p class="donor-name">${u.name}</p>
-                                <p class="donor-detail">${u.area === 'الحامي' ? '⚓️' : '🌴'} ${u.area} - ${u.hood || ''} • ${u.phone}</p>
-                                <span class="donor-status ${isAvailable ? 'available' : 'unavailable'}">${u.status || 'متاح الآن'}</span>
+                        <div class="donor-card fade-slide">
+                            <div class="flex gap-3">
+                                <div class="donor-avatar">${u.blood}</div>
+                                <div class="donor-info">
+                                    <p class="donor-name">${u.name}</p>
+                                    <p class="donor-detail">${u.area === 'الحامي' ? '⚓' : '🌴'} ${u.area} - ${u.hood || ''} • ${u.phone}</p>
+                                    <span class="donor-status ${isAvailable ? 'available' : 'unavailable'}">${u.status || 'متاح الآن'}</span>
+                                </div>
+                            </div>
+                            <div class="donor-actions">
+                                <a href="${getWhatsAppLink(u.phone)}" target="_blank" class="btn-whatsapp">💬 واتساب</a>
+                                <a href="tel:${u.phone}" class="btn-call">📞 اتصال</a>
                             </div>
                         </div>
-                        <div class="donor-actions">
-                            <a href="${getWhatsAppLink(u.phone)}" target="_blank" class="btn-whatsapp">💬 واتساب</a>
-                            <a href="tel:${u.phone}" class="btn-call">📞 اتصال</a>
-                        </div>
-                    </div>
-                `;
+                    `;
             }).join('');
 
             renderAdminsList();
@@ -1549,9 +1573,7 @@
             updateOverviewStats();
         }
 
-        function renderFilters() {
-            // تمت في HTML الثابت
-        }
+        function renderFilters() {}
 
         function renderAdminsList() {
             const l = document.getElementById('adminsList');
@@ -1562,14 +1584,13 @@
                 return;
             }
             l.innerHTML = admins.map(a => `
-                    <div class="bg-white border rounded-xl p-3 flex justify-between items-center">
-                        <div><p class="font-bold text-sm">${a.name}</p><p class="text-xs text-gray-500">${a.username} • ${a.pass}</p></div>
-                        <button onclick="deleteSubAdmin('${a.username}')" class="w-8 h-8 bg-red-50 text-red-500 rounded-full text-sm">✕</button>
-                    </div>
-                `).join('');
+                        <div class="bg-white border rounded-xl p-3 flex justify-between items-center">
+                            <div><p class="font-bold text-sm">${a.name}</p><p class="text-xs text-gray-500">${a.username} • ${a.pass}</p></div>
+                            <button onclick="deleteSubAdmin('${a.username}')" class="w-8 h-8 bg-red-50 text-red-500 rounded-full text-sm">✕</button>
+                        </div>
+                    `).join('');
         }
 
-        // ===== إدارة المتبرعين في لوحة التحكم =====
         function renderAdminDonors() {
             const l = document.getElementById('adminDonorsList');
             if (!l) return;
@@ -1578,13 +1599,13 @@
                 const count = users.filter(u => !u.deleted && (u.role === 'donor' || !u.role) && u.username !== 'admin')
                     .length;
                 l.innerHTML = `
-                        <div class="text-center py-8 bg-white rounded-2xl border border-green-100">
-                            <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto text-3xl">👥</div>
-                            <p class="font-black mt-3 text-sm text-green-800">إدارة المتبرعين</p>
-                            <p class="text-xs text-gray-500 mt-1">اضغط لعرض المتبرعين</p>
-                            <button onclick="showAdminDonors()" class="mt-3 bg-green-700 text-white px-6 py-2 rounded-full font-bold text-sm">👁 عرض المتبرعين (${count})</button>
-                        </div>
-                    `;
+                            <div class="text-center py-8 bg-white rounded-2xl border border-green-100">
+                                <div class="w-16 h-16 bg-green-50 rounded-2xl flex items-center justify-center mx-auto text-3xl">👥</div>
+                                <p class="font-black mt-3 text-sm text-green-800">إدارة المتبرعين</p>
+                                <p class="text-xs text-gray-500 mt-1">اضغط لعرض المتبرعين</p>
+                                <button onclick="showAdminDonors()" class="mt-3 bg-green-700 text-white px-6 py-2 rounded-full font-bold text-sm">👁 عرض المتبرعين (${count})</button>
+                            </div>
+                        `;
                 return;
             }
 
@@ -1597,25 +1618,25 @@
                 return;
             }
 
-            l.innerHTML = donors.map(u => {
-                const idx = users.findIndex(x => x.username === u.username);
+            l.innerHTML = donors.map((u, idx) => {
+                const realIdx = users.findIndex(x => x.username === u.username);
                 return `
-                        <div class="bg-white border border-green-100 rounded-2xl p-4">
-                            <div class="flex gap-3">
-                                <div class="w-10 h-10 rounded-xl bg-green-700 flex items-center justify-center text-white font-bold text-sm">${(u.name || 'م').substring(0,2)}</div>
-                                <div class="flex-1">
-                                    <b class="text-sm text-gray-800">${u.name || ''}</b>
-                                    <div class="text-xs text-gray-500 mt-1">📞 ${u.phone || ''} • 🩸 ${u.blood || ''} • 📍 ${u.area || ''}</div>
-                                    <div class="text-xs bg-gray-50 px-2 py-1 rounded-lg inline-block mt-1">👤 ${u.username || ''} • 🔑 ${u.pass || ''}</div>
+                            <div class="bg-white border border-green-100 rounded-2xl p-4">
+                                <div class="flex gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-green-700 flex items-center justify-center text-white font-bold text-sm">${(u.name || 'م').substring(0,2)}</div>
+                                    <div class="flex-1">
+                                        <b class="text-sm text-gray-800">${u.name || ''}</b>
+                                        <div class="text-xs text-gray-500 mt-1">📞 ${u.phone || ''} • 🩸 ${u.blood || ''} • 📍 ${u.area || ''}</div>
+                                        <div class="text-xs bg-gray-50 px-2 py-1 rounded-lg inline-block mt-1">👤 ${u.username || ''} • 🔑 ${u.pass || ''}</div>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-3 gap-2 mt-3">
+                                    <button onclick="editUserFull(${realIdx})" class="bg-green-50 text-green-700 border border-green-200 py-2 rounded-full text-xs font-bold">✏ تعديل</button>
+                                    <button onclick="resetPassFull(${realIdx})" class="bg-amber-50 text-amber-700 border border-amber-200 py-2 rounded-full text-xs font-bold">🔑 استعادة</button>
+                                    <button onclick="deleteUserFull(${realIdx})" class="bg-red-50 text-red-600 border border-red-200 py-2 rounded-full text-xs font-bold">🗑 حذف</button>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-3 gap-2 mt-3">
-                                <button onclick="editUserFull(${idx})" class="bg-green-50 text-green-700 border border-green-200 py-2 rounded-full text-xs font-bold">✏️ تعديل</button>
-                                <button onclick="resetPassFull(${idx})" class="bg-amber-50 text-amber-700 border border-amber-200 py-2 rounded-full text-xs font-bold">🔑 استعادة</button>
-                                <button onclick="deleteUserFull(${idx})" class="bg-red-50 text-red-600 border border-red-200 py-2 rounded-full text-xs font-bold">🗑 حذف</button>
-                            </div>
-                        </div>
-                    `;
+                        `;
             }).join('');
         }
 
@@ -1628,7 +1649,6 @@
             renderAdminDonors();
         };
 
-        // ===== دوال إدارة المستخدمين =====
         function editUserFull(idx) {
             const u = users[idx];
             if (!u) return;
@@ -1641,45 +1661,45 @@
             modal.style.cssText =
                 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px);';
             modal.innerHTML = `
-                    <div class="bg-white rounded-3xl p-5 w-full max-w-sm max-h-[90vh] overflow-y-auto shadow-xl">
-                        <div class="flex justify-between items-center mb-4">
-                            <b class="text-lg text-green-800">✏️ تعديل المستخدم</b>
-                            <button onclick="document.getElementById('fullEditModal').remove()" class="w-8 h-8 bg-gray-100 rounded-full text-sm">✕</button>
+                        <div class="bg-white rounded-3xl p-5 w-full max-w-sm max-h- overflow-y-auto shadow-xl">
+                            <div class="flex justify-between items-center mb-4">
+                                <b class="text-lg text-green-800">✏ تعديل المستخدم</b>
+                                <button onclick="document.getElementById('fullEditModal').remove()" class="w-8 h-8 bg-gray-100 rounded-full text-sm">✕</button>
+                            </div>
+                            <div class="flex gap-3 items-center bg-green-50 rounded-2xl p-3 mb-4">
+                                <div class="w-10 h-10 rounded-xl bg-green-700 flex items-center justify-center text-white font-bold">${(u.name || 'م').substring(0,2)}</div>
+                                <div><div class="font-bold text-sm">${u.name || ''}</div><div class="text-xs text-gray-500">${u.phone || ''}</div></div>
+                            </div>
+                            <label class="text-xs font-bold text-gray-700 block mb-1">1. الاسم الكامل</label>
+                            <input id="editName" value="${(u.name || '').replace(/"/g, '&quot;')}" class="w-full border rounded-xl p-3 text-sm mb-2">
+                            <label class="text-xs font-bold text-gray-700 block mb-1">2. رقم الجوال</label>
+                            <input id="editPhone" value="${(u.phone || '').replace(/"/g, '&quot;')}" class="w-full border rounded-xl p-3 text-sm mb-2">
+                            <label class="text-xs font-bold text-gray-700 block mb-1">3. المنطقة</label>
+                            <select id="editArea" class="w-full border rounded-xl p-3 text-sm mb-2">
+                                <option value="الحامي" ${u.area === 'الحامي' ? 'selected' : ''}>الحامي ⚓</option>
+                                <option value="المقد" ${u.area === 'المقد' ? 'selected' : ''}>المقد 🌴</option>
+                            </select>
+                            <label class="text-xs font-bold text-gray-700 block mb-1">4. فصيلة الدم</label>
+                            <select id="editBlood" class="w-full border rounded-xl p-3 text-sm mb-2">
+                                <option value="O+" ${u.blood === 'O+' ? 'selected' : ''}>O+</option>
+                                <option value="O-" ${u.blood === 'O-' ? 'selected' : ''}>O-</option>
+                                <option value="A+" ${u.blood === 'A+' ? 'selected' : ''}>A+</option>
+                                <option value="A-" ${u.blood === 'A-' ? 'selected' : ''}>A-</option>
+                                <option value="B+" ${u.blood === 'B+' ? 'selected' : ''}>B+</option>
+                                <option value="B-" ${u.blood === 'B-' ? 'selected' : ''}>B-</option>
+                                <option value="AB+" ${u.blood === 'AB+' ? 'selected' : ''}>AB+</option>
+                                <option value="AB-" ${u.blood === 'AB-' ? 'selected' : ''}>AB-</option>
+                            </select>
+                            <label class="text-xs font-bold text-gray-700 block mb-1">5. اسم المستخدم</label>
+                            <input id="editUsername" value="${(u.username || '').replace(/"/g, '&quot;')}" class="w-full border rounded-xl p-3 text-sm mb-2">
+                            <label class="text-xs font-bold text-gray-700 block mb-1">6. كلمة السر</label>
+                            <input id="editPass" value="${(u.pass || '').replace(/"/g, '&quot;')}" class="w-full border rounded-xl p-3 text-sm mb-4">
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="document.getElementById('fullEditModal').remove()" class="bg-gray-100 text-gray-700 py-3 rounded-full font-bold text-sm">إلغاء</button>
+                                <button onclick="saveFullEdit(${idx})" class="bg-green-700 text-white py-3 rounded-full font-bold text-sm">✅ حفظ</button>
+                            </div>
                         </div>
-                        <div class="flex gap-3 items-center bg-green-50 rounded-2xl p-3 mb-4">
-                            <div class="w-10 h-10 rounded-xl bg-green-700 flex items-center justify-center text-white font-bold">${(u.name || 'م').substring(0,2)}</div>
-                            <div><div class="font-bold text-sm">${u.name || ''}</div><div class="text-xs text-gray-500">${u.phone || ''}</div></div>
-                        </div>
-                        <label class="text-xs font-bold text-gray-700 block mb-1">1. الاسم الكامل</label>
-                        <input id="editName" value="${(u.name || '').replace(/"/g, '&quot;')}" class="w-full border rounded-xl p-3 text-sm mb-2">
-                        <label class="text-xs font-bold text-gray-700 block mb-1">2. رقم الجوال</label>
-                        <input id="editPhone" value="${(u.phone || '').replace(/"/g, '&quot;')}" class="w-full border rounded-xl p-3 text-sm mb-2">
-                        <label class="text-xs font-bold text-gray-700 block mb-1">3. المنطقة</label>
-                        <select id="editArea" class="w-full border rounded-xl p-3 text-sm mb-2">
-                            <option value="الحامي" ${u.area === 'الحامي' ? 'selected' : ''}>الحامي ⚓️</option>
-                            <option value="المقد" ${u.area === 'المقد' ? 'selected' : ''}>المقد 🌴</option>
-                        </select>
-                        <label class="text-xs font-bold text-gray-700 block mb-1">4. فصيلة الدم</label>
-                        <select id="editBlood" class="w-full border rounded-xl p-3 text-sm mb-2">
-                            <option value="O+" ${u.blood === 'O+' ? 'selected' : ''}>O+</option>
-                            <option value="O-" ${u.blood === 'O-' ? 'selected' : ''}>O-</option>
-                            <option value="A+" ${u.blood === 'A+' ? 'selected' : ''}>A+</option>
-                            <option value="A-" ${u.blood === 'A-' ? 'selected' : ''}>A-</option>
-                            <option value="B+" ${u.blood === 'B+' ? 'selected' : ''}>B+</option>
-                            <option value="B-" ${u.blood === 'B-' ? 'selected' : ''}>B-</option>
-                            <option value="AB+" ${u.blood === 'AB+' ? 'selected' : ''}>AB+</option>
-                            <option value="AB-" ${u.blood === 'AB-' ? 'selected' : ''}>AB-</option>
-                        </select>
-                        <label class="text-xs font-bold text-gray-700 block mb-1">5. اسم المستخدم</label>
-                        <input id="editUsername" value="${(u.username || '').replace(/"/g, '&quot;')}" class="w-full border rounded-xl p-3 text-sm mb-2">
-                        <label class="text-xs font-bold text-gray-700 block mb-1">6. كلمة السر</label>
-                        <input id="editPass" value="${(u.pass || '').replace(/"/g, '&quot;')}" class="w-full border rounded-xl p-3 text-sm mb-4">
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="document.getElementById('fullEditModal').remove()" class="bg-gray-100 text-gray-700 py-3 rounded-full font-bold text-sm">إلغاء</button>
-                            <button onclick="saveFullEdit(${idx})" class="bg-green-700 text-white py-3 rounded-full font-bold text-sm">✅ حفظ</button>
-                        </div>
-                    </div>
-                `;
+                    `;
             document.body.appendChild(modal);
         }
 
@@ -1711,9 +1731,9 @@
                 document.getElementById('fullEditModal')?.remove();
                 render();
                 renderAdminDonors();
-                notifyManagers('✏️ تم تعديل متبرع', `المتبرع: ${oldName} → ${u.name}\nالجوال: ${u.phone}\nالفصيلة: ${u.blood}\nالمنطقة: ${u.area}`,
+                window.notifyManagers('✏ تم تعديل متبرع', `المتبرع: ${oldName} → ${u.name}\nالجوال: ${u.phone}\nالفصيلة: ${u.blood}\nالمنطقة: ${u.area}`,
                     'edit_donor');
-                alert(success ? '✅ تم تعديل كل البيانات' : '⚠️ تم التعديل محلياً لكن فشل الاتصال بـ Supabase');
+                alert(success ? '✅ تم تعديل كل البيانات' : '⚠ تم التعديل محلياً لكن فشل الاتصال بـ Supabase');
             });
         }
 
@@ -1728,11 +1748,11 @@
             syncToSupabase(u).then(success => {
                 renderAdminDonors();
                 if (success) {
-                    notifyManagers('🔑 تم استعادة كلمة سر', `المتبرع: ${u.name}\nكلمة السر الجديدة: ${u.pass}`,
-                    'reset_pass');
+                    window.notifyManagers('🔑 تم استعادة كلمة سر', `المتبرع: ${u.name}\nكلمة السر الجديدة: ${u.pass}`,
+                        'reset_pass');
                     alert('✅ تم التحديث');
                 } else {
-                    alert('⚠️ تم التحديث محلياً، لكن فشل الاتصال بـ Supabase.');
+                    alert('⚠ تم التحديث محلياً، لكن فشل الاتصال بـ Supabase.');
                 }
             });
         }
@@ -1763,13 +1783,12 @@
                 render();
                 renderAdminDonors();
                 updateTrashCount();
-                notifyManagers('🗑 تم حذف متبرع', `المتبرع: ${deletedUser.name}\nالجوال: ${deletedUser.phone}\nنقل إلى سلة المحذوفات`,
+                window.notifyManagers('🗑 تم حذف متبرع', `المتبرع: ${deletedUser.name}\nالجوال: ${deletedUser.phone}\nنقل إلى سلة المحذوفات`,
                     'delete_donor');
                 alert('🗑 تم الحذف' + (success ? ' (ومن Supabase)' : ' (محلياً، سيتم المزامنة عند الاتصال)'));
             });
         }
 
-        // ===== سلة المحذوفات =====
         function showDeletedDonors() {
             const deleted = JSON.parse(localStorage.getItem('dami_deleted') || '[]');
             if (deleted.length === 0) {
@@ -1786,34 +1805,34 @@
                 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(2px);';
 
             const listHtml = deleted.map((item, i) => `
-                    <div class="bg-white border border-red-200 rounded-2xl p-4 mb-3">
-                        <div class="flex gap-3 items-center">
-                            <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-lg">🗑</div>
-                            <div class="flex-1">
-                                <b class="text-sm">${item.name || ''}</b>
-                                <div class="text-xs text-gray-500">📞 ${item.phone || ''} • 🩸 ${item.blood || ''} • 📍 ${item.area || ''}</div>
-                                <div class="text-[10px] text-gray-400 mt-1">حذف: ${item.deletedAt || ''}</div>
+                        <div class="bg-white border border-red-200 rounded-2xl p-4 mb-3">
+                            <div class="flex gap-3 items-center">
+                                <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-lg">🗑</div>
+                                <div class="flex-1">
+                                    <b class="text-sm">${item.name || ''}</b>
+                                    <div class="text-xs text-gray-500">📞 ${item.phone || ''} • 🩸 ${item.blood || ''} • 📍 ${item.area || ''}</div>
+                                    <div class="text- text-gray-400 mt-1">حذف: ${item.deletedAt || ''}</div>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 mt-3">
+                                <button onclick="restoreDeleted(${i})" class="bg-green-50 text-green-700 border border-green-200 py-2 rounded-full text-xs font-bold">♻ استعادة</button>
+                                <button onclick="permanentDelete(${i})" class="bg-red-50 text-red-600 border border-red-200 py-2 rounded-full text-xs font-bold">❌ حذف نهائي</button>
                             </div>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 mt-3">
-                            <button onclick="restoreDeleted(${i})" class="bg-green-50 text-green-700 border border-green-200 py-2 rounded-full text-xs font-bold">♻️ استعادة</button>
-                            <button onclick="permanentDelete(${i})" class="bg-red-50 text-red-600 border border-red-200 py-2 rounded-full text-xs font-bold">❌ حذف نهائي</button>
-                        </div>
-                    </div>
-                `).join('');
+                    `).join('');
 
             modal.innerHTML = `
-                    <div class="bg-red-50 rounded-3xl p-4 w-full max-w-sm max-h-[85vh] overflow-y-auto border-2 border-red-200">
-                        <div class="flex justify-between items-center mb-3">
-                            <b class="text-sm text-red-700">♻️ سلة المحذوفات (${deleted.length})</b>
-                            <div class="flex gap-2">
-                                <button onclick="clearAllDeleted()" class="bg-white border border-red-200 px-3 py-1 rounded-full text-xs font-bold text-red-600">🗑 إفراغ الكل</button>
-                                <button onclick="document.getElementById('deletedModal').remove()" class="w-8 h-8 bg-white rounded-full text-sm">✕</button>
+                        <div class="bg-red-50 rounded-3xl p-4 w-full max-w-sm max-h- overflow-y-auto border-2 border-red-200">
+                            <div class="flex justify-between items-center mb-3">
+                                <b class="text-sm text-red-700">♻ سلة المحذوفات (${deleted.length})</b>
+                                <div class="flex gap-2">
+                                    <button onclick="clearAllDeleted()" class="bg-white border border-red-200 px-3 py-1 rounded-full text-xs font-bold text-red-600">🗑 إفراغ الكل</button>
+                                    <button onclick="document.getElementById('deletedModal').remove()" class="w-8 h-8 bg-white rounded-full text-sm">✕</button>
+                                </div>
                             </div>
+                            <div class="max-h- overflow-y-auto">${listHtml}</div>
                         </div>
-                        <div class="max-h-[50vh] overflow-y-auto">${listHtml}</div>
-                    </div>
-                `;
+                    `;
             document.body.appendChild(modal);
         }
 
@@ -1842,7 +1861,7 @@
             document.getElementById('deletedModal')?.remove();
             if (deleted.length > 0) setTimeout(showDeletedDonors, 300);
             updateTrashCount();
-            notifyManagers('♻️ تم استعادة متبرع', `المتبرع: ${r.name}\nالجوال: ${r.phone}`, 'restore_donor');
+            window.notifyManagers('♻ تم استعادة متبرع', `المتبرع: ${r.name}\nالجوال: ${r.phone}`, 'restore_donor');
             alert('✅ تمت استعادة ' + r.name + (success ? ' إلى القائمة وSupabase' : ' إلى القائمة محلياً، سيتم المزامنة عند الاتصال'));
         }
 
@@ -1850,7 +1869,7 @@
             const deleted = JSON.parse(localStorage.getItem('dami_deleted') || '[]');
             if (i < 0 || i >= deleted.length) return;
             const r = deleted[i];
-            if (!confirm('⚠️ حذف نهائي لـ ' + r.name + '؟\nلن يمكن استعادته أبداً!')) return;
+            if (!confirm('⚠ حذف نهائي لـ ' + r.name + '؟\nلن يمكن استعادته أبداً!')) return;
 
             const success = await deleteFromSupabase(r.username);
 
@@ -1859,7 +1878,7 @@
             document.getElementById('deletedModal')?.remove();
             if (deleted.length > 0) setTimeout(showDeletedDonors, 300);
             updateTrashCount();
-            notifyManagers('❌ حذف نهائي', `المتبرع: ${r.name}\nتم حذفه نهائياً من السلة${success ? ' وSupabase' : ' (محلياً، سيتم المزامنة عند الاتصال)'}`,
+            window.notifyManagers('❌ حذف نهائي', `المتبرع: ${r.name}\nتم حذفه نهائياً من السلة${success ? ' وSupabase' : ' (محلياً، سيتم المزامنة عند الاتصال)'}`,
                 'permanent_delete');
             alert('تم الحذف النهائي' + (success ? ' من السلة وقاعدة البيانات' : ' من السلة محلياً، سيتم المزامنة عند الاتصال'));
         }
@@ -1867,7 +1886,7 @@
         async function clearAllDeleted() {
             const deleted = JSON.parse(localStorage.getItem('dami_deleted') || '[]');
             if (deleted.length === 0) return;
-            if (!confirm('⚠️ إفراغ سلة المحذوفات بالكامل؟\n' + deleted.length + ' متبرع سيحذف نهائياً!')) return;
+            if (!confirm('⚠ إفراغ سلة المحذوفات بالكامل؟\n' + deleted.length + ' متبرع سيحذف نهائياً!')) return;
 
             let successCount = 0;
             for (const r of deleted) {
@@ -1878,12 +1897,11 @@
             localStorage.setItem('dami_deleted', JSON.stringify([]));
             document.getElementById('deletedModal')?.remove();
             updateTrashCount();
-            notifyManagers('🗑 إفراغ سلة المحذوفات', `تم حذف ${deleted.length} متبرع نهائياً (${successCount} من Supabase)`,
+            window.notifyManagers('🗑 إفراغ سلة المحذوفات', `تم حذف ${deleted.length} متبرع نهائياً (${successCount} من Supabase)`,
                 'clear_trash');
             alert(`✅ تم إفراغ السلة وحذف ${successCount}/${deleted.length} من Supabase`);
         }
 
-        // ===== دوال الإشعارات =====
         function renderNotifs() {
             const f = document.getElementById('notifFeed');
             const l = document.getElementById('notifList');
@@ -1893,12 +1911,12 @@
             if (visible.length > 0) {
                 f.classList.remove('hidden');
                 f.innerHTML = visible.slice(0, 3).map(n => `
-                        <div class="notif-item">
-                            <p class="notif-title">${n.title || ''}</p>
-                            <p class="notif-body">${n.msg || n.message || ''}</p>
-                            <p class="notif-time">${n.time || ''}</p>
-                        </div>
-                    `).join('');
+                            <div class="notif-item">
+                                <p class="notif-title">${n.title || ''}</p>
+                                <p class="notif-body">${n.msg || n.message || ''}</p>
+                                <p class="notif-time">${n.time || ''}</p>
+                            </div>
+                        `).join('');
             } else {
                 f.classList.add('hidden');
                 f.innerHTML = '';
@@ -1906,12 +1924,12 @@
 
             if (l) {
                 l.innerHTML = visible.map(n => `
-                        <div class="notif-item">
-                            <p class="notif-title">${n.title || ''}</p>
-                            <p class="notif-body">${n.msg || n.message || ''}</p>
-                            <p class="notif-time">${n.time || ''}</p>
-                        </div>
-                    `).join('');
+                            <div class="notif-item">
+                                <p class="notif-title">${n.title || ''}</p>
+                                <p class="notif-body">${n.msg || n.message || ''}</p>
+                                <p class="notif-time">${n.time || ''}</p>
+                            </div>
+                        `).join('');
             }
         }
 
@@ -2037,7 +2055,7 @@
             if (client) {
                 txt += 'عميل محدد 👤';
             } else {
-                txt += (notifTargetArea === 'all' ? 'الجميع 🌍' : notifTargetArea === 'الحامي' ? 'الحامي فقط ⚓️' :
+                txt += (notifTargetArea === 'all' ? 'الجميع 🌍' : notifTargetArea === 'الحامي' ? 'الحامي فقط ⚓' :
                     'المقد فقط 🌴');
                 txt += ' + ' + (bloodTarget === 'all' ? 'كل الفصائل 🩸' : 'فصيلة ' + bloodTarget + ' فقط 🩸');
             }
@@ -2045,41 +2063,40 @@
             if (prev) prev.textContent = txt;
         }
 
-        // ===== دوال الحساب =====
         function renderMyAccount() {
             const c = document.getElementById('myAccountContent');
             if (!c) return;
             if (!currentUser) {
                 c.innerHTML = `
-                        <div class="text-center"><p class="font-bold text-lg text-green-800">تسجيل الدخول</p></div>
-                        <input id="loginUserInline" placeholder="اسم المستخدم" class="w-full bg-green-50 border rounded-xl p-3 text-sm mt-3 mb-2">
-                        <input id="loginPassInline" type="password" placeholder="كلمة المرور" class="w-full bg-green-50 border rounded-xl p-3 text-sm mb-3">
-                        <button onclick="doLoginInline()" class="w-full bg-green-600 text-white py-3 rounded-full font-bold text-sm">دخول</button>
-                    `;
+                            <div class="text-center"><p class="font-bold text-lg text-green-800">تسجيل الدخول</p></div>
+                            <input id="loginUserInline" placeholder="اسم المستخدم" class="w-full bg-green-50 border rounded-xl p-3 text-sm mt-3 mb-2">
+                            <input id="loginPassInline" type="password" placeholder="كلمة المرور" class="w-full bg-green-50 border rounded-xl p-3 text-sm mb-3">
+                            <button onclick="doLoginInline()" class="w-full bg-green-600 text-white py-3 rounded-full font-bold text-sm">دخول</button>
+                        `;
                 return;
             }
             c.innerHTML = `
-                    <div class="text-center">
-                        <div class="account-avatar">${currentUser.name.charAt(0)}</div>
-                        <p class="account-name">${currentUser.name}</p>
-                        <span class="account-role">${currentUser.role === 'super_admin' ? 'المدير الرئيسي - محمي ⛔️' : currentUser.role === 'admin' ? 'مدير' : 'متبرع'}</span>
-                        <div class="account-details">
-                            <div class="account-detail-row"><span class="label">اسم المستخدم</span><span class="value">${currentUser.username}</span></div>
-                            <div class="account-detail-row"><span class="label">كلمة السر</span><span class="value" id="myAccPassHidden">••••••••</span><span class="value hidden" id="myAccPassReal">${currentUser.pass}</span><button onclick="toggleMyAccPass()" class="bg-green-50 border px-3 py-1 rounded-full text-xs font-bold">عرض</button></div>
-                            <div class="account-detail-row"><span class="label">الدور</span><span class="value">${currentUser.role}</span></div>
+                        <div class="text-center">
+                            <div class="account-avatar">${currentUser.name.charAt(0)}</div>
+                            <p class="account-name">${currentUser.name}</p>
+                            <span class="account-role">${currentUser.role === 'super_admin' ? 'المدير الرئيسي - محمي ⛔' : currentUser.role === 'admin' ? 'مدير' : 'متبرع'}</span>
+                            <div class="account-details">
+                                <div class="account-detail-row"><span class="label">اسم المستخدم</span><span class="value">${currentUser.username}</span></div>
+                                <div class="account-detail-row"><span class="label">كلمة السر</span><span class="value" id="myAccPassHidden">••••••••</span><span class="value hidden" id="myAccPassReal">${currentUser.pass}</span><button onclick="toggleMyAccPass()" class="bg-green-50 border px-3 py-1 rounded-full text-xs font-bold">عرض</button></div>
+                                <div class="account-detail-row"><span class="label">الدور</span><span class="value">${currentUser.role}</span></div>
+                            </div>
+                            <div class="account-actions">
+                                <button onclick="openEditMyAccount2()" class="btn-edit">✏ تعديل</button>
+                                <button onclick="logout()" class="btn-logout">خروج</button>
+                            </div>
+                            <div id="editMyAccountBox2" class="hidden mt-3 bg-white border rounded-xl p-3">
+                                <input id="myNameEdit2" value="${currentUser.name}" class="w-full bg-green-50 border rounded-xl p-3 text-sm mb-2">
+                                <input id="myPhoneEdit2" value="${currentUser.phone || ''}" class="w-full bg-green-50 border rounded-xl p-3 text-sm mb-2">
+                                <input id="myNewPass2" type="password" placeholder="جديدة" class="w-full bg-amber-50 border rounded-xl p-3 text-sm mb-2">
+                                <button onclick="saveMyAccountData2()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold text-sm">حفظ</button>
+                            </div>
                         </div>
-                        <div class="account-actions">
-                            <button onclick="openEditMyAccount2()" class="btn-edit">✏️ تعديل</button>
-                            <button onclick="logout()" class="btn-logout">خروج</button>
-                        </div>
-                        <div id="editMyAccountBox2" class="hidden mt-3 bg-white border rounded-xl p-3">
-                            <input id="myNameEdit2" value="${currentUser.name}" class="w-full bg-green-50 border rounded-xl p-3 text-sm mb-2">
-                            <input id="myPhoneEdit2" value="${currentUser.phone || ''}" class="w-full bg-green-50 border rounded-xl p-3 text-sm mb-2">
-                            <input id="myNewPass2" type="password" placeholder="جديدة" class="w-full bg-amber-50 border rounded-xl p-3 text-sm mb-2">
-                            <button onclick="saveMyAccountData2()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold text-sm">حفظ</button>
-                        </div>
-                    </div>
-                `;
+                    `;
         }
 
         function toggleMyAccPass() {
@@ -2114,7 +2131,7 @@
             syncToSupabase(currentUser).then(success => {
                 renderMyAccount();
                 render();
-                alert(success ? '✅ تم الحفظ' : '⚠️ تم الحفظ محلياً، لكن فشل الاتصال بـ Supabase');
+                alert(success ? '✅ تم الحفظ' : '⚠ تم الحفظ محلياً، لكن فشل الاتصال بـ Supabase');
             });
         }
 
@@ -2163,7 +2180,6 @@
             if (m) m.textContent = managers;
         }
 
-        // ===== دوال إدارة المدراء =====
         function addSubAdmin() {
             if (!currentUser || currentUser.role !== 'super_admin') {
                 alert('فقط المدير الرئيسي');
@@ -2205,7 +2221,6 @@
             alert('🗑 تم الحذف');
         }
 
-        // ===== دوال الإضافة =====
         function doAdd() {
             const name = document.getElementById('dName').value.trim();
             const username = document.getElementById('dUsername').value.trim();
@@ -2222,9 +2237,9 @@
             syncToSupabase(nu).then(success => {
                 closeAdd();
                 render();
-                notifyManagers('🆕 متبرع جديد تسجل', `الاسم: ${name}\nالجوال: ${phone}\nالفصيلة: ${blood}\nالمنطقة: ${area}`,
+                window.notifyManagers('🆕 متبرع جديد تسجل', `الاسم: ${name}\nالجوال: ${phone}\nالفصيلة: ${blood}\nالمنطقة: ${area}`,
                     'new_donor');
-                alert(success ? '✅ تمت الإضافة' : '⚠️ تمت الإضافة محلياً، لكن فشل الاتصال بـ Supabase');
+                alert(success ? '✅ تمت الإضافة' : '⚠ تمت الإضافة محلياً، لكن فشل الاتصال بـ Supabase');
             });
         }
 
@@ -2236,7 +2251,6 @@
             document.getElementById('addModal').classList.add('hidden');
         }
 
-        // ===== دوال الفلاتر =====
         function setAreaFilter(area) {
             areaFilter = area;
             document.querySelectorAll('[id^="area-"]').forEach(b => {
@@ -2253,7 +2267,6 @@
             render();
         }
 
-        // ===== دوال التبويبات =====
         function switchTab(tab) {
             try {
                 document.querySelectorAll('.nav-btn').forEach(b => {
@@ -2329,11 +2342,11 @@
             const l = document.getElementById('adminNotifList');
             if (!l) return;
             l.innerHTML = notifications.map(n => `
-                    <div class="notif-item">
-                        <p class="notif-title">${n.title || ''}</p>
-                        <p class="notif-body">${(n.msg || n.message || '').substring(0, 60)}</p>
-                    </div>
-                `).join('');
+                        <div class="notif-item">
+                            <p class="notif-title">${n.title || ''}</p>
+                            <p class="notif-body">${(n.msg || n.message || '').substring(0, 60)}</p>
+                        </div>
+                    `).join('');
         }
 
         function renderAccountTab() {
@@ -2379,11 +2392,10 @@
                 renderAccountTab();
                 renderMyAccount();
                 render();
-                alert(success ? '✅ تم الحفظ' : '⚠️ تم الحفظ محلياً، لكن فشل الاتصال بـ Supabase');
+                alert(success ? '✅ تم الحفظ' : '⚠ تم الحفظ محلياً، لكن فشل الاتصال بـ Supabase');
             });
         }
 
-        // ===== المظاهر =====
         let currentTheme = localStorage.getItem('dami_theme') || 'default';
         document.documentElement.setAttribute('data-theme', currentTheme);
 
@@ -2407,7 +2419,6 @@
             }
         }
 
-        // ===== اتصال Supabase - فحص حقيقي =====
         async function checkConnection(showAlert) {
             var dot = document.getElementById('connDot');
             var text = document.getElementById('connText');
@@ -2464,7 +2475,7 @@
 
                         if (showAlert) {
                             var msg =
-                                `⚠️ متصل وهمي - RLS يمنع القراءة\n\n` +
+                                `⚠ متصل وهمي - RLS يمنع القراءة\n\n` +
                                 `الكلاينت يتصل بالسيرفر، لكن سياسات الأمان تمنع قراءة البيانات\n` +
                                 `الخطأ: ${error.message}\n` +
                                 `الكود: ${error.code}\n\n` +
@@ -2477,7 +2488,7 @@
                                 `أو عطل RLS مؤقتاً:\n` +
                                 `   ALTER TABLE donors DISABLE ROW LEVEL SECURITY;`;
 
-                            if (typeof customAlert === 'function') customAlert('⚠️ متصل وهمي', msg);
+                            if (typeof customAlert === 'function') customAlert('⚠ متصل وهمي', msg);
                             else alert(msg);
                         }
                         return 'fake';
@@ -2552,9 +2563,9 @@
                 statusDiv.title = 'اضغط لفحص حقيقي - يقرأ من قاعدة البيانات فعلاً';
                 statusDiv.onclick = function() { checkConnection(true); };
                 statusDiv.innerHTML = `
-                        <div id="connDot" style="width:10px;height:10px;border-radius:50%;background:#9CA3AF;"></div>
-                        <span id="connText" style="font-size:8px;font-weight:900;color:#6B7280;">فحص حقيقي...</span>
-                    `;
+                            <div id="connDot" style="width:10px;height:10px;border-radius:50%;background:#9CA3AF;"></div>
+                            <span id="connText" style="font-size:8px;font-weight:900;color:#6B7280;">فحص حقيقي...</span>
+                        `;
 
                 if (themeBtn && container.contains(themeBtn)) {
                     container.insertBefore(statusDiv, themeBtn);
@@ -2565,8 +2576,8 @@
                 var style = document.createElement('style');
                 style.textContent =
                     `
-                        @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,0.4)}70%{box-shadow:0 0 0 6px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
-                    `;
+                            @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,197,94,0.4)}70%{box-shadow:0 0 0 6px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+                        `;
                 document.head.appendChild(style);
 
                 checkConnection(false);
@@ -2576,7 +2587,6 @@
 
         createConnectionStatus();
 
-        // ===== تهيئة التطبيق =====
         document.addEventListener('DOMContentLoaded', async () => {
             await loadData();
             updateBadge();
@@ -2605,7 +2615,6 @@
             });
         });
 
-        // تصدير الدوال للنطاق العام
         window.switchTab = switchTab;
         window.switchAdminTab = switchAdminTab;
         window.toggleControlPanel = toggleControlPanel;
@@ -2636,7 +2645,7 @@
         window.hideAdminDonors = hideAdminDonors;
         window.addSubAdmin = addSubAdmin;
         window.deleteSubAdmin = deleteSubAdmin;
-        window.notifyManagers = notifyManagers;
+        window.notifyManagers = window.notifyManagers;
         window.openEditMyAccount = openEditMyAccount;
         window.saveMyAccountData = saveMyAccountData;
         window.renderMyAccount = renderMyAccount;
@@ -2648,7 +2657,7 @@
         window.deleteFromSupabase = deleteFromSupabase;
         window.syncToSupabase = syncToSupabase;
 
-        console.log('✅ التطبيق جاهز - المدير الرئيسي مخفي تماماً من قائمة المتبرعين');
+        console.log('✅ التطبيق جاهز - تم دمج جسر Flutter وحل الحواف');
     </script>
 
 </body>
